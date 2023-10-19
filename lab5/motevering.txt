@@ -1,0 +1,11 @@
+generator_from_image: Testar om varje indexvärde ger rätt pixel i ett testfall för att säkerställa att funktionen ger rätt utdata.
+Vid undantagshantering testar jag funktionen utanför index då detta ska ge undantaget IndexError.
+
+pixel_constraint: Testar att basecase inom constraint då funktion ska ge rätt värde samt edgecases i fallen då den är inom och utom 
+constraint då dessa är extremfall.
+Vid undantagshantering testar jag ifall en string input ger TypeError då det är fel "typ" på indatat. Jag testar även om en pixel med längd
+2 ger ValueError då detta är ett separat undantag.
+
+combine_images: Testar om ett testfall ger ett förväntat resultat för att kontrollera att funktionen ger rätt utdata.
+Vid undantagshantering testar jag om inre funktioner reser en av varje Errortyp TypeError, ValueError, IndexError i olika fall
+för olika funktioner så att varje undantag testas minst 1 gång.
