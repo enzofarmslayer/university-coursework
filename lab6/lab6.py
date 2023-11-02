@@ -1,20 +1,3 @@
-"""
-PROGRAM = '[', "'calc'", COMMA, STATEMENTS, ']' ;
-STATEMENTS = STATEMENT | STATEMENT, COMMA, STATEMENTS ;
-STATEMENT = SELECTION | OUTPUT ;
-SELECTION = '[', "'if'", COMMA, CONDITION, COMMA, STATEMENT, [COMMA, STATEMENT], ']' ;
-OUTPUT = '[', "'print'", COMMA, EXPRESSION, ']' ;
-EXPRESSION = CONSTANT | BINARYEXPR ;
-BINARYEXPR = '[', EXPRESSION, COMMA, BINARYOPER, COMMA, EXPRESSION, ']' ;
-CONDITION = '[', EXPRESSION, COMMA, CONDOPER, COMMA, EXPRESSION, ']' ;
-BINARYOPER = "'+'" | "'-'" | "'*'" | "'/'" ;
-CONDOPER = "'<'" | "'>'" | "'='" ;
-CONSTANT = ? a Python number ? ;
-"""
-
-calc1 = ['calc', ['print', 2], ['print', 4]]
-calc2 = ['calc', ['if', [3, '>', 5], ['print', 2], ['print', 4]]]
-
 from calc import *
 
 def exec_program(p):
@@ -48,8 +31,27 @@ def exec_output(statement):
     print(output)
 
 def eval_expression(expr):
-    if not is_constant(expr): raise SyntaxError("Invalid expression: " + str(expr))
-    return(expr)
+    if isinstance(expr, int): return expr   # Expression is constant
+    return eval_binaryexpr(expr)            # Expression is binary
+
+def eval_binaryexpr(expr):
+    if not is_binaryexpr(expr): raise SyntaxError("Invalid binary expression: " + str(expr))
+    expr_left = eval_expression(binaryexpr_left(expr))
+    expr_right = eval_expression(binaryexpr_right(expr))
+    binary_oper = eval_binaryoper(binaryexpr_operator(expr))
+
+    if binary_oper == "+":
+        return expr_left + expr_right
+    
+    if binary_oper == "-":
+        return expr_left - expr_right
+
+    if binary_oper == "*":
+        return expr_left * expr_right
+    
+    if binary_oper == "/":
+        return expr_left / expr_right
+
 
 def eval_condition(cond):
     if not is_condition(cond): raise SyntaxError("Invalid condition: " + str(cond))
@@ -57,15 +59,32 @@ def eval_condition(cond):
     expr_right = eval_expression(condition_right(cond))
     cond_oper = eval_condoper(condition_operator(cond))
 
+    if cond_oper == "=":
+        if expr_left == expr_right: return True
+        else: return False
+
+    if cond_oper == "<":
+        if expr_left < expr_right: return True
+        else: return False
+
+    if cond_oper == ">":
+        if expr_left > expr_right: return True
+        else: return False
+        
+def eval_binaryoper(binary_oper):
+    if not is_binaryoper(binary_oper): raise SyntaxError("Invalid binary operator: " + str(binary_oper))
+    return binary_oper
+    
 
 def eval_condoper(cond_oper):
     if not is_condoper(cond_oper): raise SyntaxError("Invalid condition operator: " + str(cond_oper))
     return cond_oper
 
 
-
-
-exec_program(calc1)
+calc1 = ['calc', ['print', 2], ['print', 4]]
+calc2 = ['calc', ['if', [3, 'å', 5], ['print', 2], ['print', 4]]]
+calc3 = []
+exec_program(calc2)
     
 
         
