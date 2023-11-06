@@ -14,9 +14,17 @@ def exec_statements(statements):
 def exec_statement(statement):
     if not is_statement(statement): raise SyntaxError("Invalid syntax: " + str(statement))
 
-    if is_output(statement): exec_output(statement)
+    if is_assignment(statement): exec_assignment(statement)
+    #elif is_repetition(statement): exec_repetition(statement)
+    elif is_output(statement): exec_output(statement)
+    #elif is_input(statement): exec_input(statement)
     else: exec_selection(statement)
 
+def exec_assignment(assignment):
+    if not is_assignment(assignment): raise SyntaxError("Invalid syntax: " + str(assignment))
+    assignment_var = assignment_variable(assignment)
+    assignment_expr = eval_expression(assignment_expression(assignment))
+    
 def exec_selection(selection):
     if not is_selection(selection): raise SyntaxError("Invalid syntax: " + str(selection))
     cond = selection_condition(selection)
@@ -81,10 +89,8 @@ def eval_condoper(cond_oper):
     return cond_oper
 
 
-calc1 = ['calc', ['print', 2], ['print', 4]]
-calc2 = ['calc', ['if', [3, 'å', 5], ['print', 2], ['print', 4]]]
-calc3 = []
-exec_program(calc2)
+calc1 = ['calc', ['set', 'a', 5], ['print', 'a']]
+exec_program(calc1)
     
 
         
