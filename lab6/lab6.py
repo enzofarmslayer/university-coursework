@@ -41,7 +41,7 @@ def exec_statement(statement, var_table:dict):
     if is_assignment(statement): 
         new_var_table = exec_assignment(statement, var_table)
     elif is_repetition(statement): 
-        new_var_table = exec_repetition(statement)
+        new_var_table = exec_repetition(statement, var_table)
     elif is_output(statement): 
         new_var_table = exec_output(statement, var_table)
     elif is_input(statement): 
@@ -59,7 +59,15 @@ def exec_assignment(assignment, var_table:dict):
     new_var_table = var_table.copy()
     new_var_table[assignment_var] = assignment_expr
     return new_var_table
-    
+
+def exec_repetition(statement, var_table:dict):
+    cond = repetition_condition(statement)
+    statements = repetition_statements(statement)
+
+    if not eval_condition(cond, var_table): return var_table
+    new_var_table = exec_statements(statements, var_table)
+    return exec_repetition(statement, new_var_table)
+
 def exec_selection(selection, var_table:dict):
     cond = selection_condition(selection)
 
@@ -110,8 +118,8 @@ def eval_binaryexpr(expr, var_table:dict):
 
 def eval_condition(cond, var_table:dict):
     if not is_condition(cond): raise SyntaxError("Invalid condition: " + str(cond))
-    expr_left = eval_expression(condition_left(cond))
-    expr_right = eval_expression(condition_right(cond))
+    expr_left = eval_expression(condition_left(cond), var_table)
+    expr_right = eval_expression(condition_right(cond), var_table)
     cond_oper = eval_condoper(condition_operator(cond))
 
     if cond_oper == "=":
@@ -139,8 +147,8 @@ def eval_condoper(cond_oper):
 calc1 = ['calc', ['set', 'a', 5], ['print', 'a']]
 calc2 = ['calc', ['set', 'x', 7], ['set', 'y', 12], ['set', 'z', ['x', '+', 'y']], ['print', 'z']]
 calc3 = ['calc', ['read', 'p1'], ['set', 'p2', 47], ['set', 'p3', 179], ['set', 'result', [['p1', '*', 'p2'], '-', 'p3']], ['print', 'result']]
-
-exec_program(calc3)
+calc4 = ['calc', ['read', 'n'], ['set', 'sum', 0], ['while', ['n', '>', 0], ['set', 'sum', ['sum', '+', 'n']], ['set', 'n', ['n', '-', 1]]], ['print', 'sum']]
+exec_program(calc4)
     
 
         
