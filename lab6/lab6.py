@@ -70,14 +70,19 @@ def exec_selection(selection, var_table:dict):
 
 def exec_input(expr, var_table:dict):
     new_var = expr[1]
-    value = input("Enter value for " + new_var + ": ")
+    value = int(input("Enter value for " + new_var + ": "))
     new_var_table = var_table.copy()
     new_var_table[new_var] = value
     return new_var_table
     
 def exec_output(statement, var_table:dict):
-    output = eval_expression(output_expression(statement), var_table)
-    print(output)
+    expr = output_expression(statement)
+    value = eval_expression(expr, var_table)
+
+    if is_variable(expr):
+        print(expr + " = " + str(value))
+    else:
+        print(value)
 
 def eval_expression(expr, var_table:dict):
     if isinstance(expr, int): return expr
