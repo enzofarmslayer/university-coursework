@@ -1,49 +1,84 @@
+'''
+COMMA = ',' ;
+PROGRAM = '[', "'calc'", COMMA, STATEMENTS, ']' ;
+STATEMENTS = STATEMENT | STATEMENT, COMMA, STATEMENTS ;
+STATEMENT = ASSIGNMENT | REPETITION | SELECTION | INPUT | OUTPUT ;
+ASSIGNMENT = '[', "'set'", COMMA, VARIABLE, COMMA, EXPRESSION, ']' ;
+REPETITION = '[', "'while'", COMMA, CONDITION, COMMA, STATEMENTS, ']' ;
+SELECTION = '[', "'if'", COMMA, CONDITION, COMMA, STATEMENT, [COMMA, STATEMENT], ']' ;
+INPUT = '[', "'read'", COMMA, VARIABLE, ']' ;
+OUTPUT = '[', "'print'", COMMA, EXPRESSION, ']' ;
+EXPRESSION = CONSTANT | VARIABLE | BINARYEXPR ;
+BINARYEXPR = '[', EXPRESSION, COMMA, BINARYOPER, COMMA, EXPRESSION, ']' ;
+CONDITION = '[', EXPRESSION, COMMA, CONDOPER, COMMA, EXPRESSION, ']' ;
+BINARYOPER = "'+'" | "'-'" | "'*'" | "'/'" ;
+CONDOPER = "'<'" | "'>'" | "'='" ;
+VARIABLE = ? a Python string ? ;
+CONSTANT = ? a Python number ? ;
+'''
+
 from calc import *
 
-def exec_program(p):
+
+def exec_program(p, var_table:dict = {}):
     if not is_program(p): raise SyntaxError("Invalid program: " + str(p))
     statements = program_statements(p)
-    exec_statements(statements)
+    new_var_table = exec_statements(statements, var_table)
+    return new_var_table
 
-def exec_statements(statements):
+def exec_statements(statements, var_table:dict):
     if not is_statements(statements): raise SyntaxError("Invalid syntax: " + str(statements))
+
+    new_var_table = exec_statement(first_statement(statements), var_table)
+    if(len(statements) == 1): return new_var_table
+
+    return exec_statements(rest_statements(statements), new_var_table)
     
-    for statement in statements:
-        exec_statement(statement)
     
-def exec_statement(statement):
+def exec_statement(statement, var_table:dict):
     if not is_statement(statement): raise SyntaxError("Invalid syntax: " + str(statement))
 
-    if is_assignment(statement): exec_assignment(statement)
-    #elif is_repetition(statement): exec_repetition(statement)
-    elif is_output(statement): exec_output(statement)
-    #elif is_input(statement): exec_input(statement)
-    else: exec_selection(statement)
-
-def exec_assignment(assignment):
-    if not is_assignment(assignment): raise SyntaxError("Invalid syntax: " + str(assignment))
-    assignment_var = assignment_variable(assignment)
-    assignment_expr = eval_expression(assignment_expression(assignment))
+    if is_assignment(statement): 
+        new_var_table = exec_assignment(statement, var_table)
+    elif is_repetition(statement): 
+        new_var_table = exec_repetition(statement)
+    elif is_output(statement): 
+        new_var_table = exec_output(statement, var_table)
+    elif is_input(statement): 
+        new_var_table = exec_input(statement)
+    elif is_selection(statement): 
+        new_var_table = exec_selection(statement, var_table)
+    else:
+        raise SyntaxError("Invalid statement: " + str(statement))
     
-def exec_selection(selection):
-    if not is_selection(selection): raise SyntaxError("Invalid syntax: " + str(selection))
+    return new_var_table
+
+def exec_assignment(assignment, var_table:dict):
+    assignment_var = assignment_variable(assignment)
+    assignment_expr = eval_expression(assignment_expression(assignment), var_table)
+    new_var_table = var_table.copy()
+    new_var_table[assignment_var] = assignment_expr
+    return new_var_table
+    
+def exec_selection(selection, var_table:dict):
     cond = selection_condition(selection)
 
     if eval_condition(cond):
-        exec_statement(selection_true_branch(selection))
+        exec_statement(selection_true_branch(selection), var_table)
     elif selection_has_false_branch(selection):
-        exec_statement(selection_false_branch(selection))
+        exec_statement(selection_false_branch(selection), var_table)
     
-def exec_output(statement):
-    output = eval_expression(output_expression(statement))
+def exec_output(statement, var_table:dict):
+    output = eval_expression(output_expression(statement), var_table)
     print(output)
 
-def eval_expression(expr):
-    if isinstance(expr, int): return expr   # Expression is constant
-    return eval_binaryexpr(expr)            # Expression is binary
+def eval_expression(expr, var_table:dict):
+    if isinstance(expr, int): return expr
+    if is_variable(expr): return var_table[expr]                    
+    if is_binaryexpr(expr, var_table): return eval_binaryexpr(expr, var_table)
+    raise SyntaxError("Invalid expression: " + str(expr))
 
-def eval_binaryexpr(expr):
-    if not is_binaryexpr(expr): raise SyntaxError("Invalid binary expression: " + str(expr))
+def eval_binaryexpr(expr, var_table:dict):
     expr_left = eval_expression(binaryexpr_left(expr))
     expr_right = eval_expression(binaryexpr_right(expr))
     binary_oper = eval_binaryoper(binaryexpr_operator(expr))
@@ -61,7 +96,7 @@ def eval_binaryexpr(expr):
         return expr_left / expr_right
 
 
-def eval_condition(cond):
+def eval_condition(cond, var_table:dict):
     if not is_condition(cond): raise SyntaxError("Invalid condition: " + str(cond))
     expr_left = eval_expression(condition_left(cond))
     expr_right = eval_expression(condition_right(cond))
@@ -79,12 +114,12 @@ def eval_condition(cond):
         if expr_left > expr_right: return True
         else: return False
         
-def eval_binaryoper(binary_oper):
+def eval_binaryoper(binary_oper, var_table:dict):
     if not is_binaryoper(binary_oper): raise SyntaxError("Invalid binary operator: " + str(binary_oper))
     return binary_oper
     
 
-def eval_condoper(cond_oper):
+def eval_condoper(cond_oper, var_table:dict):
     if not is_condoper(cond_oper): raise SyntaxError("Invalid condition operator: " + str(cond_oper))
     return cond_oper
 
