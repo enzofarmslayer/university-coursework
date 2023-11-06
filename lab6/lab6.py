@@ -75,12 +75,12 @@ def exec_output(statement, var_table:dict):
 def eval_expression(expr, var_table:dict):
     if isinstance(expr, int): return expr
     if is_variable(expr): return var_table[expr]                    
-    if is_binaryexpr(expr, var_table): return eval_binaryexpr(expr, var_table)
+    if is_binaryexpr(expr): return eval_binaryexpr(expr, var_table)
     raise SyntaxError("Invalid expression: " + str(expr))
 
 def eval_binaryexpr(expr, var_table:dict):
-    expr_left = eval_expression(binaryexpr_left(expr))
-    expr_right = eval_expression(binaryexpr_right(expr))
+    expr_left = eval_expression(binaryexpr_left(expr), var_table) 
+    expr_right = eval_expression(binaryexpr_right(expr), var_table)
     binary_oper = eval_binaryoper(binaryexpr_operator(expr))
 
     if binary_oper == "+":
@@ -114,18 +114,19 @@ def eval_condition(cond, var_table:dict):
         if expr_left > expr_right: return True
         else: return False
         
-def eval_binaryoper(binary_oper, var_table:dict):
+def eval_binaryoper(binary_oper):
     if not is_binaryoper(binary_oper): raise SyntaxError("Invalid binary operator: " + str(binary_oper))
     return binary_oper
     
 
-def eval_condoper(cond_oper, var_table:dict):
+def eval_condoper(cond_oper):
     if not is_condoper(cond_oper): raise SyntaxError("Invalid condition operator: " + str(cond_oper))
     return cond_oper
 
 
 calc1 = ['calc', ['set', 'a', 5], ['print', 'a']]
-exec_program(calc1)
+calc2 = ['calc', ['set', 'x', 7], ['set', 'y', 12], ['set', 'z', ['x', '+', 'y']], ['print', 'z']]
+exec_program(calc2)
     
 
         
