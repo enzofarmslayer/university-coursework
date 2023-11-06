@@ -45,7 +45,7 @@ def exec_statement(statement, var_table:dict):
     elif is_output(statement): 
         new_var_table = exec_output(statement, var_table)
     elif is_input(statement): 
-        new_var_table = exec_input(statement)
+        new_var_table = exec_input(statement, var_table)
     elif is_selection(statement): 
         new_var_table = exec_selection(statement, var_table)
     else:
@@ -67,6 +67,13 @@ def exec_selection(selection, var_table:dict):
         exec_statement(selection_true_branch(selection), var_table)
     elif selection_has_false_branch(selection):
         exec_statement(selection_false_branch(selection), var_table)
+
+def exec_input(expr, var_table:dict):
+    new_var = expr[1]
+    value = input("Enter value for " + new_var + ": ")
+    new_var_table = var_table.copy()
+    new_var_table[new_var] = value
+    return new_var_table
     
 def exec_output(statement, var_table:dict):
     output = eval_expression(output_expression(statement), var_table)
@@ -126,7 +133,9 @@ def eval_condoper(cond_oper):
 
 calc1 = ['calc', ['set', 'a', 5], ['print', 'a']]
 calc2 = ['calc', ['set', 'x', 7], ['set', 'y', 12], ['set', 'z', ['x', '+', 'y']], ['print', 'z']]
-exec_program(calc2)
+calc3 = ['calc', ['read', 'p1'], ['set', 'p2', 47], ['set', 'p3', 179], ['set', 'result', [['p1', '*', 'p2'], '-', 'p3']], ['print', 'result']]
+
+exec_program(calc3)
     
 
         
