@@ -24,26 +24,27 @@ def exec_program(p, var_table = {}):
     if not is_program(p): raise SyntaxError("Invalid program: " + str(p))
     statements = program_statements(p)
     new_var_table = exec_statements(statements, var_table)
+
     return new_var_table
 
 def exec_statements(statements, var_table):
     if not is_statements(statements): raise SyntaxError("Invalid syntax: " + str(statements))
-
     new_var_table = exec_statement(first_statement(statements), var_table)
     if(len(statements) == 1): return new_var_table
-
+    
     return exec_statements(rest_statements(statements), new_var_table)
     
     
 def exec_statement(statement, var_table):
     if not is_statement(statement): raise SyntaxError("Invalid syntax: " + str(statement))
 
+    new_var_table = var_table.copy()
     if is_assignment(statement): 
         new_var_table = exec_assignment(statement, var_table)
     elif is_repetition(statement): 
         new_var_table = exec_repetition(statement, var_table)
     elif is_output(statement): 
-        new_var_table = exec_output(statement, var_table)
+        exec_output(statement, var_table)
     elif is_input(statement): 
         new_var_table = exec_input(statement, var_table)
     elif is_selection(statement): 
@@ -142,14 +143,3 @@ def eval_binaryoper(binary_oper):
 def eval_condoper(cond_oper):
     if not is_condoper(cond_oper): raise SyntaxError("Invalid condition operator: " + str(cond_oper))
     return cond_oper
-
-
-# calc1 = ['calc', ['set', 'var', 33], ['print', 'var']]
-# calc2 = ['calc', ['set', 'x', 7], ['set', 'y', 12], ['set', 'z', ['x', '+', 'y']], ['print', 'z']]
-# calc3 = ['calc', ['read', 'p1'], ['set', 'p2', 47], ['set', 'p3', 179], ['set', 'result', [['p1', '*', 'p2'], '-', 'p3']], ['print', 'result']]
-# calc4 = ['calc', ['read', 'n'], ['set', 'sum', 0], ['while', ['n', '>', 0], ['set', 'sum', ['sum', '+', 'n']], ['set', 'n', ['n', '-', 1]]], ['print', 'sum']]
-# calc5 = []
-# calc6 = ['calc',]
-
-
-# exec_program(calc6)
