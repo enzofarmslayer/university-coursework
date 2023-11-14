@@ -1,21 +1,3 @@
-'''
-COMMA = ',' ;
-PROGRAM = '[', "'calc'", COMMA, STATEMENTS, ']' ;
-STATEMENTS = STATEMENT | STATEMENT, COMMA, STATEMENTS ;
-STATEMENT = ASSIGNMENT | REPETITION | SELECTION | INPUT | OUTPUT ;
-ASSIGNMENT = '[', "'set'", COMMA, VARIABLE, COMMA, EXPRESSION, ']' ;
-REPETITION = '[', "'while'", COMMA, CONDITION, COMMA, STATEMENTS, ']' ;
-SELECTION = '[', "'if'", COMMA, CONDITION, COMMA, STATEMENT, [COMMA, STATEMENT], ']' ;
-INPUT = '[', "'read'", COMMA, VARIABLE, ']' ;
-OUTPUT = '[', "'print'", COMMA, EXPRESSION, ']' ;
-EXPRESSION = CONSTANT | VARIABLE | BINARYEXPR ;
-BINARYEXPR = '[', EXPRESSION, COMMA, BINARYOPER, COMMA, EXPRESSION, ']' ;
-CONDITION = '[', EXPRESSION, COMMA, CONDOPER, COMMA, EXPRESSION, ']' ;
-BINARYOPER = "'+'" | "'-'" | "'*'" | "'/'" ;
-CONDOPER = "'<'" | "'>'" | "'='" ;
-VARIABLE = ? a Python string ? ;
-CONSTANT = ? a Python number ? ;
-'''
 
 from calc import *
 
@@ -140,6 +122,41 @@ def eval_binaryoper(binary_oper):
     return binary_oper
     
 
+# exec_program()
+
 def eval_condoper(cond_oper):
     if not is_condoper(cond_oper): raise SyntaxError("Invalid condition operator: " + str(cond_oper))
     return cond_oper
+
+'''
+COMMA = ',' ;
+PROGRAM = '[', "'calc'", COMMA, STATEMENTS, ']' ;
+STATEMENTS = STATEMENT | STATEMENT, COMMA, STATEMENTS ;
+STATEMENT = ASSIGNMENT | REPETITION | SELECTION | INPUT | OUTPUT ;
+ASSIGNMENT = '[', "'set'", COMMA, VARIABLE, COMMA, EXPRESSION, ']' ;
+REPETITION = '[', "'while'", COMMA, CONDITION, COMMA, STATEMENTS, ']' ;
+SELECTION = '[', "'if'", COMMA, CONDITION, COMMA, STATEMENT, [COMMA, STATEMENT], ']' ;
+INPUT = '[', "'read'", COMMA, VARIABLE, ']' ;
+OUTPUT = '[', "'print'", COMMA, EXPRESSION, ']' ;
+EXPRESSION = CONSTANT | VARIABLE | BINARYEXPR ;
+BINARYEXPR = '[', EXPRESSION, COMMA, BINARYOPER, COMMA, EXPRESSION, ']' ;
+CONDITION = '[', EXPRESSION, COMMA, CONDOPER, COMMA, EXPRESSION, ']' ;
+BINARYOPER = "'+'" | "'-'" | "'*'" | "'/'" ;
+CONDOPER = "'<'" | "'>'" | "'='" ;
+VARIABLE = ? a Python string ? ;
+CONSTANT = ? a Python number ? ;
+'''
+
+# Kvadrera givet tal
+calc_test_1 = ['calc', ['read', 'x'], ['set', 'x2', ['x', '*', 'x']], ['print', 'x2']]
+
+# Beräkna fakultet av givet tal
+calc_test_2 = ['calc', ['read', 'n'], ['set', 'result', 'n'], ['while', ['n', '>', 1], ['set', 'n2', ['n', '-', 1]], ['set', 'result', ['result', '*', 'n2']], ['set', 'n', 'n2']], ['print', 'result']]
+
+# Systembolaget check
+calc_test_3 =  ['calc', ['read', 'age'], ['if', ['age', '>', 19], ['print', 1], ['print', 0]]]
+
+# Error checks
+calc_test_4 = []
+calc_test_5 = ['enzo']
+calc_test_6 = ['calc', ['set', 'a', '*']]
