@@ -34,6 +34,20 @@ def contains_key(key, tree):
     return found
 
 
-ret = contains_key(5, [6, 7, 8])
+def tree_size(tree):
+    size = 0
+
+    def node_is_empty():
+        return False
+
+    def node(val):
+        nonlocal size
+        size += 1
+
+    traverse(tree, node_is_empty, node, node)
+    return size
+
+
+ret = tree_size([[1, 2, []], 4, [[], 5, 6]])
 print(ret)
 
