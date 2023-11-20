@@ -2,6 +2,9 @@ def match(seq, pattern):
     """
     Returns whether given sequence matches the given pattern
     """
+    if type(seq) != type(pattern):
+        raise TypeError("Seq and pattern must be of same type.")
+    
     if not pattern:
         return not seq
     elif pattern[0] == '--':
