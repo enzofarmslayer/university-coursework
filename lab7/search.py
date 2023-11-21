@@ -2,7 +2,6 @@ from match import match
 from books import db
 
 def search(pattern, db):
-    
     if not isinstance(pattern, list) or not isinstance(db, list):
         raise TypeError("Pattern and db must both be lists.")
     

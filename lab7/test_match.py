@@ -2,7 +2,7 @@ import unittest
 from match import *
 
 class TestMatch(unittest.TestCase):
-    
+
     def test_empty_pattern(self):
         self.assertTrue(match([], []))
         
