@@ -30,21 +30,19 @@ def exec_statement(statement, var_table):
     if not is_statement(statement):
         raise SyntaxError("Invalid syntax: " + str(statement))
 
-    new_var_table = var_table.copy()
     if is_assignment(statement):
-        new_var_table = exec_assignment(statement, var_table)
+        return exec_assignment(statement, var_table)
     elif is_repetition(statement):
-        new_var_table = exec_repetition(statement, var_table)
+        return exec_repetition(statement, var_table)
     elif is_output(statement):
         exec_output(statement, var_table)
+        return var_table
     elif is_input(statement):
-        new_var_table = exec_input(statement, var_table)
+        return exec_input(statement, var_table)
     elif is_selection(statement):
-        new_var_table = exec_selection(statement, var_table)
+        return exec_selection(statement, var_table)
     else:
         raise SyntaxError("Invalid statement: " + str(statement))
-
-    return new_var_table
 
 
 def exec_assignment(assignment, var_table):
