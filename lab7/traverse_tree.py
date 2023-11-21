@@ -1,3 +1,4 @@
+
 def is_leaf(tree):
     if isinstance(tree, int): return True
     if not tree[0] and not tree[2]: return True
@@ -68,5 +69,5 @@ def tree_depth(tree):
     traverse(tree, node_is_empty, node_is_leaf, node_is_inner)
     return depth
 
-ret = contains_key(2, [[], 1, 5])
-print(ret)
+# ret = contains_key(2, [[], 1, 5])
+# print(ret)

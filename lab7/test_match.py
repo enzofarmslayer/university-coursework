@@ -30,9 +30,11 @@ class TestMatchFunctionTypeErrors(unittest.TestCase):
         with self.assertRaises(TypeError):
             match(['a', 'b', 'c'], 'abc')
             match(['a', 'b', 'c'], 3)
+            match(['a', 'b', 'c'], ('a', 'b', 'c'))
 
     def test_invalid_seq_type(self):
         with self.assertRaises(TypeError):
             match('abc', ['a', 'b', 'c'])
             match(3, ['a', 'b', 'c'])
+            match(('a', 'b', 'c'), ['a', 'b', 'c'])
             

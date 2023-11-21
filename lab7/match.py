@@ -2,8 +2,8 @@ def match(seq, pattern):
     """
     Returns whether given sequence matches the given pattern
     """
-    if type(seq) != type(pattern):
-        raise TypeError("Seq and pattern must be of same type.")
+    if not isinstance(seq, list) or not isinstance(pattern, list):
+        raise TypeError("Seq and pattern must both be lists.")
     
     if not pattern:
         return not seq
