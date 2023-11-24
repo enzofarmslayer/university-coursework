@@ -4,7 +4,7 @@ def match(seq, pattern):
     """
     if not isinstance(seq, list) or not isinstance(pattern, list):
         raise TypeError("Seq and pattern must both be lists.")
-    
+
     if not pattern:
         return not seq
     elif pattern[0] == '--':
@@ -19,7 +19,8 @@ def match(seq, pattern):
     elif pattern[0] == '&':
         return match(seq[1:], pattern[1:])
     elif type(pattern[0]) is list:
-        if not match(seq[0], pattern[0]): return False
+        if not match(seq[0], pattern[0]):
+            return False
         return match(seq[1:], pattern[1:])
     elif seq[0] == pattern[0]:
         return match(seq[1:], pattern[1:])
