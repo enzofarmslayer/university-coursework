@@ -182,7 +182,7 @@ def time_equals(t1: Time, t2: Time) -> bool:
     min2 = minute_number(time_minute(t2))
     return (hour1, min1) == (hour2, min2)
 
-
+insert
 def time_precedes_or_equals(t1: Time, t2: Time) -> bool:
     """Return true iff t1 is before t2 or at the same time."""
     return time_precedes(t1, t2) or time_equals(t1, t2)

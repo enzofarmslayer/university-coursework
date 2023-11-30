@@ -1,34 +1,60 @@
+from typing import NamedTuple, List
+from cal_abstraction import *
 # =========================================================================
 # Type definition
 # =========================================================================
 
 # Define the type somehow...  The initial "" is simply here as a placeholder.
-TimeSpanSeq = ""
-
+TimeSpanSeq = NamedTuple("TimeSpanSeq", [("Timespans", List[TimeSpan])])
 # =========================================================================
 #  Function implementations
 # =========================================================================
 
 # Implement these functions!  Also determine if you need *additional* functions.
 
-def new_time_span_seq():
-    pass
+def new_time_span_seq(timespans: List[TimeSpan] = None):
+    return TimeSpanSeq(timespans)
 
 
 def tss_is_empty(tss):
-    pass
+    ensure_type(tss, TimeSpanSeq)
+    if tss.Timespans: return False
+    return True
 
 
 def tss_plus_span(tss, ts):
-    pass
+    ensure_type(tss, TimeSpanSeq)
+    ensure_type(ts, TimeSpan)
 
+    def add_span(seq: List[TimeSpan], span):
+        span_start_t = ts_start(span)
+        span_start_t_num = span_start_t.hour.number * 60 + span_start_t.minute.number
+
+        if not seq: return [span]
+        
+        i = 0
+        for ts in seq:
+            start_t = ts_start(ts)
+            time_num = start_t.hour.number * 60 + start_t.minute.number
+            if time_num > span_start_t_num: break
+            i += 1
+        
+        return seq.insert(i, span)
+
+    return new_time_span_seq(add_span(tss.Timespans, ts))
 
 def tss_iter_spans(tss):
-    pass
+    ensure_type(tss, TimeSpanSeq)
+    for ts in tss.Timespans:
+        yield ts
 
 
 def show_time_spans(tss):
-    pass
+    ensure_type(tss, TimeSpanSeq)
+    i = 1
+    for ts in tss.Timespans:
+        print("Timespan " + str(i) + " |  " + "Start: " + str(ts_start(ts).hour.number) + "h " + str(ts_start(ts).minute.number) + "min \t" + "End: " + str(ts_end(ts).hour.number) + "h " + str(ts_end(ts).minute.number) + str("min"))
+        i += 1
 
 
 # Keep only time spans that satisfy pred.
@@ -40,3 +66,27 @@ def tss_keep_spans(tss, pred):
             result = tss_plus_span(result, span)
 
     return result
+
+
+m8 = new_minute(8)
+m14 = new_minute(14)
+m25 = new_minute(25)
+m49 = new_minute(49)
+
+h0 = new_hour(0)
+h2 = new_hour(2)
+h4 = new_hour(4)
+h6 = new_hour(6)
+
+t1 = new_time(h0, m8)
+t2 = new_time(h2, m14)
+t3 = new_time(h4, m25)
+t4 = new_time(h6, m49)
+
+ts1 = new_time_span(t1, t2)
+ts2 = new_time_span(t3, t4)
+
+tss = new_time_span_seq([ts2])
+tss2 = tss_plus_span(tss, ts1)
+
+show_time_spans(tss2)
