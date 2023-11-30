@@ -13,7 +13,29 @@ TimeSpanSeq = NamedTuple("TimeSpanSeq", [("Timespans", List[TimeSpan])])
 # Implement these functions!  Also determine if you need *additional* functions.
 
 def new_time_span_seq(timespans: List[TimeSpan] = None):
-    return TimeSpanSeq(timespans)
+
+    def add_span(seq: List[TimeSpan], span):
+        span_start_t = ts_start(span)
+        span_start_t_num = span_start_t.hour.number * 60 + span_start_t.minute.number
+
+        if not seq: return [span]
+        new_seq = seq.copy()
+
+        i = 0
+        for ts in new_seq:
+            start_t = ts_start(ts)
+            time_num = start_t.hour.number * 60 + start_t.minute.number
+            if time_num > span_start_t_num: break
+            i += 1
+        
+        new_seq.insert(i, span)
+        return new_seq
+
+    new_tss = TimeSpanSeq(None)
+    for ts in timespans:
+        new_tss = TimeSpanSeq(add_span(new_tss.Timespans, ts))
+
+    return new_tss
 
 
 def tss_is_empty(tss):
@@ -26,22 +48,10 @@ def tss_plus_span(tss, ts):
     ensure_type(tss, TimeSpanSeq)
     ensure_type(ts, TimeSpan)
 
-    def add_span(seq: List[TimeSpan], span):
-        span_start_t = ts_start(span)
-        span_start_t_num = span_start_t.hour.number * 60 + span_start_t.minute.number
+    new_seq = tss.Timespans.copy()
+    new_seq.append(ts)
 
-        if not seq: return [span]
-        
-        i = 0
-        for ts in seq:
-            start_t = ts_start(ts)
-            time_num = start_t.hour.number * 60 + start_t.minute.number
-            if time_num > span_start_t_num: break
-            i += 1
-        
-        return seq.insert(i, span)
-
-    return new_time_span_seq(add_span(tss.Timespans, ts))
+    return new_time_span_seq(new_seq)
 
 def tss_iter_spans(tss):
     ensure_type(tss, TimeSpanSeq)
@@ -85,8 +95,9 @@ t4 = new_time(h6, m49)
 
 ts1 = new_time_span(t1, t2)
 ts2 = new_time_span(t3, t4)
+ts3 = new_time_span(t1, t3)
 
-tss = new_time_span_seq([ts2])
-tss2 = tss_plus_span(tss, ts1)
+tss = new_time_span_seq([ts1, ts2])
+tss2 = tss_plus_span(tss, ts3)
 
 show_time_spans(tss2)
