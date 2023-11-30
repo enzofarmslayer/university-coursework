@@ -1,13 +1,14 @@
 import unittest
 from traverse_tree import *
 
+
 class TestTreeFunctions(unittest.TestCase):
 
     def setUp(self):
         """ Sample trees of different complexities
         """
         self.empty_tree = []
-        self.simple_tree = [[], 1, []]  
+        self.simple_tree = [[], 1, []]
         self.complex_tree = [[[], 2, []], 1, [[], 3, []]]
 
     def test_is_leaf(self):
