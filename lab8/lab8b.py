@@ -31,9 +31,10 @@ def new_time_span_seq(timespans: List[TimeSpan] = None):
         new_seq.insert(i, span)
         return new_seq
 
-    new_tss = TimeSpanSeq(None)
-    for ts in timespans:
-        new_tss = TimeSpanSeq(add_span(new_tss.Timespans, ts))
+    new_tss = TimeSpanSeq([])
+    if timespans:
+        for ts in timespans:
+            new_tss = TimeSpanSeq(add_span(new_tss.Timespans, ts))
 
     return new_tss
 
@@ -48,7 +49,10 @@ def tss_plus_span(tss, ts):
     ensure_type(tss, TimeSpanSeq)
     ensure_type(ts, TimeSpan)
 
-    new_seq = tss.Timespans.copy()
+    if tss.Timespans:
+        new_seq = tss.Timespans.copy()
+    else:
+        new_seq = []
     new_seq.append(ts)
 
     return new_time_span_seq(new_seq)
@@ -62,9 +66,12 @@ def tss_iter_spans(tss):
 def show_time_spans(tss):
     ensure_type(tss, TimeSpanSeq)
     i = 1
-    for ts in tss.Timespans:
-        print("Timespan " + str(i) + " |  " + "Start: " + str(ts_start(ts).hour.number) + "h " + str(ts_start(ts).minute.number) + "min \t" + "End: " + str(ts_end(ts).hour.number) + "h " + str(ts_end(ts).minute.number) + str("min"))
-        i += 1
+    if tss.Timespans: 
+        for ts in tss.Timespans:
+            print("Timespan " + str(i) + " |  " + "Start: " + str(ts_start(ts).hour.number) + "h " + str(ts_start(ts).minute.number) + "min \t" + "End: " + str(ts_end(ts).hour.number) + "h " + str(ts_end(ts).minute.number) + str("min"))
+            i += 1
+    else:
+        print("Timespan sequence is empty")
 
 
 # Keep only time spans that satisfy pred.
@@ -100,4 +107,4 @@ ts3 = new_time_span(t1, t3)
 tss = new_time_span_seq([ts1, ts2])
 tss2 = tss_plus_span(tss, ts3)
 
-show_time_spans(tss2)
+#show_time_spans(tss2)

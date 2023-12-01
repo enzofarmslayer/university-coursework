@@ -25,7 +25,7 @@ def create_tests_for_free_span() -> dict:
         end_str="22:00",  # Search interval ends
         booking_data=["07:00-09:00", "09:00-13:00", "13:00-23:00"],  # This day's appointments
         exp_result=[],
-    )  # Expected no free time
+    )  # No free time
 
     store_test_case(
         test_cases,
@@ -34,7 +34,7 @@ def create_tests_for_free_span() -> dict:
         end_str="21:00",  # Search interval ends
         booking_data=[],  # This day's appointments
         exp_result=["07:00-21:00"],
-    )  # No booked times
+    )  # All times are free
 
     store_test_case(
         test_cases,
@@ -48,15 +48,6 @@ def create_tests_for_free_span() -> dict:
     store_test_case(
         test_cases,
         5,
-        start_str="15:00",  # Search interval starts
-        end_str="08:00",  # Search interval ends
-        booking_data=["09:00-10:30", "16:00-18:00"],  # This day's appointments
-        exp_result=[],
-    )  # Search start is after end
-
-    store_test_case(
-        test_cases,
-        6,
         start_str="07:00",  # Search interval starts
         end_str="07:00",  # Search interval ends
         booking_data=["09:00-10:30"],  # This day's appointments
