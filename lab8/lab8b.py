@@ -12,47 +12,52 @@ TimeSpanSeq = NamedTuple("TimeSpanSeq", [("Timespans", List[TimeSpan])])
 
 # Implement these functions!  Also determine if you need *additional* functions.
 
+
 def new_time_span_seq():
     """Create new empty timespan sequence"""
-    
+
     return TimeSpanSeq([])
 
 
 def tss_is_empty(tss):
     """Check if a TimeSpanSeq object is empty"""
-    
+
     ensure_type(tss, TimeSpanSeq)
-    if tss.Timespans: return False
+    if tss.Timespans:
+        return False
     return True
 
 
 def tss_plus_span(tss, ts):
     """Add a TimeSpan to a TimeSpanSeq object in its correct chronological position."""
-    
+
     ensure_type(tss, TimeSpanSeq)
     ensure_type(ts, TimeSpan)
 
     def add_span(seq: List[TimeSpan], span):
 
-        if not seq: return [span]
+        if not seq:
+            return [span]
         new_seq = seq.copy()
 
         i = 0
         for ts in new_seq:
             start_t = ts_start(ts)
-            if time_precedes(ts_start(span), start_t): break
+            if time_precedes(ts_start(span), start_t):
+                break
             i += 1
-        
+
         new_seq.insert(i, span)
         return new_seq
-    
+
     ts_list = tss.Timespans.copy()
     ts_list = add_span(ts_list, ts)
     return TimeSpanSeq(ts_list)
 
+
 def tss_iter_spans(tss):
     """Generator that yields TimeSpans from a TimeSpanSeq."""
-    
+
     ensure_type(tss, TimeSpanSeq)
     for ts in tss.Timespans:
         yield ts
@@ -60,14 +65,14 @@ def tss_iter_spans(tss):
 
 def show_time_spans(tss):
     """Print details of each TimeSpan in a TimeSpanSeq object."""
-    
+
     ensure_type(tss, TimeSpanSeq)
     i = 1
-    if tss.Timespans: 
+    if tss.Timespans:
         for ts in tss.Timespans:
-            print("Timespan " + str(i) + " |  " + "Start: " + str(ts_start(ts).hour.number) 
-                  + "h " + str(ts_start(ts).minute.number) + "min \t" 
-                  + "End: " + str(ts_end(ts).hour.number) + 
+            print("Timespan " + str(i) + " |  " + "Start: " + str(ts_start(ts).hour.number)
+                  + "h " + str(ts_start(ts).minute.number) + "min \t"
+                  + "End: " + str(ts_end(ts).hour.number) +
                   "h " + str(ts_end(ts).minute.number) + str("min"))
             i += 1
     else:
@@ -83,7 +88,7 @@ def tss_keep_spans(tss, pred):
 
     return result
 
-
+"""
 m8 = new_minute(8)
 m14 = new_minute(14)
 m25 = new_minute(25)
@@ -109,3 +114,4 @@ tss = tss_plus_span(tss, ts3)
 tss = tss_plus_span(tss, ts2)
 
 show_time_spans(tss)
+"""

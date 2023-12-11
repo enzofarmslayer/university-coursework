@@ -1,6 +1,7 @@
 # This code violates abstraction layers, and should be reimplemented in lab 8A.
 from cal_abstraction import *
 
+
 def ts_equals(ts1: TimeSpan, ts2: TimeSpan):
     """Return true iff the two given TimeSpans are equal."""
     ensure_type(ts1, TimeSpan)
@@ -21,6 +22,7 @@ def ts_overlap(ts1: TimeSpan, ts2: TimeSpan) -> bool:
             time_precedes(ts_start(ts1), ts_end(ts2))
     )
 
+
 def ts_overlapping_part(ts1: TimeSpan, ts2: TimeSpan) -> TimeSpan:
     """Return the overlapping part of two overlapping time spans,
     under the assumption that they really *are* overlapping."""
@@ -32,7 +34,7 @@ def ts_overlapping_part(ts1: TimeSpan, ts2: TimeSpan) -> TimeSpan:
     # att göra detta...
     start_time = time_latest(ts_start(ts1), ts_start(ts2))
     end_time = time_earliest(ts_end(ts1), ts_end(ts2))
-    
+
     return new_time_span(start_time, end_time)
 
 

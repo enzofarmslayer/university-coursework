@@ -1,5 +1,6 @@
 from cal_ui import *
 
+
 def cd_minus_appointment(cal_day: CalendarDay, time: Time) -> CalendarDay:
     """
     Returns a copy of the given CalendarDay, where the given Appointment
@@ -15,6 +16,7 @@ def cd_minus_appointment(cal_day: CalendarDay, time: Time) -> CalendarDay:
             new_cal_day_app.remove(app)
 
     return new_calendar_day(cd_day(cal_day), new_cal_day_app)
+
 
 def minus_appointment(
     cal_year: CalendarYear,
@@ -52,6 +54,7 @@ def remove(cal_name: str, d: int, m: str, t1: str) -> None:
         new_year = minus_appointment(cal_year, day, mon, start)
         insert_calendar(cal_name, new_year)
         print("The appointment has been removed.")
+
 
 """
 create("enzo")
