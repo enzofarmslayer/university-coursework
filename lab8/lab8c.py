@@ -53,10 +53,12 @@ def remove(cal_name: str, d: int, m: str, t1: str) -> None:
         insert_calendar(cal_name, new_year)
         print("The appointment has been removed.")
 
-
+"""
 create("enzo")
 book("enzo", 30, "nov", "14:00", "16:00", "knas")
 book("enzo", 30, "nov", "16:30", "19:00", "mys")
 show("enzo", 30, "nov")
 remove("enzo", 30, "nov", "14:00")
+book("enzo", 30, "nov", "19:30", "20:00", "mys2")
 show("enzo", 30, "nov")
+"""

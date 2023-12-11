@@ -39,8 +39,6 @@ def first_free_time(start, end, apps) -> Time:
                 continue
             if not first_time:
                 first_time = ts_end(app.span)
-            elif not time_precedes(ts_end(app.span), first_time):
-                first_time = ts_end(app.span)
 
     if not first_time and in_time_span:
         return None
@@ -76,7 +74,7 @@ def free_spans(cal_day: CalendarDay, start: Time, end: Time) -> TimeSpanSeq:
     if not first_time:
         return tss_spans
 
-    # Find end time of free span
+    # Find end time of first free span
     end_time = first_busy_time(start, end, apps)
 
     if end_time:
