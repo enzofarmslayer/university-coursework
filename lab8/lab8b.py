@@ -1,5 +1,8 @@
 from typing import NamedTuple, List
 from cal_abstraction import *
+from cal_output import *
+
+
 # =========================================================================
 # Type definition
 # =========================================================================
@@ -70,11 +73,8 @@ def show_time_spans(tss):
     i = 1
     if tss.Timespans:
         for ts in tss.Timespans:
-            print("Timespan " + str(i) + " |  " + "Start: " + str(ts_start(ts).hour.number)
-                  + "h " + str(ts_start(ts).minute.number) + "min \t"
-                  + "End: " + str(ts_end(ts).hour.number) +
-                  "h " + str(ts_end(ts).minute.number) + str("min"))
-            i += 1
+            show_ts(ts)
+            print()     # Show_ts contains no newline char
     else:
         print("Timespan sequence is empty")
 
