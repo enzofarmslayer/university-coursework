@@ -9,13 +9,13 @@ def cd_minus_appointment(cal_day: CalendarDay, time: Time) -> CalendarDay:
     ensure_type(time, Time)
     ensure_type(cal_day, CalendarDay)
 
-    new_cal_day_app = cal_day.appointments.copy()
+    new_cal_day = new_calendar_day(cd_day(cal_day))
 
-    for app in new_cal_day_app:
-        if time == ts_start(app.span):
-            new_cal_day_app.remove(app)
+    for app in cd_iter_appointments(cal_day):
+        if time != ts_start(app.span):
+                new_cal_day.appointments.append(app)
 
-    return new_calendar_day(cd_day(cal_day), new_cal_day_app)
+    return new_cal_day
 
 
 def minus_appointment(
