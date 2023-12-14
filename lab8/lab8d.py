@@ -1,6 +1,8 @@
 # Write your code for lab 8d here.
 from cal_abstraction import CalendarDay, Time
 from settings import CHECK_AGAINST_FACIT
+from cal_ui import *
+from lab8c import *
 
 if CHECK_AGAINST_FACIT:
     try:
@@ -62,12 +64,14 @@ def first_busy_time(start, end, apps) -> Time:
 
 def free_spans(cal_day: CalendarDay, start: Time, end: Time) -> TimeSpanSeq:
     """Return all timespans that are not booked in the time interval of the given day."""
-    apps = cal_day.appointments
+    apps = []
+    for app in cd_iter_appointments(cal_day):
+        apps.append(app)
     tss_spans = new_time_span_seq()
 
     # Check if there are no appointments
     if not apps:
-        return new_time_span_seq([new_time_span(start, end)])
+        return tss_plus_span(tss_spans, new_time_span(start, end))
 
     # Find first available time given span
     first_time = first_free_time(start, end, apps)
@@ -90,3 +94,23 @@ def free_spans(cal_day: CalendarDay, start: Time, end: Time) -> TimeSpanSeq:
         tss_spans = tss_plus_span(tss_spans, free_span)
 
     return tss_spans
+
+def show_free(cal_name: str, d: int, m: str, t1: str, t2: str):
+    day = new_day(d)
+    mon = new_month(m)
+    start = new_time_from_string(t1)
+    end = new_time_from_string(t2)
+    cal_year = get_calendar(cal_name)
+    cal_month = cy_get_month(mon, cal_year)
+    cal_day = cm_get_day(cal_month, day)
+    
+    tss = free_spans(cal_day, start, end)
+    show_time_spans(tss)
+
+"""
+# Example
+create("Lukas")
+book("Lukas", 13, "dec", "12:00", "13:00", "Lucia")
+book("Lukas", 13, "dec", "17:00", "18:30", "Handla mat")
+show_free("Lukas", 13, "dec", "09:00", "20:00")
+"""
