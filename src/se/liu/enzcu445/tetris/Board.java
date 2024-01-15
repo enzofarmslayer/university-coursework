@@ -47,11 +47,11 @@ public class Board {
     }
 
     public SquareType getVisibleSquaresAt(int height, int width){
-        // Om det inte finns något fallande block
+
         if (falling == null) {
             return squares[height][width];
         }
-        // Kontrollera om det fallande blocket täcker den aktuella positionen
+
         int blockX = fallingPos.x;
         int blockY = fallingPos.y;
         int blockWidth = falling.getWidth();
@@ -59,11 +59,10 @@ public class Board {
 
         if (height >= blockY && height < blockY + blockHeight &&
                 width >= blockX && width < blockX + blockWidth) {
-            // Adjust the indices for the falling block's shape array
+
             int shapeY = height - blockY;
             int shapeX = width - blockX;
 
-            // Ensure the indices are within the bounds of the falling block's shape
             if (shapeY >= 0 && shapeY < falling.getShape().length &&
                     shapeX >= 0 && shapeX < falling.getShape()[shapeY].length) {
                 SquareType type = falling.getShape()[shapeY][shapeX];

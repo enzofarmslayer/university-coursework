@@ -8,7 +8,7 @@ public class DiagramComponent extends JComponent {
     @Override protected void paintComponent(final Graphics g) {
         super.paintComponent(g);
         for (Shape shape : shapes) {
-            shape.draw(g); // Assuming each shape has a 'draw' method
+            shape.draw(g);
         }
         // Senare ska vi rita upp alla former här!
     }
