@@ -22,5 +22,4 @@ public class Poly {
         this.width = shape[0].length;
         this.height = shape.length;
     }
-
 }

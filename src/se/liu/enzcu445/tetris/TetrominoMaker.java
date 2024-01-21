@@ -1,16 +1,15 @@
 package se.liu.enzcu445.tetris;
 
 public class TetrominoMaker {
-    public int getNumberOfTypes() {
-        return SquareType.values().length;
-    }
 
     public Poly getPoly(int n) {
 
-        if (n < 0 || n >= getNumberOfTypes()) {
+        // Check if the provided index is within the valid range of Tetromino types.
+        if (n < 0 || n >= SquareType.values().length) {
             throw new IllegalArgumentException("Invalid index: " + n);
         }
 
+        // Create a Tetromino based on the provided index.
         switch (n) {
             case 0:
                 return createBlockI();
@@ -31,6 +30,7 @@ public class TetrominoMaker {
         }
     }
 
+    // Each method below returns a Poly object representing the Tetromino's shape.
     private Poly createBlockI() {
         SquareType[][] shape = {{SquareType.EMPTY, SquareType.EMPTY, SquareType.EMPTY, SquareType.EMPTY},
                 {SquareType.I, SquareType.I, SquareType.I, SquareType.I},
@@ -59,7 +59,7 @@ public class TetrominoMaker {
     }
     private Poly createBlockS() {
         SquareType[][] shape = {{SquareType.EMPTY, SquareType.S, SquareType.S},
-                {SquareType.S, SquareType.S, SquareType.S},
+                {SquareType.S, SquareType.S, SquareType.EMPTY},
                 {SquareType.EMPTY, SquareType.EMPTY, SquareType.EMPTY}};
         return new Poly(shape);
     }

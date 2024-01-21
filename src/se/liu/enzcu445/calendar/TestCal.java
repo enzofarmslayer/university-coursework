@@ -3,7 +3,8 @@ package se.liu.enzcu445.calendar;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Testcal {
+public class TestCal
+{
         public static void main(String[] args) {
             List<Appointment> appointments1 = new ArrayList<>();
 

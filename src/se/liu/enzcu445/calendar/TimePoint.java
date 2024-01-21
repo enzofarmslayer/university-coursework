@@ -19,6 +19,7 @@ public class TimePoint {
 
     @Override
     public String toString() {
+        // prints in format 01:01 instead of 1:1
         return String.format("%02d:%02d", hour, minute);
     }
 

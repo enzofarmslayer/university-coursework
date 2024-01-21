@@ -1,10 +1,29 @@
 package se.liu.enzcu445.tetris;
 import javax.swing.JComponent;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
+import java.util.EnumMap;
+import java.util.regex.MatchResult;
 
-public class TetrisComponent extends JComponent {
+import static javax.swing.UIManager.put;
+
+public class TetrisComponent extends JComponent implements BoardListener{
     private Board board;
+    private final static int SQUARE_SIZE = 20;
+    private final static EnumMap<SquareType, Color> squareColors = createColorMap();
+
+    private static EnumMap<SquareType, Color> createColorMap() {
+        EnumMap<SquareType, Color> colorMap = new EnumMap<>(SquareType.class);
+        colorMap.put(SquareType.EMPTY, Color.BLACK);
+        colorMap.put(SquareType.I, Color.CYAN);
+        colorMap.put(SquareType.O, Color.YELLOW);
+        colorMap.put(SquareType.T, Color.MAGENTA);
+        colorMap.put(SquareType.S, Color.GREEN);
+        colorMap.put(SquareType.Z, Color.RED);
+        colorMap.put(SquareType.J, Color.BLUE);
+        colorMap.put(SquareType.L, Color.ORANGE);
+        colorMap.put(SquareType.OUTSIDE, Color.BLACK);
+        return colorMap;
+    }
 
     public TetrisComponent(Board board) {
         this.board = board;
@@ -12,9 +31,8 @@ public class TetrisComponent extends JComponent {
 
     @Override
     public Dimension getPreferredSize() {
-
-        int width = 10 * 30;
-        int height = 20 * 30;
+        int width = (SQUARE_SIZE * board.getWidth());
+        int height = SQUARE_SIZE * board.getHeight();
 
         return new Dimension(width, height);
     }
@@ -22,5 +40,20 @@ public class TetrisComponent extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        final Graphics2D g2d = (Graphics2D) g;
+        for (int y = 0; y < board.getHeight(); y++) {
+            for (int x = 0; x < board.getWidth(); x++) {
+                SquareType type = board.getVisibleSquaresAt(y,x);
+                g2d.setColor(squareColors.get(type));
+                g2d.fillRect(x*SQUARE_SIZE, y*SQUARE_SIZE, SQUARE_SIZE,SQUARE_SIZE);
+                g2d.setColor(Color.BLACK);
+                g2d.setStroke(new BasicStroke(2));
+                g2d.drawRect(x*SQUARE_SIZE, y*SQUARE_SIZE, SQUARE_SIZE,SQUARE_SIZE);
+            }
+        }
+    }
+
+    @Override public void boardChanged() {
+        repaint();
     }
 }

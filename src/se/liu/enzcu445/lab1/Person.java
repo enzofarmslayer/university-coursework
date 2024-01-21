@@ -11,16 +11,20 @@ public class Person {
         this.name = name;
         this.birthDay = birthDay;
     }
-    public int getAge() {
-        return Period.between(birthDay, LocalDate.now()).getYears();
-    }
 
     @Override
     public String toString() {
+        // When calling print function on a Person the namne and age gets printed instead
         return name + " " + getAge();
     }
 
+    public int getAge() {
+        // Calculates and returns a Persons age based on their birthday
+        return Period.between(birthDay, LocalDate.now()).getYears();
+    }
+
     public static void main(String[] args){
+        // Creates two Person objects and prints them
         LocalDate birthDateEnzo = LocalDate.of(2004,10,18);
         Person Enzo = new Person("Enzo", birthDateEnzo);
 
