@@ -19,6 +19,8 @@ public class TetrisViewer {
     private PauseController pauseController = new PauseController();
     private GameSpeedController speedController = new GameSpeedController();
     private Timer gameTimer;
+    JButton pauseButton;
+    final int startScreendelay = 2000;
 
     public TetrisViewer(Board board) {
         this.board = board;
@@ -38,7 +40,7 @@ public class TetrisViewer {
         startScreen.display();
 
         // Wait before the main game starts
-        Timer timer = new Timer(2000, new ActionListener() {
+        Timer timer = new Timer(startScreendelay, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 startScreen.hide();
@@ -60,39 +62,47 @@ public class TetrisViewer {
         toolBar.add(exitButton);
 
         JButton resetButton = new JButton(new ResetAction(board));
+
         resetButton.setText("Omstart");
         toolBar.add(resetButton);
 
-        JButton pauseButton = new JButton(new AbstractAction("Pausa/Fortsätt") {
+        pauseButton = new JButton(new AbstractAction(pauseController.pauseText()) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 pauseController.togglePause();
+                pauseButton.setText(pauseController.pauseText());
             }
         });
         toolBar.add(pauseButton);
 
-        JMenuItem scoreLabel = new JMenuItem("Score:" + board.getScore() + "    ");
+        JLabel scoreLabel = new JLabel("\n"+"Score:" + board.getScore() + "\n");
         toolBar.add(scoreLabel);
-//        //frame.add(scoreLabel, BorderLayout.EAST);
-//        frame.setJMenuBar(bar);
+        frame.add(toolBar, BorderLayout.EAST);
+
+        JLabel powerupLabel = new JLabel();
+        toolBar.add(powerupLabel);
+
+        toolBar.setPreferredSize(new Dimension(150, 100));
+
         frame.add(toolBar, BorderLayout.EAST);
         frame.pack(); // Justerar storlek baserat på föredragna storlekar på komponenter
 
-        //final int tickDelayMs = 10;
         gameTimer = new Timer(speedController.getCurrentTickDelayMs(), new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!pauseController.isPaused()){
+                if(!pauseController.isPaused()) {
                     speedController.updateSpeed();
                     gameTimer.setDelay(speedController.getCurrentTickDelayMs());
                     board.tick();
                     scoreLabel.setText("Score:" + board.getScore());
-                if (board.isGameOver()) {
-                    updateHighscore();
-                    board.resetGame();
-                    speedController.resetSpeed();
-                    gameTimer.setDelay(speedController.getCurrentTickDelayMs());
-                }
+                    if (board.isGameOver()) {
+                        updateHighscore();
+                        board.resetGame();
+                        speedController.resetSpeed();
+                        gameTimer.setDelay(speedController.getCurrentTickDelayMs());
+                    }
+                powerupLabel.setText("Powerup:"+ board.getCurrentFallHandlerDescription());
+                tetrisComponent.requestFocusInWindow();
             }
             }
         });

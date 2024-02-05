@@ -53,7 +53,7 @@ public class HighscoreList {
 
     public void loadHighscoresFromFile() throws IOException {
 	Gson gson = new Gson();
-	String filePath = System.getProperty("user.home") + "/TetrisHighscoreList.json";
+	String filePath = System.getProperty("user.home") + "/HighscoreList.json";
 	try (FileReader reader = new FileReader(filePath)) {
 	    Type type = new TypeToken<List<Highscore>>() {}.getType();
 	    highscores = gson.fromJson(reader, type);

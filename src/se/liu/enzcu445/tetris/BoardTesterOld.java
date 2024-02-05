@@ -35,11 +35,11 @@ public class BoardTesterOld
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < board.getHeight(); y++) {
             for (int x = 0; x < board.getWidth(); x++) {
-                if (board.getVisibleSquaresAt(y, x) == SquareType.EMPTY) {
+                if (board.getSquareType(y, x) == SquareType.EMPTY) {
                     sb.append("--");
                 }
                 else{
-                    sb.append(board.getVisibleSquaresAt(y, x));
+                    sb.append(board.getSquareType(y, x));
                 }
                 sb.append(" ");
             }

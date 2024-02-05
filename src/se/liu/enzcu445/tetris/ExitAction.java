@@ -8,5 +8,6 @@ public class ExitAction extends AbstractAction {
 	if (result == JOptionPane.YES_OPTION) {
 	    System.exit(0);
 	}
+	//.requestFocusInWindow();
     }
 }

@@ -11,6 +11,14 @@ public class PauseController {
 	paused = !paused;
     }
 
+    public String pauseText(){
+	if (paused){
+	    return "Unpause";
+	}
+	else{
+	    return "Pause";
+	}
+    }
     public boolean isPaused() {
 	return paused;
     }

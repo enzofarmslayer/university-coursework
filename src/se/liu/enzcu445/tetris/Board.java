@@ -2,8 +2,10 @@ package se.liu.enzcu445.tetris;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public class Board
 {
@@ -20,20 +22,28 @@ public class Board
     private boolean gameOver = false;
     private int score;
     private static final Map<Integer, Integer> scoreMap = Map.of(1, 100, 2, 300, 3, 500, 4, 800);
-    private FallHandler fallHandler = new DefaultFallHandler();
+    private FallHandler currentFallHandler = new DefaultFallHandler();
+
     public Poly getFalling() {
         return falling;
     }
+
     public int getWidth() {
         return width;
     }
+
     public int getHeight() {
         return height;
     }
-    public int getScore(){return score;}
+
+    public int getScore() {
+        return score;
+    }
+
+    private Point previousFallingPos = new Point();
 
     public SquareType getSquareType(int height, int width) {
-        return squares[height + MARGIN][width + MARGIN];
+        return squares[height][width];
     }
 
     public Board(int height, int width) {
@@ -50,38 +60,46 @@ public class Board
         return fallingPos;
     }
 
+    public int getFallingPosX() {
+        return fallingPos.x;
+    }
+
+    public int getFallingPosY() {
+        return fallingPos.y;
+    }
+
     public SquareType getVisibleSquaresAt(int boardY, int boardX) {
-            // Justera för MARGIN
-            boardY += MARGIN;
-            boardX += MARGIN;
+        // Justera för MARGIN
+        boardY += MARGIN;
+        boardX += MARGIN;
 
-            // Kontrollera om koordinaterna är utanför brädet
-            if (boardY < MARGIN || boardY >= height + MARGIN || boardX < MARGIN || boardX >= width + MARGIN) {
-                return SquareType.OUTSIDE;
-            }
-
-            // Kontrollera om koordinaterna överlappar med den fallande tetrominon
-            if (falling != null) {
-                int x1 = fallingPos.x;
-                int y1 = fallingPos.y;
-                int fallingWidth = falling.getWidth();
-                int fallingHeight = falling.getHeight();
-
-                if (boardY >= y1 && boardY < y1 + fallingHeight && boardX >= x1 && boardX < x1 + fallingWidth) {
-                    int shapeY = boardY - y1;
-                    int shapeX = boardX - x1;
-                    SquareType type = falling.getShape()[shapeY][shapeX];
-                    if (type != SquareType.EMPTY) {
-                        return type;
-                    }
-                }
-            }
-            // Returnera typen av statiska block
-            return squares[boardY][boardX];
+        // Kontrollera om koordinaterna är utanför brädet
+        if (boardY < MARGIN || boardY >= height + MARGIN || boardX < MARGIN || boardX >= width + MARGIN) {
+            return SquareType.OUTSIDE;
         }
 
+        // Kontrollera om koordinaterna överlappar med den fallande tetrominon
+        if (falling != null) {
+            int x1 = fallingPos.x;
+            int y1 = fallingPos.y;
+            int fallingWidth = falling.getWidth();
+            int fallingHeight = falling.getHeight();
 
-        public void boardWithRndSquare() {
+            if (boardY >= y1 && boardY < y1 + fallingHeight && boardX >= x1 && boardX < x1 + fallingWidth) {
+                int shapeY = boardY - y1;
+                int shapeX = boardX - x1;
+                SquareType type = falling.getShape()[shapeY][shapeX];
+                if (type != SquareType.EMPTY) {
+                    return type;
+                }
+            }
+        }
+        // Returnera typen av statiska block
+        return squares[boardY][boardX];
+    }
+
+
+    public void boardWithRndSquare() {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 squares[y][x] = SquareType.values()[RND.nextInt(7)];
@@ -102,23 +120,24 @@ public class Board
 
     public void tick() {
 
-        if (gameOver){
+        if (gameOver) {
             return;
         }
 
         if (falling == null) {
-            falling = tetrominoMaker.getPoly(RND.nextInt(7));
+            falling = tetrominoMaker.getPoly(RND.nextInt(7));//RND.nextInt(7)
             fallingPos = new Point(((width + MARGIN) / 2), MARGIN);
-            if(hasCollision()){
+            if (hasCollision()) {
                 gameOver = true;
             }
         } else {
+            previousFallingPos = new Point(fallingPos);
             fallingPos.y += 1;
-            if(hasCollision()){
-                fallingPos.y -= 1;
-                for (int y = MARGIN; y < height+MARGIN; y++) {
-                    for (int x = MARGIN; x < width+MARGIN; x++) {
-                        squares[y][x] = getVisibleSquaresAt(y-MARGIN,x-MARGIN);
+            if (hasCollision()) {
+                fallingPos = new Point(previousFallingPos);
+                for (int y = MARGIN; y < height + MARGIN; y++) {
+                    for (int x = MARGIN; x < width + MARGIN; x++) {
+                        squares[y][x] = getVisibleSquaresAt(y - MARGIN, x - MARGIN);
                     }
                 }
                 ClearFilledLines();
@@ -129,63 +148,32 @@ public class Board
     }
 
     public void move(Direction direction) {
+        previousFallingPos = new Point(fallingPos);
+
         switch (direction) {
-            case Direction.RIGHT:
+            case RIGHT:
                 fallingPos.x += 1;
-                if(hasCollision()){
-                    fallingPos.x -= 1;
-                }
                 break;
-            case Direction.LEFT:
+            case LEFT:
                 fallingPos.x -= 1;
-                if(hasCollision()){
-                    fallingPos.x += 1;
-                }
                 break;
             default:
                 break;
         }
+
+        if (hasCollision()) {
+            fallingPos = new Point(previousFallingPos); // Revert position due to collision
+        }
+
         notifyListeners();
     }
 
-    private boolean hasCollision(){
-        return fallHandler.hasCollision(this, falling, fallingPos);
+    private boolean hasCollision() {
+        return currentFallHandler.hasCollision(this, previousFallingPos.x);
     }
-    public SquareType[][] getSquares() {
-        return squares;
-    }
-//    private boolean hasCollision() {
-//        if (falling == null) {
-//            return false;
-//        }
-//        int x1 = fallingPos.x;
-//        int y1 = fallingPos.y;
-//        int fallingWidth = falling.getWidth();
-//        int fallingHeight = falling.getHeight();
-//
-//        for (int row = 0; row < fallingHeight; row++) {
-//            for (int col = 0; col < fallingWidth; col++) {
-//                if (falling.getShape()[row][col] != SquareType.EMPTY) {
-//                    int boardY = y1 + row;
-//                    int boardX = x1 + col;
-//
-//                    // Control collision out of bounds
-//                    if (boardY >= height + MARGIN || boardX < MARGIN || boardX >= (width + MARGIN)) {
-//                        return true;
-//                    }
-//
-//                    // Control collision between nonEmpty squares
-//                    if (squares[boardY][boardX] != SquareType.EMPTY) {
-//                        return true;
-//                    }
-//                }
-//            }
-//        }
-//        return false;
-//    }
 
-    public void rotate(Direction dir){
-        if (falling == null){
+    public void rotate(Direction dir) {
+        if (falling == null) {
             return;
         }
         Poly rotatedPoly = new Poly(new SquareType[falling.getHeight()][falling.getWidth()]);
@@ -203,13 +191,13 @@ public class Board
         Poly fallingCopy = falling;
         falling = rotatedPoly;
 
-        if (hasCollision()){
+        if (hasCollision()) {
             falling = fallingCopy;
         }
         notifyListeners();
     }
 
-    public void ClearFilledLines(){
+    public void ClearFilledLines() {
         int clearedLines = 0;
         for (int y = MARGIN; y < height + MARGIN; y++) {
             boolean isFilled = true;
@@ -225,13 +213,31 @@ public class Board
             }
         }
         updateScore(clearedLines);
+        activateFallthroughPowerup(clearedLines);
         notifyListeners();
     }
 
-    private void clearLine(int clearLineY){
-        for (int x = MARGIN; x < getWidth()+MARGIN; x++) {
+    public void activateFallthroughPowerup(int clearedLines) {
+
+        if (clearedLines > 1) {
+         currentFallHandler = new HeavyFallHandler();
+        }
+        else if (clearedLines == 1) {
+            currentFallHandler = new FallthroughFallHandler();
+        }
+        else {
+            currentFallHandler = new DefaultFallHandler();
+        }
+    }
+
+    public String getCurrentFallHandlerDescription() {
+        return currentFallHandler.getDescription();
+    }
+
+    private void clearLine(int clearLineY) {
+        for (int x = MARGIN; x < getWidth() + MARGIN; x++) {
             for (int y = clearLineY; y > MARGIN; y--) {
-                squares[y][x] = squares[y-1][x];
+                squares[y][x] = squares[y - 1][x];
             }
         }
     }
@@ -260,7 +266,7 @@ public class Board
         notifyListeners();
     }
 
-    private void constructBoard(){
+    private void constructBoard() {
         for (int y = 0; y < height + DOUBLE_MARGIN; y++) {
             for (int x = 0; x < width + DOUBLE_MARGIN; x++) {
                 if (y < MARGIN || y >= height + MARGIN || x < MARGIN || x >= width + MARGIN) {
@@ -272,8 +278,48 @@ public class Board
         }
     }
 
-    public static void main(String[] args) {
-        //Board board = new Board(10,10);
+    public void collapseBelow(Board board, int collistionY, int collistionX) {
+        for (int y = collistionY; y < board.getHeight()+MARGIN ; y++) {
+            if (squares[y][collistionX] == SquareType.EMPTY){
+                for (int y2 = y; y2 > collistionY-board.getFalling().getHeight() ; y2--) {
+                    squares[y2][collistionX] = squares[y2-1][collistionX];
+                }
+                notifyListeners();
+                break;
+            }
+        }
+        notifyListeners();
+    }
+
+    public boolean canCollapseBelow(Board board, int collistionY, int collistionX, Point fallingPos) {
+
+        int fallingSquaresToRight = (fallingPos.x+board.getFalling().getWidth() - collistionX);
+        int polyY = collistionY - fallingPos.y;
+        boolean columnHasEmptySquare = false;
+
+        // Iterate over the columns of the falling piece and rows below it, starting from collistionX.
+        for (int x = collistionX; x < collistionX + fallingSquaresToRight; x++) {
+            int polyX = x - fallingPos.x;
+            if(board.getFalling().getShape()[polyY][polyX] != SquareType.EMPTY) {
+                columnHasEmptySquare = false;
+                for (int y = collistionY; y < board.getHeight() + MARGIN; y++) {
+                    {
+                        if (squares[y][x] == SquareType.EMPTY) {
+                            columnHasEmptySquare = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // If any column is found to be full (no empty squares), return false.
+            if (!columnHasEmptySquare) {
+                return false;
+            }
+        }
+
+        // If all checked columns have at least one empty square, return true.
+        return true;
     }
 }
 
