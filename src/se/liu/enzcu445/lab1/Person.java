@@ -26,12 +26,12 @@ public class Person {
     public static void main(String[] args){
         // Creates two Person objects and prints them
         LocalDate birthDateEnzo = LocalDate.of(2004,10,18);
-        Person Enzo = new Person("Enzo", birthDateEnzo);
+        Person enzo = new Person("Enzo", birthDateEnzo);
 
         LocalDate birthDateIwan = LocalDate.of(1971,1,23);
-        Person Iwan = new Person("Iwan", birthDateIwan);
+        Person iwan = new Person("Iwan", birthDateIwan);
 
-        System.out.println(Enzo);
-        System.out.println(Iwan);
+        System.out.println(enzo);
+        System.out.println(iwan);
     }
 }

@@ -18,9 +18,8 @@ public class TetrisViewer {
     private HighscoreList highscoreList;
     private PauseController pauseController = new PauseController();
     private GameSpeedController speedController = new GameSpeedController();
-    private Timer gameTimer;
-    JButton pauseButton;
-    final int startScreendelay = 2000;
+    private Timer gameTimer = null;
+    private JButton pauseButton = null;
 
     public TetrisViewer(Board board) {
         this.board = board;
@@ -40,7 +39,8 @@ public class TetrisViewer {
         startScreen.display();
 
         // Wait before the main game starts
-        Timer timer = new Timer(startScreendelay, new ActionListener() {
+	int startScreendelay = 2000;
+	Timer timer = new Timer(startScreendelay, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 startScreen.hide();

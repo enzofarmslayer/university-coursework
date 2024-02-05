@@ -25,6 +25,6 @@ private TimeSpan timeSpan;
 
     @Override
     public String toString() {
-        return "Subject: " + subject + "\nDate: " + date.toString() + "\nTime: " + timeSpan.toString();
+        return "Subject: " + subject + "\nDate: " + date + "\nTime: " + timeSpan;
     }
 }

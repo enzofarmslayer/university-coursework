@@ -8,13 +8,13 @@ public class ShapesTest {
 
         ArrayList<Shape> shapes = new ArrayList<>();
 
-        Shape shapeCir = new Circle(1, 1, 1, Color.blue);
-        Shape shapeRec = new Rectangle(3, 3, 2, 2, Color.cyan);
-        Shape shapeTex = new Text(4,4,1,Color.black, "ee");
+        Shape shapeCircle = new Circle(1, 1, 1, Color.blue);
+        Shape shapeRectangle = new Rectangle(3, 3, 2, 2, Color.cyan);
+        Shape shapeText = new Text(4,4,1,Color.black, "ee");
 
-        shapes.add(shapeCir);
-        shapes.add(shapeRec);
-        shapes.add(shapeTex);
+        shapes.add(shapeCircle);
+        shapes.add(shapeRectangle);
+        shapes.add(shapeText);
 
         for (Shape shape : shapes) {
             //shape.draw();

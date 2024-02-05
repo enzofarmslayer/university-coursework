@@ -2,10 +2,8 @@ package se.liu.enzcu445.tetris;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 public class Board
 {
@@ -13,12 +11,12 @@ public class Board
     private SquareType[][] squares;
     private int width;
     private int height;
-    private Poly falling;
-    private Point fallingPos;
+    private Poly falling = null;
+    private Point fallingPos = null;
     private ArrayList<BoardListener> listeners = new ArrayList<>();
     private TetrominoMaker tetrominoMaker = new TetrominoMaker();
-    private static int MARGIN = 2;
-    private static int DOUBLE_MARGIN = MARGIN * 2;
+    private static final int MARGIN = 2;
+    private static final int DOUBLE_MARGIN = MARGIN * 2;
     private boolean gameOver = false;
     private int score;
     private static final Map<Integer, Integer> scoreMap = Map.of(1, 100, 2, 300, 3, 500, 4, 800);
@@ -140,7 +138,7 @@ public class Board
                         squares[y][x] = getVisibleSquaresAt(y - MARGIN, x - MARGIN);
                     }
                 }
-                ClearFilledLines();
+                clearFilledLines();
                 falling = null;
             }
         }
@@ -197,7 +195,7 @@ public class Board
         notifyListeners();
     }
 
-    public void ClearFilledLines() {
+    public void clearFilledLines() {
         int clearedLines = 0;
         for (int y = MARGIN; y < height + MARGIN; y++) {
             boolean isFilled = true;

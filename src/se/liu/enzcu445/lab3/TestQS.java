@@ -7,18 +7,18 @@ import java.time.LocalDate;
 public class TestQS {
     public static void main(String[] args) {
         LocalDate birthDateEnzo = LocalDate.of(2004, 10, 18);
-        Person Enzo = new Person("Enzo", birthDateEnzo);
+        Person enzo = new Person("Enzo", birthDateEnzo);
 
         LocalDate birthDateIwan = LocalDate.of(1971, 1, 23);
-        Person Iwan = new Person("Iwan", birthDateIwan);
+        Person iwan = new Person("Iwan", birthDateIwan);
 
         LocalDate birthDateVera = LocalDate.of(1971, 1, 23);
-        Person Vera = new Person("Vera", birthDateVera);
+        Person vera = new Person("Vera", birthDateVera);
 
         Stack stack = new Stack();
-        stack.push(Enzo);
-        stack.push(Iwan);
-        stack.push(Vera);
+        stack.push(enzo);
+        stack.push(iwan);
+        stack.push(vera);
 
         System.out.println("Stack:");
         while (!stack.isEmpty()) {
@@ -26,9 +26,9 @@ public class TestQS {
         }
 
         Queue queue = new Queue();
-        queue.enqueue(Enzo);
-        queue.enqueue(Iwan);
-        queue.enqueue(Vera);
+        queue.enqueue(enzo);
+        queue.enqueue(iwan);
+        queue.enqueue(vera);
 
         System.out.println("\nQueue:");
         while (!queue.isEmpty()) {
