@@ -17,9 +17,6 @@ public class AbstractFallHandler implements FallHandler {
 	    return false;
 	}
 
-	// Check if falling is moving straight down from previous position
-	boolean movingStraightDown = (board.getFallingPosX() - oldX == 0);
-
 	// Check for collision and collapse unsupported squares if needed
 	for (int row = 0; row < board.getFalling().getHeight(); row++) {
 	    for (int col = 0; col < board.getFalling().getWidth(); col++) {
@@ -27,29 +24,10 @@ public class AbstractFallHandler implements FallHandler {
 		    int boardY = board.getFallingPosY() + row;
 		    int boardX = board.getFallingPosX() + col;
 
-		    // Check out of bounds, ensure that overlappingpiece wont be OUTSIDE
-		    if (boardY >= board.getHeight() + Board.getMARGIN() || boardX < Board.getMARGIN() ||
-			boardX >= board.getWidth() + Board.getMARGIN()) {
+		    // if collitiiondetectors finds a collition (based on Fallhandler) a collistion is detected
+		    if (checkBorderCollistion(board, boardY, boardX) || checkPieceCollistion(board, boardY, boardX)
+			|| checkHeavyCollistion(board, boardY, boardX, oldX)){
 			return true;
-		    }
-
-		    // Check normal collistion between pieces
-		    if (this instanceof DefaultFallHandler || !movingStraightDown && this instanceof HeavyFallHandler){
-			if (board.getSquareType(boardY,boardX) != SquareType.EMPTY){
-			    return true;
-			}
-		    }
-
-		    // Check collistion with Heavy piece
-		    if (this instanceof HeavyFallHandler && movingStraightDown){
-			if (board.getSquareType(boardY, boardX) != SquareType.EMPTY){
-			    if (!board.canCollapseBelow(board, boardY, boardX, board.getFallingPos())){
-				// If canCollapseBelow is false, we have a collision and the piece should lock in place.
-				return true;
-			    }
-			    // If canCollapseBelow is true, we collapse the squares below it
-			    board.collapseBelow(board, boardY, boardX);
-			}
 		    }
 		}
 	    }
@@ -57,5 +35,30 @@ public class AbstractFallHandler implements FallHandler {
 	return false;
     }
     @Override public String getDescription() {
-	    return null;}
+	// Default implimentation for getDescription
+	return null;
     }
+
+    public boolean checkPieceCollistion(Board board, int boardY, int boardX){
+	// Default implimentation for checkPieceCollitsion
+	if (board.getSquareType(boardY,boardX) != SquareType.EMPTY){
+	    return true;
+	}
+	return false;
+    }
+
+    public boolean checkBorderCollistion(Board board, int boardY, int boardX){
+	// Default implimentation for checkBorderCollitsion
+	if (boardY >= board.getHeight() + Board.getMARGIN() || boardX < Board.getMARGIN() ||
+	    boardX >= board.getWidth() + Board.getMARGIN()) {
+	    return true;
+	}
+	return false;
+    }
+
+    public boolean checkHeavyCollistion(Board board, int boardY, int boardX, int oldX){
+	// Default implimentation for checkHeavyCollitsion
+	return false;
+    }
+
+}

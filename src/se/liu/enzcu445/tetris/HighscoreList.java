@@ -51,7 +51,7 @@ public class HighscoreList {
     }
 
 
-    public void loadHighscoresFromFile() throws IOException {
+    public void loadHighscoresFromFile() throws IOException, FileNotFoundException {
 	Gson gson = new Gson();
 	String filePath = System.getProperty("user.home") + "/HighscoreList.json";
 	try (FileReader reader = new FileReader(filePath)) {

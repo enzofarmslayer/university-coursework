@@ -87,6 +87,7 @@ public class TetrisViewer {
         frame.add(toolBar, BorderLayout.EAST);
         frame.pack(); // Justerar storlek baserat på föredragna storlekar på komponenter
 
+        //Create the gametimer
         gameTimer = new Timer(speedController.getCurrentTickDelayMs(), new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {

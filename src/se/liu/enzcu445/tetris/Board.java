@@ -123,7 +123,7 @@ public class Board
         }
 
         if (falling == null) {
-            falling = tetrominoMaker.getPoly(RND.nextInt(7));//RND.nextInt(7)
+            falling = tetrominoMaker.getPoly(3);//RND.nextInt(7)
             fallingPos = new Point(((width + MARGIN) / 2), MARGIN);
             if (hasCollision()) {
                 gameOver = true;
@@ -221,10 +221,10 @@ public class Board
          currentFallHandler = new HeavyFallHandler();
         }
         else if (clearedLines == 1) {
-            currentFallHandler = new FallthroughFallHandler();
+            currentFallHandler = new HeavyFallHandler();
         }
         else {
-            currentFallHandler = new DefaultFallHandler();
+            currentFallHandler = new HeavyFallHandler();
         }
     }
 
