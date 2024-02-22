@@ -4,7 +4,7 @@ public class GameSpeedController
 {
     private static final int INITIAL_TICK_DELAY_MS = 500;
     private static final int MINIMUM_TICK_DELAY_MS = 100;
-    private static final int SPEED_INCREMENT_INTERVAL_MS = 1; // 1 minut
+    private static final int SPEED_INCREMENT_INTERVAL_MS = 10000; // 10 sek
     private static final int TICK_DECREMENT_PER_LEVEL = 10;
 
     private int currentTickDelayMs;
