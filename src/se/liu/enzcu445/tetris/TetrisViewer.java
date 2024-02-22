@@ -12,9 +12,9 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 public class TetrisViewer {
-    private JFrame frame;
+    private JFrame frame = null;
     private Board board;
-    private StartScreen startScreen;
+    private StartScreen startScreen = null;
     private HighscoreList highscoreList;
     private PauseController pauseController = new PauseController();
     private GameSpeedController speedController = new GameSpeedController();
@@ -23,10 +23,6 @@ public class TetrisViewer {
 
     public TetrisViewer(Board board) {
         this.board = board;
-        frame = new JFrame("Tetris");
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        startScreen = new StartScreen(frame);
         highscoreList = new HighscoreList();
         try {
             highscoreList.loadHighscoresFromFile();
@@ -36,11 +32,17 @@ public class TetrisViewer {
     }
 
     public void show() {
+
+        frame = new JFrame("Tetris");
+        frame.setResizable(false);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        startScreen = new StartScreen(frame);
+
         startScreen.display();
 
         // Wait before the main game starts
-	int startScreendelay = 2000;
-	Timer timer = new Timer(startScreendelay, new ActionListener() {
+	int startScreenDelay = 2000;
+	Timer timer = new Timer(startScreenDelay, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 startScreen.hide();

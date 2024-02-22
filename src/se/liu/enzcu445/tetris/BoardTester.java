@@ -1,15 +1,11 @@
 package se.liu.enzcu445.tetris;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-
 public class BoardTester
 {
-    private final static int BOARDSQUAREHEIGHT = 20;
-    private final static int BOARDSQUAREWITDH = 10;
+    private final static int BOARD_SQUARE_HEIGHT = 20;
+    private final static int BOARD_SQUARE_WITDH = 10;
     public static void main(String[] args) {
-	TetrisViewer viewer = new TetrisViewer(new Board(BOARDSQUAREHEIGHT,BOARDSQUAREWITDH));
+	TetrisViewer viewer = new TetrisViewer(new Board(BOARD_SQUARE_HEIGHT, BOARD_SQUARE_WITDH));
 	viewer.show();
     }
 }

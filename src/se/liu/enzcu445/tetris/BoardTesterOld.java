@@ -7,7 +7,7 @@ public class BoardTesterOld
 {
     public static void main(String[] args) {
             Board board = new Board(20, 10);
-            board.boardWithRndSquare();
+            board.buildBoardWithRndSquare();
             JFrame frame = new JFrame("Tetris");
             JTextArea textArea = new JTextArea();
             updateTextArea(textArea, board);

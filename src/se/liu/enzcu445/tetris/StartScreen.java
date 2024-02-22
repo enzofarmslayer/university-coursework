@@ -2,7 +2,7 @@ package se.liu.enzcu445.tetris;
 
 import javax.swing.*;
 
-public class StartScreen extends JFrame{
+public class StartScreen{
     private JFrame frame;
 
     public StartScreen(JFrame frame) {

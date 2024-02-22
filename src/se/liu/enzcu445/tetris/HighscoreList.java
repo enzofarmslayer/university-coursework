@@ -24,7 +24,7 @@ public class HighscoreList {
 
     public void addHighscore(Highscore highscore) {
 	highscores.add(highscore);
-	Collections.sort(highscores, new ScoreComparator());
+	highscores.sort(new ScoreComparator());
     }
 
 
@@ -43,8 +43,12 @@ public class HighscoreList {
 	File tempFile = new File(tempFilePath);
 	File finalFile = new File(filePath);
 	if (finalFile.exists()) {
-	    finalFile.delete(); // Ta bort den gamla filen
+	    boolean deleted = finalFile.delete();
+	    if (!deleted) { // Check if the file was not successfully deleted
+		throw new IOException("Could not delete the old file.");
+	    }
 	}
+
 	if (!tempFile.renameTo(finalFile)) {
 	    throw new IOException("Kunde inte döpa om temporärfilen till den slutgiltiga filen.");
 	}

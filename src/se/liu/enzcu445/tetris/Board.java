@@ -2,6 +2,7 @@ package se.liu.enzcu445.tetris;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -13,14 +14,16 @@ public class Board
     private int height;
     private Poly falling = null;
     private Point fallingPos = null;
-    private ArrayList<BoardListener> listeners = new ArrayList<>();
+    private List<BoardListener> listeners = new ArrayList<>();
     private TetrominoMaker tetrominoMaker = new TetrominoMaker();
     private static final int MARGIN = 2;
     private static final int DOUBLE_MARGIN = MARGIN * 2;
     private boolean gameOver = false;
     private int score;
-    private static final Map<Integer, Integer> scoreMap = Map.of(1, 100, 2, 300, 3, 500, 4, 800);
+    private static final Map<Integer, Integer> SCORE_MAP = Map.of(1, 100, 2, 300, 3, 500, 4, 800);
     private FallHandler currentFallHandler = new DefaultFallHandler();
+
+    private final int pieceAmount = 7;
 
     public Poly getFalling() {
         return falling;
@@ -97,10 +100,10 @@ public class Board
     }
 
 
-    public void boardWithRndSquare() {
+    public void buildBoardWithRndSquare() {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                squares[y][x] = SquareType.values()[RND.nextInt(7)];
+                squares[y][x] = SquareType.values()[RND.nextInt(pieceAmount)];
             }
         }
         notifyListeners();
@@ -123,7 +126,7 @@ public class Board
         }
 
         if (falling == null) {
-            falling = tetrominoMaker.getPoly(RND.nextInt(7));//RND.nextInt(7)
+            falling = tetrominoMaker.getPoly(RND.nextInt(pieceAmount));//RND.nextInt(7)
             fallingPos = new Point(((width + MARGIN) / 2), MARGIN);
             if (hasCollision()) {
                 gameOver = true;
@@ -242,7 +245,7 @@ public class Board
 
     private void updateScore(int clearedLines) {
         if (clearedLines > 0) {
-            score += scoreMap.getOrDefault(clearedLines, 0);
+            score += SCORE_MAP.getOrDefault(clearedLines, 0);
         }
     }
 

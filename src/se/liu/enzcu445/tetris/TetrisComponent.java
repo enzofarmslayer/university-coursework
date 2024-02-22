@@ -2,14 +2,11 @@ package se.liu.enzcu445.tetris;
 import javax.swing.JComponent;
 import java.awt.*;
 import java.util.EnumMap;
-import java.util.regex.MatchResult;
-
-import static javax.swing.UIManager.put;
 
 public class TetrisComponent extends JComponent implements BoardListener{
     private Board board;
     private final static int SQUARE_SIZE = 20;
-    private final static EnumMap<SquareType, Color> squareColors = createColorMap();
+    private final static EnumMap<SquareType, Color> SQUARE_COLORS = createColorMap();
 
     private static EnumMap<SquareType, Color> createColorMap() {
         EnumMap<SquareType, Color> colorMap = new EnumMap<>(SquareType.class);
@@ -44,7 +41,7 @@ public class TetrisComponent extends JComponent implements BoardListener{
         for (int y = 0; y < board.getHeight(); y++) {
             for (int x = 0; x < board.getWidth(); x++) {
                 SquareType type = board.getVisibleSquaresAt(y,x);
-                g2d.setColor(squareColors.get(type));
+                g2d.setColor(SQUARE_COLORS.get(type));
                 g2d.fillRect(x*SQUARE_SIZE, y*SQUARE_SIZE, SQUARE_SIZE,SQUARE_SIZE);
                 g2d.setColor(Color.BLACK);
                 g2d.setStroke(new BasicStroke(2));
