@@ -19,7 +19,7 @@ public class HeavyFallHandler extends AbstractFallHandler
     }
 
     @Override public boolean checkPieceCollistion(final Board board, final int boardY, final int boardX) {
-	// HeavyFallhandler uses checkHeavyCollition instead
+	// HeavyFallhandler uses checkHeavyCollition instead of checkPieceCollistion
 	return false;
     }
 

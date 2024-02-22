@@ -23,23 +23,25 @@ public class HighscoreList {
     }
 
     public void addHighscore(Highscore highscore) {
+	// Adds a highscore to the list and sorts it
 	highscores.add(highscore);
 	highscores.sort(new ScoreComparator());
     }
 
 
     public void saveHighscoresToFile() throws IOException {
+	// Saves the highscores list to a file
 	Gson gson = new Gson();
 	String json = gson.toJson(highscores);
 	String filePath = System.getProperty("user.home") + "/HighscoreList.json";
 	String tempFilePath = filePath + ".tmp";
 
-	// Skriv till en temporär fil
+	// FileWrite to a temporary file
 	try (FileWriter writer = new FileWriter(tempFilePath)) {
 	    writer.write(json);
 	}
 
-	// Byt namn på den temporära filen till den slutgiltiga filen
+	// Change name on the temporary file to the final file
 	File tempFile = new File(tempFilePath);
 	File finalFile = new File(filePath);
 	if (finalFile.exists()) {
@@ -50,12 +52,13 @@ public class HighscoreList {
 	}
 
 	if (!tempFile.renameTo(finalFile)) {
-	    throw new IOException("Kunde inte döpa om temporärfilen till den slutgiltiga filen.");
+	    throw new IOException("Could not rename the temp file to the final file name.");
 	}
     }
 
-
     public void loadHighscoresFromFile() throws IOException, FileNotFoundException {
+	// Loads the highscores list from a file
+
 	Gson gson = new Gson();
 	String filePath = System.getProperty("user.home") + "/HighscoreList.json";
 	try (FileReader reader = new FileReader(filePath)) {
@@ -67,7 +70,7 @@ public class HighscoreList {
 	}
     }
 
-    public List<Highscore> getAllHighscores() {
+    public List<Highscore> getHighscores() {
 	return highscores;
     }
 }

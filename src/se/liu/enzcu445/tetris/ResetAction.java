@@ -7,7 +7,6 @@ public class ResetAction extends AbstractAction
 {
     private Board board;
     public ResetAction(Board board) {
-	//super("Reset Game"); // Set the name of the action
 	this.board = board;
     }
     @Override public void actionPerformed(final ActionEvent e) {

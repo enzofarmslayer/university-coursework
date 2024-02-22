@@ -17,7 +17,7 @@ public class AbstractFallHandler implements FallHandler {
 	    return false;
 	}
 
-	// Check for collision and collapse unsupported squares if needed
+	// Check for collision
 	for (int row = 0; row < board.getFalling().getHeight(); row++) {
 	    for (int col = 0; col < board.getFalling().getWidth(); col++) {
 		if (board.getFalling().getShape()[row][col] != SquareType.EMPTY) {

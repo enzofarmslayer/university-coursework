@@ -70,6 +70,8 @@ public class Board
     }
 
     public SquareType getVisibleSquaresAt(int boardY, int boardX) {
+        // Returns the squaretype of given position on board
+
         // Justera för MARGIN
         boardY += MARGIN;
         boardX += MARGIN;
@@ -101,6 +103,7 @@ public class Board
 
 
     public void buildBoardWithRndSquare() {
+        // Builds board with random squares
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 squares[y][x] = SquareType.values()[RND.nextInt(pieceAmount)];
@@ -120,18 +123,22 @@ public class Board
     }
 
     public void tick() {
+        // Hanlde logic after each gametick
 
         if (gameOver) {
             return;
         }
 
+        // Spawn new falling piece if there are none and check for immediate collisition
         if (falling == null) {
             falling = tetrominoMaker.getPoly(RND.nextInt(pieceAmount));//RND.nextInt(7)
             fallingPos = new Point(((width + MARGIN) / 2), MARGIN);
             if (hasCollision()) {
                 gameOver = true;
             }
-        } else {
+        }
+        // handle falling logic
+        else {
             previousFallingPos = new Point(fallingPos);
             fallingPos.y += 1;
             if (hasCollision()) {
@@ -149,6 +156,8 @@ public class Board
     }
 
     public void move(Direction direction) {
+        // Handle logic when moving left or right
+
         previousFallingPos = new Point(fallingPos);
 
         switch (direction) {
@@ -174,6 +183,8 @@ public class Board
     }
 
     public void rotate(Direction dir) {
+        // Rotates the falling piece based on user input
+
         if (falling == null) {
             return;
         }
@@ -199,6 +210,8 @@ public class Board
     }
 
     public void clearFilledLines() {
+        // Clears all filled lines on board and keps tracks of amount
+
         int clearedLines = 0;
         for (int y = MARGIN; y < height + MARGIN; y++) {
             boolean isFilled = true;
@@ -214,14 +227,15 @@ public class Board
             }
         }
         updateScore(clearedLines);
-        activateFallthroughPowerup(clearedLines);
+        activatePowerup(clearedLines);
         notifyListeners();
     }
 
-    public void activateFallthroughPowerup(int clearedLines) {
+    public void activatePowerup(int clearedLines) {
+        // Based on amount of cleardLines activates appropriate powerup
 
         if (clearedLines > 1) {
-         currentFallHandler = new HeavyFallHandler();
+            currentFallHandler = new HeavyFallHandler();
         }
         else if (clearedLines == 1) {
             currentFallHandler = new FallthroughFallHandler();
@@ -236,6 +250,7 @@ public class Board
     }
 
     private void clearLine(int clearLineY) {
+        // Clears a line on the board an move the above pieces down accordingly
         for (int x = MARGIN; x < getWidth() + MARGIN; x++) {
             for (int y = clearLineY; y > MARGIN; y--) {
                 squares[y][x] = squares[y - 1][x];
@@ -280,6 +295,7 @@ public class Board
     }
 
     public void collapseBelow(Board board, int collistionY, int collistionX) {
+        // Collapses collumn below heavy piece collition
         for (int y = collistionY; y < board.getHeight()+MARGIN ; y++) {
             if (squares[y][collistionX] == SquareType.EMPTY){
                 for (int y2 = y; y2 > collistionY-board.getFalling().getHeight() ; y2--) {
@@ -293,6 +309,7 @@ public class Board
     }
 
     public boolean canCollapseBelow(Board board, int collistionY, int collistionX, Point fallingPos) {
+        // Checks if a collpase is possible when a collistion is detected with heavy piece
 
         int fallingSquaresToRight = (fallingPos.x+board.getFalling().getWidth() - collistionX);
         int polyY = collistionY - fallingPos.y;

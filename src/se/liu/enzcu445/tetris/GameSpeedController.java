@@ -1,5 +1,7 @@
 package se.liu.enzcu445.tetris;
-
+/**
+ * Controls the game speed in Tetris by managing the tick delay.
+ */
 public class GameSpeedController
 {
     private static final int INITIAL_TICK_DELAY_MS = 500;
@@ -20,6 +22,8 @@ public class GameSpeedController
     }
 
     public void updateSpeed() {
+	//  Updates the speed of the game based on elapsed time since the last increase.
+
 	long currentTime = System.currentTimeMillis();
 	long elapsedTimeSinceLastIncrease = currentTime - lastSpeedIncreaseTime;
 
