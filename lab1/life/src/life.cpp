@@ -6,6 +6,7 @@
 #include "grid.h"
 #include "lifeutil.h"
 #include <string>
+
 int main() {
 
     std::cout << "Welcome to the TDDD86 Game of Life,"  << std::endl;
