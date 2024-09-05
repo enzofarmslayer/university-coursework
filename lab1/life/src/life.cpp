@@ -7,15 +7,28 @@
 #include "lifeutil.h"
 #include <string>
 
+using namespace std;
+string askForFile();
+
+
 int main() {
 
-    std::cout << "Welcome to the TDDD86 Game of Life,"  << std::endl;
-    std::cout << "a simulation of the lifecycle of a bacteria colony."  << std::endl;
-    std::cout << "Cells (X) live and die by the following rules:"  << std::endl;
-    std::cout << " - A cell with 1 or fewer neighbours dies."  << std::endl;
-    std::cout << " - Locations with 2 with neighbours remain stable."  << std::endl;
-    std::cout << " - Locations with 3 with neighbours will create life."  << std::endl;
-    std::cout << " - A cell with 4 or more neighbours dies."  << std::endl;
+    cout << "Welcome to the TDDD86 Game of Life,"  << endl;
+    cout << "a simulation of the lifecycle of a bacteria colony."  << endl;
+    cout << "Cells (X) live and die by the following rules:"  << endl;
+    cout << " - A cell with 1 or fewer neighbours dies."  << endl;
+    cout << " - Locations with 2 with neighbours remain stable."  << endl;
+    cout << " - Locations with 3 with neighbours will create life."  << endl;
+    cout << " - A cell with 4 or more neighbours dies."  << endl;
 
+    string fileName = askForFile();
     return 0;
+}
+
+string askForFile() {
+    string fileName;
+    cout << "Grid input file name? ";
+    cin >> fileName;
+    cout << "You entered: " << fileName << endl;
+    return fileName;
 }
