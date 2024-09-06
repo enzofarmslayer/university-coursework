@@ -12,6 +12,7 @@ using namespace std;
 string askForFile();
 void readFile(string fileName, Grid<char> &grid);
 void printGrid(const Grid<char> &grid);
+void advanceGen(Grid<char> &grid);
 
 
 int main() {
@@ -33,6 +34,10 @@ int main() {
     printGrid(grid);
 
     return 0;
+}
+
+void advanceGen(Grid<char> &grid){
+
 }
 
 string askForFile() {
@@ -71,12 +76,3 @@ void printGrid(const Grid<char> &grid){
     }
 }
 
-/*void printFile(string fileName) {
-    ifstream input;
-    input.open(fileName.c_str());
-    string line;
-    while (getline(input, line)) {        
-        cout << line << endl;
-    }
-    input.close();
-}*/
