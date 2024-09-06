@@ -3,13 +3,14 @@
 // TODO: remove this comment header
 
 #include <iostream>
+#include<fstream>
 #include "grid.h"
 #include "lifeutil.h"
 #include <string>
 
 using namespace std;
 string askForFile();
-
+void printFile(string fileName);
 
 int main() {
 
@@ -22,6 +23,7 @@ int main() {
     cout << " - A cell with 4 or more neighbours dies."  << endl;
 
     string fileName = askForFile();
+    printFile(fileName);
     return 0;
 }
 
@@ -29,6 +31,15 @@ string askForFile() {
     string fileName;
     cout << "Grid input file name? ";
     cin >> fileName;
-    cout << "You entered: " << fileName << endl;
     return fileName;
+}
+
+void printFile(string fileName) {
+    ifstream input;
+    input.open(fileName.c_str());
+    string line;
+    while (getline(input, line)) {
+        cout << line << endl;
+    }
+    input.close();
 }
