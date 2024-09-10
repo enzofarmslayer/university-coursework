@@ -15,6 +15,7 @@ void printGrid(const Grid<char> &grid);
 int countNeighbours(int posY, int posX,const Grid<char> &grid);
 void advanceGen(Grid<char> &grid);
 char newCell(int neighbours, const char currentCell);
+void animateGrid(const Grid<char> &grid);
 
 
 int main() {
@@ -39,7 +40,6 @@ int main() {
     while (quit == false){
         cout << "a)nimate, t)ick, q)uit? ";
         cin >> userInput;
-        cout << endl;
         switch (userInput){
             case 'a':
                 // animate
@@ -54,6 +54,14 @@ int main() {
             }
     }
     return 0;
+}
+
+void animateGrid(const Grid<char> &grid){
+    int generationCount = 20;
+
+    for (int i = 0; i < generationCount; ++i) {
+
+    }
 }
 
 char newCell(int neighbours, const char currentCell){
@@ -144,6 +152,5 @@ void printGrid(const Grid<char> &grid){
         }
         cout << endl;
     }
-    cout << "\n" << endl;
 }
 
