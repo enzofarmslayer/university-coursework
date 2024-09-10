@@ -32,13 +32,27 @@ int main() {
     Grid<char> grid;
 
     readFile(fileName, grid);
-
+    bool quit = false;
+    char userInput;
     printGrid(grid);
 
-    advanceGen(grid);
-
-    printGrid(grid);
-
+    while (quit == false){
+        cout << "a)nimate, t)ick, q)uit? ";
+        cin >> userInput;
+        cout << endl;
+        switch (userInput){
+            case 'a':
+                // animate
+                break;
+            case 't':
+                advanceGen(grid);
+                printGrid(grid);
+                break;
+            case 'q':
+                quit = true;
+                break;
+            }
+    }
     return 0;
 }
 
@@ -85,8 +99,8 @@ void advanceGen(Grid<char> &grid){
     Grid<char> tempGrid = grid;
 
 
-    for(int y = 1; y < numRows-1; y++){
-        for(int x = 1; x < numCols-1; x++){
+    for(int y = 0; y < numRows; y++){
+        for(int x = 0; x < numCols; x++){
             neighbours = countNeighbours(y,x,grid);
             char cell = newCell(neighbours, grid.get(y,x));
             tempGrid.set(y,x,cell);
@@ -130,5 +144,6 @@ void printGrid(const Grid<char> &grid){
         }
         cout << endl;
     }
+    cout << "\n" << endl;
 }
 
