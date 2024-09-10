@@ -12,7 +12,9 @@ using namespace std;
 string askForFile();
 void readFile(string fileName, Grid<char> &grid);
 void printGrid(const Grid<char> &grid);
+int countNeighbours(int posY, int posX,const Grid<char> &grid);
 void advanceGen(Grid<char> &grid);
+char newCell(int neighbours, const char currentCell);
 
 
 int main() {
@@ -33,11 +35,62 @@ int main() {
 
     printGrid(grid);
 
+    advanceGen(grid);
+
+    printGrid(grid);
+
     return 0;
 }
 
-void advanceGen(Grid<char> &grid){
+char newCell(int neighbours, const char currentCell){
+    switch (neighbours) {
+    case 0:
+    case 1:
+        return '-';
+        break;
+    case 2:
+        return currentCell;
+        break;
+    case 3:
+        return 'X';
+        break;
+    default:
+        return '-';
+    }
+}
 
+int countNeighbours(int posY,int posX, const Grid<char> &grid){
+    int neighbours = 0;
+    for(int y = posY-1; y < posY+2; y++){
+        for(int x = posX-1; x < posX+2; x++){
+            if (y == posY && x == posX) {
+                continue;
+            }
+            if(grid.get(y,x) == 'X'){
+                neighbours++;
+            }
+        }
+    }
+    return neighbours;
+}
+
+
+void advanceGen(Grid<char> &grid){
+    int numRows = grid.numRows();
+    int numCols = grid.numCols();
+    int neighbours;
+    Grid<char> tempGrid = grid;
+
+
+    for(int y = 1; y < numRows-1; y++){
+        for(int x = 1; x < numCols-1; x++){
+            neighbours = countNeighbours(y,x,grid);
+            char cell = newCell(neighbours, grid.get(y,x));
+            tempGrid.set(y,x,cell);
+        }
+    }
+
+    grid = tempGrid;
 }
 
 string askForFile() {
