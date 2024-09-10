@@ -66,8 +66,11 @@ int countNeighbours(int posY,int posX, const Grid<char> &grid){
             if (y == posY && x == posX) {
                 continue;
             }
-            if(grid.get(y,x) == 'X'){
-                neighbours++;
+
+            if (y > 0 && y < grid.numRows() && x > 0 && x < grid.numCols()){
+                if(grid.get(y,x) == 'X'){
+                    neighbours++;
+                }
             }
         }
     }
