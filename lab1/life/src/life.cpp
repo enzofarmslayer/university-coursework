@@ -15,11 +15,10 @@ void printGrid(const Grid<char> &grid);
 int countNeighbours(int posY, int posX,const Grid<char> &grid);
 void advanceGen(Grid<char> &grid);
 char newCell(int neighbours, const char currentCell);
-void animateGrid(const Grid<char> &grid);
+void animateGrid(Grid<char> &grid);
 
 
 int main() {
-
     cout << "Welcome to the TDDD86 Game of Life,"  << endl;
     cout << "a simulation of the lifecycle of a bacteria colony."  << endl;
     cout << "Cells (X) live and die by the following rules:"  << endl;
@@ -37,14 +36,16 @@ int main() {
     char userInput;
     printGrid(grid);
 
+    // kan göra gameloop metod elr liknande
     while (quit == false){
         cout << "a)nimate, t)ick, q)uit? ";
         cin >> userInput;
         switch (userInput){
             case 'a':
-                // animate
+            animateGrid(grid);
                 break;
             case 't':
+                clearConsole();
                 advanceGen(grid);
                 printGrid(grid);
                 break;
@@ -53,14 +54,18 @@ int main() {
                 break;
             }
     }
+
     return 0;
 }
 
-void animateGrid(const Grid<char> &grid){
+void animateGrid(Grid<char> &grid){
     int generationCount = 20;
 
     for (int i = 0; i < generationCount; ++i) {
-
+        clearConsole();
+        advanceGen(grid);
+        printGrid(grid);
+        pause(100);
     }
 }
 
@@ -83,7 +88,7 @@ char newCell(int neighbours, const char currentCell){
 
 int countNeighbours(int posY,int posX, const Grid<char> &grid){
     int neighbours = 0;
-    for(int y = posY-1; y < posY+2; y++){
+    for(int y = posY-1; y <= posY+2; y++){
         for(int x = posX-1; x < posX+2; x++){
             if (y == posY && x == posX) {
                 continue;
