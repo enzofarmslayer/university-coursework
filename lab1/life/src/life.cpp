@@ -19,11 +19,11 @@
 using namespace std;
 void welcomeUser();
 string askForFile();
-void readFile(string fileName, Grid<char> &grid);
+void readFile(const string &fileName, Grid<char> &grid);
 void printGrid(const Grid<char> &grid);
-int countNeighbours(int posY, int posX,const Grid<char> &grid);
+int countNeighbours(const int posY, const int posX,const Grid<char> &grid);
 void advanceGen(Grid<char> &grid);
-char createCell(int neighbours, const char currentCell);
+char createCell(const int neighbours, const char currentCell);
 void animateGrid(Grid<char> &grid);
 
 
@@ -49,7 +49,7 @@ int main() {
         cin >> userInput;
         switch (userInput){
             case 'a':
-            animateGrid(grid);
+                animateGrid(grid);
                 break;
             case 't':
                 clearConsole();
@@ -98,7 +98,7 @@ void animateGrid(Grid<char> &grid) {
  *  Checks the neighbours of a cell and returns a new
  *  cell for the next generation with correct status.
  */
-char createCell(int neighbours, const char currentCell) {
+char createCell(const int neighbours, const char currentCell) {
     switch (neighbours) {
     case 0:
     case 1:
@@ -121,7 +121,7 @@ char createCell(int neighbours, const char currentCell) {
  * square with the relevant cell in middle and skipping it when
  * we get to it.
  */
-int countNeighbours(int posY,int posX, const Grid<char> &grid) {
+int countNeighbours(const int posY,const int posX, const Grid<char> &grid) {
     int neighbours = 0;
     for (int y = posY-1; y < posY+2; y++) {
         for (int x = posX-1; x < posX+2; x++) {
@@ -164,7 +164,7 @@ void advanceGen(Grid<char> &grid){
     grid = tempGrid;
 }
 
-
+// Ask for a filename from the user
 string askForFile() {
     string fileName;
     cout << "Grid input file name? ";
@@ -172,8 +172,8 @@ string askForFile() {
     return fileName;
 }
 
-
-void readFile (string fileName, Grid<char> &grid){
+// Reads file from given filename and sets the gridlayout given from file
+void readFile (const string &fileName, Grid<char> &grid){
     ifstream input;
     input.open(fileName.c_str());
     int numRows, numCols;
