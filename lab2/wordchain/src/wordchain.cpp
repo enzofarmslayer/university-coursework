@@ -27,7 +27,26 @@ int main() {
     cin >> beginWord >> endWord;
 
     finalStack = wordChain(beginWord, endWord, dictionary);
-    cout << finalStack.top();
+    // Printing the stack if it's not empty
+    if (!finalStack.empty()) {
+        cout << "Word chain from " << beginWord << " to " << endWord << ":" << endl;
+
+        // Create a temporary stack to reverse the order for printing
+        stack<string> tempStack;
+        while (!finalStack.empty()) {
+            tempStack.push(finalStack.top());
+            finalStack.pop();
+        }
+
+        // Print words in the correct order
+        while (!tempStack.empty()) {
+            cout << tempStack.top() << " ";
+            tempStack.pop();
+        }
+        cout << endl;
+    } else {
+        cout << "No word chain found from " << beginWord << " to " << endWord << "." << endl;
+    }
 
     return 0;
 }
@@ -52,7 +71,7 @@ stack<string> wordChain(const string &w1, const string &w2, const unordered_set<
             neighbours = getNeighbours(currentChainStack.top(), dictionary);
             stack<string> copyS;
             for(unordered_set<string>::const_iterator it = neighbours.begin(); it != neighbours.end(); it++){
-                if(usedWords.find(*it) != usedWords.end()){
+                if(usedWords.find(*it) == usedWords.end()){
                       usedWords.insert(*it);
                       copyS = currentChainStack;
                       copyS.push(*it);
