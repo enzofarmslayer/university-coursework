@@ -1,3 +1,9 @@
+/*
+ * A program that finds out the shortest path from one word to another using BFS algorithm.
+ *
+ * Developers: kevma271, enzcu445
+ */
+
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -11,9 +17,10 @@ const char ALPHABET[]  = "abcdefghijklmnopqrstuvwxyz";
 void welcomeUser();
 void getDict(const string &fileName, unordered_set<string> &dictionary);
 stack<string> wordChain(const string &w1, const string &w2, const unordered_set<string> &dictionary);
-unordered_set<string> getNeighbours(string word, const unordered_set<string> &dictionary);
+unordered_set<string> getNeighbours(string &word, const unordered_set<string> &dictionary);
 
 
+// Main function, handles all function calls and the printing of the result
 int main() {
     unordered_set<string> dictionary;
     stack<string> finalStack;
@@ -27,6 +34,7 @@ int main() {
     cin >> beginWord >> endWord;
 
     finalStack = wordChain(beginWord, endWord, dictionary);
+
     // Printing the stack if it's not empty
     if (!finalStack.empty()) {
         cout << "Word chain from " << beginWord << " to " << endWord << ":" << endl;
@@ -45,13 +53,13 @@ int main() {
         }
         cout << endl;
     } else {
-        cout << "No word chain found from " << beginWord << " to " << endWord << "." << endl;
+        cout << "No word chain found from " << beginWord << " to " << endWord;
     }
-
     return 0;
 }
 
-stack<string> wordChain(const string &w1, const string &w2, const unordered_set<string> &dictionary){
+// Main function for finding the wordchain
+stack<string> wordChain(const string &w1, const string &w2, const unordered_set<string> &dictionary) {
     unordered_set<string> neighbours;
     unordered_set<string> usedWords;
     queue<stack<string>> q;
@@ -60,18 +68,26 @@ stack<string> wordChain(const string &w1, const string &w2, const unordered_set<
     s.push(w1);
     q.push(s);
 
+    // Make a stack of the front of queue
     while (!q.empty()){
         stack<string> currentChainStack = q.front();
         q.pop();
+
+        // Finish the loop if the stack is our goal word
         if (currentChainStack.top() == w2) {
             finalStack = currentChainStack;
             break;
         }
+        // Otherwise we find all neighbours of our current word
         else {
             neighbours = getNeighbours(currentChainStack.top(), dictionary);
             stack<string> copyS;
-            for(unordered_set<string>::const_iterator it = neighbours.begin(); it != neighbours.end(); it++){
-                if(usedWords.find(*it) == usedWords.end()){
+
+            // Loop through all words that are neighbours
+            for (unordered_set<string>::const_iterator it = neighbours.begin(); it != neighbours.end(); it++) {
+
+                // Check if the neighbour word hasn't been found yet
+                if (usedWords.find(*it) == usedWords.end()) {
                       usedWords.insert(*it);
                       copyS = currentChainStack;
                       copyS.push(*it);
@@ -84,14 +100,20 @@ stack<string> wordChain(const string &w1, const string &w2, const unordered_set<
 }
 
 
-unordered_set<string> getNeighbours(string word, const unordered_set<string> &dictionary){
+// Get all neighbours for a string which are english words
+unordered_set<string> getNeighbours(string &word, const unordered_set<string> &dictionary) {
     unordered_set<string> neighbours;
 
+    // Loop through every position of the word
     for (unsigned long i = 0; i < word.length(); i++) {
         char tempSave = word[i];
-        for(int j = 0; j < 26; j++){
+
+        // Try every letter in the alphabet for that position
+        for (int j = 0; j < 26; j++) {
             word[i] = ALPHABET[j];
-            if(dictionary.find(word) != dictionary.end()){
+
+            // Check if it's a real word
+            if (dictionary.find(word) != dictionary.end()) {
                 neighbours.insert(word);
             }
         }
@@ -101,10 +123,11 @@ unordered_set<string> getNeighbours(string word, const unordered_set<string> &di
 }
 
 
+// Converts the content of the given file to a set
 void getDict(const string& fileName, unordered_set<string> &dictionary) {
     ifstream input(fileName);
-
     string line;
+
     while (getline(input, line)) {
         dictionary.insert(line);
     }
@@ -112,21 +135,8 @@ void getDict(const string& fileName, unordered_set<string> &dictionary) {
     input.close();
 }
 
-//function wordChain(w1, w2):
-//    create an empty queue of stacks
-//    create/add a stack containing {w1} to the queue
-//  while the queue is not empty:
-//  dequeue the partial-chain stack from the front of the queue
-//  if the word at the top of the stack is the destinaction word:
-//  hooray! output the elements of the stack as the solution
-//  e l s e :
-//  f o r each valid English word that is a neighbour (differs
-//  by 1 letter) of the word at the top of the stack:
-//  i f that neighbour word has not already been used in a ladder before:
-//  create a copy of the current chain stack
-//  put the neighbour word at the top of the copy stack
-//  add the copy stack to the end of the queue
 
+// Simple welcoming function
 void welcomeUser() {
     cout << "Welcome to TDDD86 Word Chain." << endl;
     cout << "If you give me two English words, I will transform the" << endl;
