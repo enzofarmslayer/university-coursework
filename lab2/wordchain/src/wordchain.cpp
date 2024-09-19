@@ -10,25 +10,77 @@ using namespace std;
 const char ALPHABET[]  = "abcdefghijklmnopqrstuvwxyz";
 void welcomeUser();
 void getDict(const string &fileName, unordered_set<string> &dictionary);
-stack<string> wordChain(const string w1, const string w2);
-string getNeighbours(const string word);
+stack<string> wordChain(const string &w1, const string &w2, const unordered_set<string> &dictionary);
+unordered_set<string> getNeighbours(string word, const unordered_set<string> &dictionary);
 
 
 int main() {
     unordered_set<string> dictionary;
+    stack<string> finalStack;
     string fileName = "dictionary.txt";
-    getDict(fileName);
+    getDict(fileName, dictionary);
 
     welcomeUser();
 
     cout << "Please type two words: ";
-    string twoWords, beginWord, endWord;
+    string beginWord, endWord;
     cin >> beginWord >> endWord;
 
-
+    finalStack = wordChain(beginWord, endWord, dictionary);
+    cout << finalStack.top();
 
     return 0;
 }
+
+stack<string> wordChain(const string &w1, const string &w2, const unordered_set<string> &dictionary){
+    unordered_set<string> neighbours;
+    unordered_set<string> usedWords;
+    queue<stack<string>> q;
+    stack<string> s;
+    stack<string> finalStack;
+    s.push(w1);
+    q.push(s);
+
+    while (!q.empty()){
+        stack<string> currentChainStack = q.front();
+        q.pop();
+        if (currentChainStack.top() == w2) {
+            finalStack = currentChainStack;
+            break;
+        }
+        else {
+            neighbours = getNeighbours(currentChainStack.top(), dictionary);
+            stack<string> copyS;
+            for(unordered_set<string>::const_iterator it = neighbours.begin(); it != neighbours.end(); it++){
+                if(usedWords.find(*it) != usedWords.end()){
+                      usedWords.insert(*it);
+                      copyS = currentChainStack;
+                      copyS.push(*it);
+                      q.push(copyS);
+                }
+            }
+        }
+    }
+    return finalStack;
+}
+
+
+unordered_set<string> getNeighbours(string word, const unordered_set<string> &dictionary){
+    unordered_set<string> neighbours;
+
+    for (unsigned long i = 0; i < word.length(); i++) {
+        char tempSave = word[i];
+        for(int j = 0; j < 26; j++){
+            word[i] = ALPHABET[j];
+            if(dictionary.find(word) != dictionary.end()){
+                neighbours.insert(word);
+            }
+        }
+        word[i] = tempSave;
+    }
+    return neighbours;
+}
+
 
 void getDict(const string& fileName, unordered_set<string> &dictionary) {
     ifstream input(fileName);
@@ -39,41 +91,6 @@ void getDict(const string& fileName, unordered_set<string> &dictionary) {
     }
 
     input.close();
-
-
-}
-
-//string getNeighbours(const string word){
-
-//}
-
-stack<string> wordChain(const string &w1, const string &w2){
-    queue<stack<string>> q;
-    stack<string> s;
-    stack<string> finalStack;
-    s.push(w1);
-    q.push(s);
-
-    while (!q.empty()){
-        stack<string> currentChainStack = q.front();
-        q.pop();
-        if (currentChainStack.top() == w2)
-        {
-            finalStack = currentChainStack;
-            break;
-        }
-        else
-        {
-            //for()
-            //  for each valid English word that is a neighbour (differs
-            //  by 1 letter) of the word at the top of the stack:
-                //  if that neighbour word has not already been used in a ladder before:
-                    //  create a copy of the current chain stack
-                    //  put the neighbour word at the top of the copy stack
-                    //  add the copy stack to the end of the queue
-        }
-    }
-    return finalStack;
 }
 
 //function wordChain(w1, w2):
