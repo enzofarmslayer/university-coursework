@@ -13,15 +13,18 @@ using namespace std;
 
 const char ALPHABET[] = "abcdefghijklmnopqrstuvwxyz";
 void getDict(unordered_set<string> &dictionary);
-int askWordLength(const unordered_set<string> &dictionary);
+int askWordLength(const unordered_set<string> &dictionary, string &displayString);
 int askForGuesses();
 bool askToDrawEveryAttempt();
 bool validateGuess(const char& guess);
-void gameOver();
+bool gameOver(const int &guesses, const int &wordsInDict);
+void handleGameOver();
 bool askToPlayAgain();
+void updateDict(unordered_set<string> &dictionary, const string &largestFamilyKey, unordered_map<string, unordered_set<string>> &wordFamily, string &displayString);
 void getWordsWithLength(unordered_set<string> &dictionary, const int wordLength);
 void gameLoop(int &guesses, string &displayString, const bool &showWordsLeft,
-              unordered_set<string> &dictionary, const unordered_set<string> &wordsGuessed);
+              unordered_set<string> &dictionary, const unordered_set<char> &wordsGuessed,
+             unordered_map<string, unordered_set<string>> &wordFamily);
 
 
 // The main function, calls relevant helper functions to execute the program.
@@ -33,18 +36,18 @@ int main() {
     bool showWordsLeft;
 
     string displayString;
-    unordered_set<string> wordsGuessed;
+    unordered_set<char> wordsGuessed;
     unordered_map<string, unordered_set<string>> wordFamily;
     unordered_set<string> dictionary;
 
-    wordLength = askWordLength(dictionary);
+    getDict(dictionary);
+    wordLength = askWordLength(dictionary, displayString);
     guesses = askForGuesses();
     showWordsLeft = askToDrawEveryAttempt();
 
-    getDict(dictionary);
     getWordsWithLength(dictionary, wordLength);
 
-    gameLoop(guesses, displayString, showWordsLeft, dictionary, wordsGuessed);
+    gameLoop(guesses, displayString, showWordsLeft, dictionary, wordsGuessed, wordFamily);
 
     return 0;
 }
@@ -61,7 +64,7 @@ string keyMaker(const string& word, char guess) {
     // Loop through every char in the string
     for (size_t i = 0; i < word.size(); ++i) {
         // if our char matches the guess one we add it as is
-        if (guess == word[i]){
+        if (tolower(guess) == word[i]){
             key.push_back(guess);
         }
         // Otherwise we add the char as a '_'
@@ -88,30 +91,34 @@ void gameLoop(int &guesses, string &displayString, const bool &showWordsLeft,
 
         // If user wants to, they will see the amount of words that are still 'available'
         if (showWordsLeft) {
-            cout << dictionary.size() << endl;
+            cout << "Possible words left: " << dictionary.size() << endl;
         }
 
         char newGuessLetter;
         // New round, let the user take a guess
-        while (true) {
+        bool validGuess = false;
+
+        while (!validGuess) {
             cout << "Guess a letter :";
             cin >> newGuessLetter;
 
             // Check if the letter isn't valid
             if (!validateGuess(newGuessLetter)) {
                 cout << "Invalid. Must be a letter A-Z" << endl;
-                break;
             }
             // Check if the letter has already been guessed
             else if (wordsGuessed.find(newGuessLetter) != wordsGuessed.end()) {
                 cout << "Letter already guessed!" << endl;
-                break;
             }
-            break;
+            // If guess is valid then exit the question loop
+            else {
+                validGuess = true;
+            }
         }
 
         // Loop through all words and divide them into 'families'
         // TODO: Compare families and choose the one with most members. Make game completable
+        // TODO: Update display string, game win condition
         for (unordered_set<string>::const_iterator it = dictionary.begin(); it != dictionary.end(); it++) {
             string key = keyMaker(*it, newGuessLetter);
 
@@ -121,8 +128,37 @@ void gameLoop(int &guesses, string &displayString, const bool &showWordsLeft,
             }
             wordFamily[key].insert(*it);
         }
+
+        int largestFamilyCount = 0;
+        string largestFamilyKey;
+
+        // Loop through all wordfamilies and stick with the biggest one
+        for (unordered_map<string,unordered_set<string>>::const_iterator it = wordFamily.begin(); it != wordFamily.end(); it++){
+            if((*it).second.size() > largestFamilyCount){
+                largestFamilyCount = (*it).second.size();
+                largestFamilyKey = (*it).first;
+            }
+        }
+
+        updateDict(dictionary, largestFamilyKey, wordFamily, displayString);
+
+        guesses -= 1;
+        if (gameOver(guesses, dictionary.size())) {
+            handleGameOver();
+            gameCompleted = true;
+        }
     }
 }
+
+
+// Removes all words from dict that doesn't match our key
+void updateDict(unordered_set<string> &dictionary, const string &largestFamilyKey, unordered_map<string, unordered_set<string>> &wordFamily, string &displayString) {
+    dictionary = wordFamily.at(largestFamilyKey);
+    unordered_map<string, unordered_set<string>> emptymap;
+    wordFamily = emptymap;
+    displayString = largestFamilyKey;
+}
+
 
 
 // Removes all words from our dictionary if their length is not our desired length
@@ -150,18 +186,19 @@ void getDict(unordered_set<string> &dictionary) {
 
 // Asks the user if they want a visual process of the game
 bool askToDrawEveryAttempt() {
-    bool response;
     string input;
 
-    cout << "Do you want to see the amount of words left after every guess? (y/n)";
-    cin >> input;
+    while (true) {
+        cout << "Do you want to see the amount of words left after every guess? (y/n)";
+        cin >> input;
 
-    if (input == "y") {
-        response = true;
-    } else {
-        response = false;
+        if (input == "y") {
+            return true;
+        } else if (input == "n") {
+            return false;
+        }
+        cout << "Invalid input. Only accepting 'y' or 'n'!" << endl;
     }
-    return response;
 }
 
 
@@ -186,7 +223,7 @@ int askForGuesses() {
 
 
 // Asks the user for a word length and returns it as an int
-int askWordLength(const unordered_set<string> &dictionary) {
+int askWordLength(const unordered_set<string> &dictionary, string &displayString) {
     while (true) {
         string wordLength;
         cout << "Enter a wordlength: ";
@@ -194,13 +231,17 @@ int askWordLength(const unordered_set<string> &dictionary) {
 
         unsigned long length = stoi(wordLength);
 
-        // Check if there is a word with that length
-        for(unordered_set<string>::const_iterator it = dictionary.begin(); it != dictionary.end(); it++){
+        // Loop through all words in dictionary
+        for (unordered_set<string>::const_iterator it = dictionary.begin(); it != dictionary.end(); it++){
+
+            // Check if there is a word with that length
             if (length == it->length()) {
+                for (int i = 0; i < (int)length; i++) {
+                    displayString.push_back('_');
+                }
                 return length;
             }
         }
-
         cout << "No words with that length, try again!" << endl;
     }
 }
@@ -208,18 +249,27 @@ int askWordLength(const unordered_set<string> &dictionary) {
 
 // Verfies the guess to see that it is of desired input
 bool validateGuess(const char& guess) {
-    bool valid = false;
     for (int i = 0; i < 26; i++) {
         if (guess == toupper(ALPHABET[i])) {
-            return valid;
+            return true;
         }
     }
-    return valid;
+    return false;
+}
+
+
+// Checks if game's over
+bool gameOver(const int &guesses, const int &wordsInDict) {
+    if (guesses == 0 || wordsInDict == 1) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
 // Gives the user a random word that was the goal word
-void gameOver() {
+void handleGameOver() {
     cout << "Game Over! The word was: ";
     float v1;
     //v1 = rand() % wordsLeft.size();
