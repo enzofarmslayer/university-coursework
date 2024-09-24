@@ -9,9 +9,18 @@
 #include "Node.h"
 #include "Point.h"
 
-Tour::Tour()
-{
-    // TODO: write this member
+Tour::Tour(Point a, Point b, Point c, Point d):first(Node(a)) {
+
+    // Dynamically allocate nodes on the heap
+    Node* second = new Node(b);
+    Node* third = new Node(c);
+    Node* fourth = new Node(d);
+
+    // Set up the circular linked list
+    first.next = second;
+    second->next = third;
+    third->next = fourth;
+    fourth->next = &first;
 }
 
 Tour::~Tour()
@@ -19,10 +28,13 @@ Tour::~Tour()
     // TODO: write this member
 }
 
-void Tour::show()
-{
-    // TODO: write this member
+void Tour::show() {
+    cout << first.point.toString()  << endl;
+    cout << first.next->point.toString()  << endl;
+    cout << first.next->next->point.toString()  << endl;
+    cout << first.next->next->next->point.toString()  << endl;
 }
+
 
 void Tour::draw(QGraphicsScene *scene)
 {

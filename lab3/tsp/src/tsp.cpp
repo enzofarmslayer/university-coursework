@@ -36,8 +36,16 @@ int main(int argc, char *argv[]) {
     view->setSceneRect(0, 0, width, height);
     view->show();
 
+    Point p(100.0, 100.0);
+    Point q(500.0, 100.0);
+    Point r(500.0, 500.0);
+    Point s(100.0, 500.0);
     // run insertion heuristic
-    Tour tour;
+
+    Tour tour(p,q,r,s);
+
+    tour.show();
+
     double x;
     double y;
     while (input >> x >> y) {
