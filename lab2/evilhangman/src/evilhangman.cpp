@@ -23,6 +23,9 @@ bool askToPlayAgain();
 bool stringFullyDisplayed(const string &displayString);
 void updateContainers(unordered_set<string> &dictionary, const string &largestFamilyKey, unordered_map<string, unordered_set<string>> &wordFamily, string &displayString);
 void getWordsWithLength(unordered_set<string> &dictionary, const int wordLength);
+void findBiggestFamily(unordered_map<string, unordered_set<string>> &wordFamily, int &largestFamilyCount, string &largestFamilyKey);
+void createFamilies(unordered_set<string> &dictionary, unordered_map<string, unordered_set<string>> &wordFamily,
+                    const char &newGuessLetter);
 void gameLoop(int &guesses, string &displayString, const bool &showWordsLeft,
               unordered_set<string> &dictionary, const unordered_set<char> &wordsGuessed,
              unordered_map<string, unordered_set<string>> &wordFamily, bool &playAgain);
@@ -125,28 +128,11 @@ void gameLoop(int &guesses, string &displayString, const bool &showWordsLeft,
             }
         }
 
-        // Loop through all words and divide them into 'families'
-        for (unordered_set<string>::const_iterator it = dictionary.begin(); it != dictionary.end(); it++) {
-            string key = keyMaker(*it, newGuessLetter);
-
-            // Add the key if it doesn't exist and then add the word to the key/family
-            if (wordFamily.find(key) == wordFamily.end()){
-                wordFamily[key];
-            }
-            wordFamily[key].insert(*it);
-        }
-
         int largestFamilyCount = 0;
         string largestFamilyKey;
 
-        // Loop through all wordfamilies and stick with the biggest one
-        for (unordered_map<string,unordered_set<string>>::const_iterator it = wordFamily.begin(); it != wordFamily.end(); it++){
-            if((*it).second.size() > largestFamilyCount){
-                largestFamilyCount = (*it).second.size();
-                largestFamilyKey = (*it).first;
-            }
-        }
-
+        createFamilies(dictionary, wordFamily, newGuessLetter);
+        findBiggestFamily(wordFamily, largestFamilyCount, largestFamilyKey);
         updateContainers(dictionary, largestFamilyKey, wordFamily, displayString);
 
         guesses -= 1;
@@ -158,6 +144,35 @@ void gameLoop(int &guesses, string &displayString, const bool &showWordsLeft,
             gameCompleted = true;
         }
     }
+}
+
+
+// Loop through all wordfamilies and stick with the biggest one
+void findBiggestFamily(unordered_map<string, unordered_set<string>> &wordFamily, int &largestFamilyCount, string &largestFamilyKey) {
+
+    for (unordered_map<string,unordered_set<string>>::const_iterator it = wordFamily.begin(); it != wordFamily.end(); it++){
+        if((*it).second.size() > largestFamilyCount){
+            largestFamilyCount = (*it).second.size();
+            largestFamilyKey = (*it).first;
+        }
+    }
+}
+
+
+// Loop through all words and divide them into 'families'
+void createFamilies(unordered_set<string> &dictionary, unordered_map<string, unordered_set<string>> &wordFamily,
+                    const char &newGuessLetter) {
+
+    for (unordered_set<string>::const_iterator it = dictionary.begin(); it != dictionary.end(); it++) {
+        string key = keyMaker(*it, newGuessLetter);
+
+        // Add the key if it doesn't exist and then add the word to the key/family
+        if (wordFamily.find(key) == wordFamily.end()){
+            wordFamily[key];
+        }
+        wordFamily[key].insert(*it);
+    }
+
 }
 
 
