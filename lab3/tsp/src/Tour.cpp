@@ -23,9 +23,19 @@ Tour::Tour(Point a, Point b, Point c, Point d) {
     fourth->next = first;
 }
 
-Tour::~Tour()
-{
-    // TODO: write this member
+Tour::~Tour() {
+    if (first != nullptr) {
+        Node* temp = first;
+
+        do {
+            temp = first->next;
+            first->next = temp->next;
+            delete temp;
+
+        } while(first->next != first);
+
+        delete first;
+    }
 }
 
 void Tour::show() {
