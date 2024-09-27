@@ -101,15 +101,14 @@ void Tour::insertNearest(Point p) {
     }
 }
 
-void Tour::insertSmallest(Point p)
-{
-    Node* newNode = new Node(p);
-    Node* bestNode;
+void Tour::insertSmallest(Point p) {
 
     if (first != nullptr) {
-        int shortestTourDistance = qInf();
+        double shortestTourDistance = qInf();
 
+        Node* bestNode = first;
         Node* temp = first;
+        Node* newNode = new Node(p);
 
         do {
             newNode->next = temp->next;
@@ -120,9 +119,10 @@ void Tour::insertSmallest(Point p)
                 shortestTourDistance = this->distance();
             }
 
-            temp = newNode->next;
-            newNode->next = nullptr;
+            temp->next = newNode->next;
             temp = temp->next;
+            newNode->next = nullptr;
+
         } while(temp != first);
 
         newNode->next = bestNode->next;
