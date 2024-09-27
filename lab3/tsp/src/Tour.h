@@ -22,7 +22,7 @@ public:
     void insertSmallest(Point p);
 
 private: 
-   Node first;
+   Node* first;
 };
 
 #endif // TOUR_H
