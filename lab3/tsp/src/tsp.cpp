@@ -43,13 +43,14 @@ int main(int argc, char *argv[]) {
     // run insertion heuristic
 
     Tour tour(p,q,r,s);
-    tour.distance();
+//    tour.distance();
+//    tour.show();
+//    tour.size();
+//    tour.draw(scene);
 
-    //tour.show();
-    int h;
-    h = tour.size();
-    cout << h << endl;
-
+    Point t(300,300);
+    tour.insertSmallest(t);
+    tour.draw(scene);
 
 //    double x;
 //    double y;

@@ -12,14 +12,15 @@
 Tour::Tour(Point a, Point b, Point c, Point d) {
     // Dynamically allocate nodes on the heap
     first = new Node(a);
-//    Node* second = new Node(b);
-//    Node* third = new Node(c);
-//    Node* fourth = new Node(d);
-    // Set up the circular linked list
-     first->next = first;
-//    second->next = first;
-//    third->next = fourth;
-//    fourth->next = first;
+    Node* second = new Node(b);
+    Node* third = new Node(c);
+    Node* fourth = new Node(d);
+
+     //Set up the circular linked list
+     first->next = second;
+    second->next = third;
+    third->next = fourth;
+    fourth->next = first;
 }
 
 Tour::~Tour()
@@ -28,7 +29,7 @@ Tour::~Tour()
 }
 
 void Tour::show() {
-    if (first) {
+    if (first != nullptr) {
         Node* temp = first;
 
         do {
@@ -38,16 +39,21 @@ void Tour::show() {
     }
 }
 
+void Tour::draw(QGraphicsScene *scene) {
+    if (first != nullptr) {
+        Node* temp = first;
 
-void Tour::draw(QGraphicsScene *scene)
-{
-    // TODO: write this member
+        do {
+            temp->point.drawTo(temp->next->point, scene);
+            temp = temp->next;
+        } while(temp != first);
+    }
 }
 
 int Tour::size() {
     int size = 0;
 
-    if (first) {
+    if (first != nullptr) {
         Node* temp = first;
         do {
             size += 1;
@@ -55,7 +61,6 @@ int Tour::size() {
         } while(temp != first);
     }
 
-    cout << size << endl;
     return size;
 }
 
@@ -70,16 +75,61 @@ double Tour::distance() {
 
         } while(temp != first);
     }
-    cout << distance << endl;
     return distance;
 }
 
-void Tour::insertNearest(Point p)
-{
-    // TODO: write this member
+void Tour::insertNearest(Point p) {
+
+    if (first != nullptr) {
+        int shortestDistance = qInf();
+        Node* closestNode = first;
+
+        Node* temp = first;
+        do {
+            if (temp->point.distanceTo(p) < shortestDistance) {
+                closestNode = temp;
+            }
+            temp = temp->next;
+        } while(temp != first);
+
+        Node* newNode = new Node(p, closestNode->next);
+        closestNode->next = newNode;
+    }
+    // If no nodes exist
+    else {
+        cout << "Error" << endl;
+    }
 }
 
 void Tour::insertSmallest(Point p)
 {
-    // TODO: write this member
+    Node* newNode = new Node(p);
+    Node* bestNode;
+
+    if (first != nullptr) {
+        int shortestTourDistance = qInf();
+
+        Node* temp = first;
+
+        do {
+            newNode->next = temp->next;
+            temp->next = newNode;
+
+            if(shortestTourDistance > this->distance()){
+                bestNode = temp;
+                shortestTourDistance = this->distance();
+            }
+
+            temp = newNode->next;
+            newNode->next = nullptr;
+            temp = temp->next;
+        } while(temp != first);
+
+        newNode->next = bestNode->next;
+        bestNode->next = newNode;
+    }
+    // If no nodes exist
+    else {
+        cout << "Error" << endl;
+    }
 }
