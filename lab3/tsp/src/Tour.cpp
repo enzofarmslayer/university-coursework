@@ -143,46 +143,41 @@ void Tour::insertNearest(Point p) {
 
 // Adds a point in a way that makes minimal change in the tour distance
 void Tour::insertSmallest(Point p) {
-    // Check if a node exists
-    if (first != nullptr) {
-        Node* bestNode = first;
-        Node* temp = first;
-        Node* newNode = new Node(p);
-
-        newNode->next = first->next;
-        first->next = newNode;
-
-        // Initialize shortestTourDistance to the current tour distance
-        double shortestTourDistance = this->distance();
-
-        // Add the new point in all possible positions and save the one that adds the least to the distance
-        do {
-            newNode->next = temp->next;
-            temp->next = newNode;
-
-            // Check if the new tour distance is smaller
-            double currentTourDistance = this->distance();
-            if(shortestTourDistance > currentTourDistance){
-                bestNode = temp;
-                shortestTourDistance = currentTourDistance;
-            }
-
-            // Undo the insertion to try the next position
-            temp->next = newNode->next;
-            temp = temp->next;
-            newNode->next = nullptr;
-
-        } while(temp != first);
-
-        // Finalize the best insertion
-        newNode->next = bestNode->next;
-        bestNode->next = newNode;
-    }
-
-    // If no nodes exist create the first one
-    else {
+    // If there are no nodes, create the first node
+    if (first == nullptr) {
         first = new Node(p);
         first->next = first;
+        return;
     }
+
+    Node* bestNode = nullptr;  // Node where the point should be inserted
+    Node* temp = first;        // Iterator for the nodes
+    Node* newNode = new Node(p);  // New node to be inserted
+
+    // Set up the initial best distance to be high, we will calculate actual distances next
+    double bestDistanceIncrease = std::numeric_limits<double>::max();
+
+    // Iterate through each position (between temp and temp->next)
+    do {
+        Node* nextNode = temp->next;
+
+        // Calculate the change in distance if we insert the new point between temp and nextNode
+        double currentDistanceIncrease = temp->point.distanceTo(p) + p.distanceTo(nextNode->point) - temp->point.distanceTo(nextNode->point);
+
+        // If the change in distance is smaller than the best we've found so far, update
+        if (currentDistanceIncrease < bestDistanceIncrease) {
+            bestNode = temp;
+            bestDistanceIncrease = currentDistanceIncrease;
+        }
+
+        // Move to the next node
+        temp = nextNode;
+
+    } while (temp != first);
+
+    // Insert the new node after the bestNode
+    newNode->next = bestNode->next;
+    bestNode->next = newNode;
 }
+
 
