@@ -145,15 +145,20 @@ void Tour::insertNearest(Point p) {
 void Tour::insertSmallest(Point p) {
     // Check if a node exists
     if (first != nullptr) {
+
         Node* bestNode = first;
         Node* temp = first;
         Node* newNode = new Node(p);
 
+        // Initialize shortestTourDistance to the current tour distance + new node
         newNode->next = first->next;
         first->next = newNode;
 
-        // Initialize shortestTourDistance to the current tour distance
         double shortestTourDistance = this->distance();
+
+        // reset the list without the node
+        first->next = newNode->next;
+        newNode->next = nullptr;
 
         // Add the new point in all possible positions and save the one that adds the least to the distance
         do {
