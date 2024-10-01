@@ -11,25 +11,15 @@
 
 
 // Constructor
-Tour::Tour(Point a, Point b, Point c, Point d) {
-    // Dynamically allocate nodes on the heap
-    first = new Node(a);
-    Node* second = new Node(b);
-    Node* third = new Node(c);
-    Node* fourth = new Node(d);
-
-     //Set up the circular linked list
-     first->next = second;
-    second->next = third;
-    third->next = fourth;
-    fourth->next = first;
+Tour::Tour() {
+    //first = nullptr;
 }
 
 // Destructor
 Tour::~Tour() {
     // Check if a node exists
     if (first != nullptr) {
-        Node* temp = first;
+        Node* temp;
 
         // Link the first node with the second next and remove the next
         // Loop until there is no second node
@@ -63,7 +53,14 @@ void Tour::show() {
 // Draws the points with QGraphics
 void Tour::draw(QGraphicsScene *scene) {
     // Check if a node exists
-    if (first != nullptr) {
+    if (first == nullptr) {
+        return;
+    }
+    else if (first->next == first){
+        first->point.draw(scene);
+    }
+    else
+    {
         Node* temp = first;
 
         // Loop through all points and draw them out
@@ -96,10 +93,10 @@ int Tour::size() {
 
 // Returns the distance of the tour
 double Tour::distance() {
-    int distance = 0;
+    double distance = 0;
 
     // Check if a node exists
-    if (first->next != nullptr) {
+    if (first != nullptr && first->next != first) {
         Node* temp = first;
 
         do {
@@ -119,13 +116,14 @@ void Tour::insertNearest(Point p) {
 
     // Check if a node exists
     if (first != nullptr) {
-        int shortestDistance = qInf();
         Node* closestNode = first;
         Node* temp = first;
+        int shortestDistance = first->point.distanceTo(p);
 
         // Loop through the nodes and if the current node is the closest we save it
         do {
             if (temp->point.distanceTo(p) < shortestDistance) {
+                shortestDistance = temp->point.distanceTo(p);
                 closestNode = temp;
             }
             temp = temp->next;
@@ -135,46 +133,56 @@ void Tour::insertNearest(Point p) {
         closestNode->next = newNode;
     }
 
-    // If no nodes exist
+    // If no nodes exist create the first one
     else {
-        cout << "Error" << endl;
+        first = new Node(p);
+        first->next = first;
     }
 }
 
 
 // Adds a point in a way that makes minimal change in the tour distance
 void Tour::insertSmallest(Point p) {
-
     // Check if a node exists
     if (first != nullptr) {
-        double shortestTourDistance = qInf();
-
         Node* bestNode = first;
         Node* temp = first;
         Node* newNode = new Node(p);
 
-        // Add the new point in all possible poistions and save the one that adds the least to the distance
+        newNode->next = first->next;
+        first->next = newNode;
+
+        // Initialize shortestTourDistance to the current tour distance
+        double shortestTourDistance = this->distance();
+
+        // Add the new point in all possible positions and save the one that adds the least to the distance
         do {
             newNode->next = temp->next;
             temp->next = newNode;
 
-            if(shortestTourDistance > this->distance()){
+            // Check if the new tour distance is smaller
+            double currentTourDistance = this->distance();
+            if(shortestTourDistance > currentTourDistance){
                 bestNode = temp;
-                shortestTourDistance = this->distance();
+                shortestTourDistance = currentTourDistance;
             }
 
+            // Undo the insertion to try the next position
             temp->next = newNode->next;
             temp = temp->next;
             newNode->next = nullptr;
 
         } while(temp != first);
 
+        // Finalize the best insertion
         newNode->next = bestNode->next;
         bestNode->next = newNode;
     }
 
-    // If no nodes exist
+    // If no nodes exist create the first one
     else {
-        cout << "Error" << endl;
+        first = new Node(p);
+        first->next = first;
     }
 }
+
