@@ -1,7 +1,7 @@
 /*
- * TDDD86 TSP
- * This client program uses your Tour class and contains the 'main'
- * function to open the input file and set up the program's primitive GUI.
+ * The main program that creates tours and utilizes BFS to find the shortest path.
+ *
+ * Developers: kevma271, enz
  */
 
 #include <QApplication>
@@ -15,6 +15,8 @@
 #include "Point.h"
 #include "Tour.h"
 
+
+// The main program that calls relevant functions
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
