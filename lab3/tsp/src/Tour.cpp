@@ -189,5 +189,5 @@ void Tour::insertSmallest(Point p) {
         first = new Node(p);
         first->next = first;
     }
-}
 
+}
