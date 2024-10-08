@@ -57,3 +57,24 @@ void Unit::checkBounds() {
     if (y < MIN_Y) y = MIN_Y;
     if (y > MAX_Y) y = MAX_Y;
 }
+
+bool Unit::isAlive() const {
+    return false;
+}
+void Unit::doCrash(){
+
+}
+
+bool Unit::isToBeJunked() const{
+    return false;
+}
+
+void Unit::draw(QGraphicsScene*){
+
+}
+
+void Unit::moveTowards(){
+
+}
+
+

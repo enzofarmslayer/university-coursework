@@ -16,7 +16,7 @@ GameState::GameState(int numberOfRobots) {
         while(!isEmpty(robot)){
             robot = Robot();
         }
-        robots.push_back(robot);
+        units.push_back(robot);
     }
     teleportHero();
 }
@@ -42,58 +42,70 @@ void GameState::moveRobots() {
 
 
 void GameState::updateCrashes() {
-    for(unsigned i=0; i < robots.size(); ++i){
-        for(unsigned j=0; j < junks.size(); ++j){
-            if(robots[i].at(junks[j])){
-                robots[i].doCrash();
-            }
-        }
-        for(unsigned o=i+1; o < robots.size(); ++o){
-            if(robots[i].at(robots[o])){
-                robots[i].doCrash();
-                robots[o].doCrash();
+    for(unsigned i=0; i < units.size(); ++i){
+        for(unsigned j=i+1; j < units.size(); ++j) {
+            if(units[i].at(units[j])) {
+                units[i].doCrash();
+                units[j].doCrash();
             }
         }
     }
 }
+
 
 int GameState::countToBeJunked()const{
     int numberDestroyed =0;
-    for(unsigned i=0; i < robots.size(); ++i)
-        if(robots[i].isToBeJunked())
+
+    for(unsigned i=0; i < units.size(); ++i)
+        if(units[i].isToBeJunked())
             numberDestroyed++;
+
+//    for(unsigned i=0; i < robots.size(); ++i)
+//        if(robots[i].isToBeJunked())
+//            numberDestroyed++;
     return numberDestroyed;
 }
 
+
 void GameState::junkTheCrashed(){
-    for(unsigned i=0; i < robots.size(); ++i){
-        if (robots[i].isToBeJunked()) {
-            junks.push_back(Junk(robots[i].asPoint()));
-            robots[i] = robots[robots.size()-1];
-            robots.pop_back();
+    for(unsigned i=0; i < units.size(); ++i){
+        if (units[i].isToBeJunked()) {
+            units.push_back(Junk(units[i].asPoint()));
+            units[i] = units[units.size()-1];
+            units.pop_back();
         }
     }
 }
 
+
 bool GameState::someRobotsAlive() const {
-    for(unsigned i=0; i < robots.size(); ++i)
-        if(robots[i].isAlive())
+    for(unsigned i=0; i < units.size(); ++i) {
+        if(units[i].isAlive()) {
             return true;
+        }
+    }
     return false;
 }
 
 
 bool GameState::heroDead() const {
-    for(const Robot& robot: robots){
-        if(hero.at(robot)){
+    for (const Unit& unit: units)
+    {
+        if (hero.at(unit)){
             return true;
         }
     }
-    for(const Junk& junk: junks){
-        if(hero.at(junk)){
-            return true;
-        }
-    }
+
+//    for(const Robot& robot: robots){
+//        if(hero.at(robot)){
+//            return true;
+//        }
+//    }
+//    for(const Junk& junk: junks){
+//        if(hero.at(junk)){
+//            return true;
+//        }
+//    }
     return false;
 }
 
@@ -107,13 +119,20 @@ Point GameState::getHeroAsPoint() const {return hero.asPoint();}
 /*
  * Free of robots and junk
  */
-bool GameState::isEmpty(const Unit& unit) const {
-    for(const Robot& robot: robots)
-        if(robot.at(unit))
+bool GameState::isEmpty(const Unit& unit1) const {
+    for (const Unit& unit2: units)
+    {
+        if (unit1.at(unit2)){
             return false;
-    for(const Junk& junk: junks)
-        if(junk.at(unit))
-            return false;
+        }
+    }
+
+//    for(const Robot& robot: robots)
+//        if(robot.at(unit))
+//            return false;
+//    for(const Junk& junk: junks)
+//        if(junk.at(unit))
+//            return false;
     return true;
 }
 

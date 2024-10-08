@@ -54,6 +54,17 @@ public:
     * Euclidean distance to u
     */
     double distanceTo(const Unit& u) const;
+
+
+
+    virtual bool isAlive() const;
+    virtual void doCrash();
+    virtual bool isToBeJunked() const;
+    virtual void draw(QGraphicsScene*);
+    virtual void moveTowards();
+
+
+
 private:
     int x;  // x position of this unit
     int y;  // y position of this unit

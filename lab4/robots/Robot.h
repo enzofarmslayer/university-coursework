@@ -36,6 +36,8 @@ public:
     void draw(QGraphicsScene* scene) const;
 
 
+
+
 };
 
 #endif // ROBOT_H
