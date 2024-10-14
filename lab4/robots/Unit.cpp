@@ -59,14 +59,11 @@ void Unit::checkBounds() {
 }
 
 bool Unit::isAlive() const {
-    return false;
 }
-void Unit::doCrash(){
 
-}
+void Unit::doCrash() const {}
 
 bool Unit::isToBeJunked() const{
-    return false;
 }
 
 void Unit::draw(QGraphicsScene*) const {

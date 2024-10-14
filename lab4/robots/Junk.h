@@ -18,7 +18,7 @@ public:
     */
     void draw(QGraphicsScene* scene) const;
     bool isAlive() const override;
-    void doCrash() override;
+    void doCrash() const override;
     bool isToBeJunked() const override;
     void moveTowards() override;
 

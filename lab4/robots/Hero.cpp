@@ -6,7 +6,18 @@
 #include "Hero.h"
 #include "constants.h"
 
+bool Hero::isAlive() const {
+    return !toBeJunked;
+}
 
+void Hero::doCrash() {
+    toBeJunked = true;
+}
+
+bool Hero::isToBeJunked() const {
+    return toBeJunked;
+
+}
 
 void Hero::draw(QGraphicsScene *scene) const {
     Point corner = asPoint();

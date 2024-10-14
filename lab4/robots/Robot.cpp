@@ -6,19 +6,18 @@
 #include "Robot.h"
 #include "constants.h"
 
-bool Robot::isAlive() const{
+bool Robot::isAlive() const {
     return !toBeJunked;
 }
 
-void Robot::doCrash(){
+void Robot::doCrash() {
     toBeJunked = true;
 }
 
-bool Robot::isToBeJunked() const{
+bool Robot::isToBeJunked() const {
     return toBeJunked;
 
 }
-
 
 void Robot::draw(QGraphicsScene *scene) const {
     Point corner = asPoint();

@@ -17,7 +17,7 @@ public:
     /*
      * did not crash yet
      */
-    bool isAlive() const;
+    bool isAlive() const override;
 
     /*
      * Crashes and remembers it

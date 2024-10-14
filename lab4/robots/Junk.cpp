@@ -19,12 +19,12 @@ bool Junk::isAlive() const {
     return false;
 }
 
-
-void Junk::doCrash() {
+void Junk::doCrash() const {
+    return;
 }
 
 
-bool Junk::isToBeJunked() const {
+bool Junk::isToBeJunked() const{
     return false;
 }
 
