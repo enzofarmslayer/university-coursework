@@ -25,38 +25,38 @@ GameState::GameState(int numberOfRobots) {
 }
 
 
-//GameState::GameState(const GameState& that) : hero(that.hero){
-//    for (const Unit* unit : units) {
-//        units.push_back(unit->clone());
-//    }
-//}
+GameState::GameState(const GameState& that) : hero(that.hero){
+   for (const Unit* unit : that.units) {
+       units.push_back(unit->clone());
+   }
+}
 
 
-//GameState& GameState::operator=(const GameState& that) {
-//    if (this != &that) {
-//        hero = that.hero;
+GameState& GameState::operator=(const GameState& that) {
+   if (this != &that) {
+       hero = that.hero;
 
-//        deleteUnits();
+       deleteUnits();
 
-//        for (const Unit* unit : units) {
-//            units.push_back(unit->clone());
-//        }
-//    }
-//    return *this;
-//}
-
-
-//GameState::~GameState() {
-//    deleteUnits();
-//}
+       for (const Unit* unit : that.units) {
+           units.push_back(unit->clone());
+       }
+   }
+   return *this;
+}
 
 
-//void GameState::deleteUnits() {
-//    for (Unit* unit : units) {
-//        delete unit;
-//    }
-//    units.clear();
-//}
+GameState::~GameState() {
+   deleteUnits();
+}
+
+
+void GameState::deleteUnits() {
+   for (Unit* unit : units) {
+       delete unit;
+   }
+   units.clear();
+}
 
 
 void GameState::draw(QGraphicsScene *scene) const {
@@ -73,8 +73,6 @@ void GameState::teleportHero() {
 }
 
 void GameState::moveRobots() {
-
-
     for(Unit* unit: units)
         unit->moveTowards(hero.asPoint());
 

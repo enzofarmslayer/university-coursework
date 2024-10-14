@@ -19,6 +19,7 @@ Unit::Unit(const Point& p) {
 }
 
 
+
 Point Unit::asPoint() const {
     return Point{x, y};
 }

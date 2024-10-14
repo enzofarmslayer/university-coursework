@@ -26,7 +26,7 @@ public:
     */
     Unit(const Point& p);
 
-
+    virtual ~Unit() = default;
     /*
      * Create a unit at a random position
      */
