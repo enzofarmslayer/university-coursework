@@ -60,7 +60,7 @@ public:
     virtual bool isAlive() const;
     virtual void doCrash();
     virtual bool isToBeJunked() const;
-    virtual void draw(QGraphicsScene*);
+    virtual void draw(QGraphicsScene*) const;
     virtual void moveTowards();
 
 

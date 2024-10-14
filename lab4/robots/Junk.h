@@ -17,9 +17,9 @@ public:
     * Draws this junk onto the given QGraphicsScene.
     */
     void draw(QGraphicsScene* scene) const;
-    bool isAlive();
+    bool isAlive() const override;
     void doCrash() override;
-    bool isToBeJunked();
+    bool isToBeJunked() const override;
     void moveTowards() override;
 
 };

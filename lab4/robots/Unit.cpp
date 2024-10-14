@@ -69,7 +69,7 @@ bool Unit::isToBeJunked() const{
     return false;
 }
 
-void Unit::draw(QGraphicsScene*){
+void Unit::draw(QGraphicsScene*) const {
 
 }
 
