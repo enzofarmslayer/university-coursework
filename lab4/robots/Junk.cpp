@@ -19,7 +19,7 @@ bool Junk::isAlive() const {
     return false;
 }
 
-void Junk::doCrash() const {
+void Junk::doCrash() {
     return;
 }
 
@@ -28,6 +28,6 @@ bool Junk::isToBeJunked() const{
     return false;
 }
 
-void Junk::moveTowards(){
+void Junk::moveTowards(const Point& p){
     return;
 }

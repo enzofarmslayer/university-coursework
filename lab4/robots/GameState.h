@@ -25,7 +25,7 @@ public:
      */
     GameState(int numberOfRobots);
 
-    ~GameState() = default;
+    ~GameState();
 
 
     /*

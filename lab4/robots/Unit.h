@@ -29,6 +29,11 @@ public:
     virtual ~Unit(){}
 
     /*
+     * Create a unit at a random position
+     */
+    //virtual clone();
+
+    /*
     * Return Point representation of Unit
     */
     Point asPoint() const;
@@ -42,7 +47,7 @@ public:
     /*
     * Take one step closer to point
     */
-    void moveTowards(const Point&);
+    virtual void moveTowards(const Point&);
 
 
     /*
@@ -58,10 +63,9 @@ public:
 
 
     virtual bool isAlive() const;
-    virtual void doCrash() const;
+    virtual void doCrash();
     virtual bool isToBeJunked() const;
     virtual void draw(QGraphicsScene*) const;
-    virtual void moveTowards();
 
 
 

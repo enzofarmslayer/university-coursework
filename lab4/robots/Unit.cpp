@@ -61,7 +61,7 @@ void Unit::checkBounds() {
 bool Unit::isAlive() const {
 }
 
-void Unit::doCrash() const {}
+void Unit::doCrash() {}
 
 bool Unit::isToBeJunked() const{
 }
@@ -70,8 +70,5 @@ void Unit::draw(QGraphicsScene*) const {
 
 }
 
-void Unit::moveTowards(){
-
-}
 
 

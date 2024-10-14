@@ -32,6 +32,13 @@ GameState::GameState(int numberOfRobots) {
     teleportHero();
 }
 
+GameState::~GameState() {
+//    for (Unit* unit : units) {
+//        delete unit;
+//    }
+}
+
+
 void GameState::draw(QGraphicsScene *scene) const {
     scene->clear();
     hero.draw(scene);
@@ -95,7 +102,6 @@ int GameState::countToBeJunked()const{
     int numberDestroyed =0;
 
     for(unsigned i=0; i < units.size(); ++i) {
-        Unit* temp = units[i];
         if(units[i]->isToBeJunked())
             numberDestroyed++;
     }
