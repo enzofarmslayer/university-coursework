@@ -13,11 +13,11 @@ Unit::Unit() {
     teleport();
 }
 
-
 Unit::Unit(const Point& p) {
     x = p.x;
     y = p.y;
 }
+
 
 Point Unit::asPoint() const {
     return Point{x, y};
@@ -67,6 +67,10 @@ bool Unit::isToBeJunked() const{
 }
 
 void Unit::draw(QGraphicsScene*) const {
+
+}
+
+Unit* Unit::clone() const {
 
 }
 

@@ -6,6 +6,11 @@
 #include "Robot.h"
 #include "constants.h"
 
+
+Robot* Robot::clone() const {
+    return new Robot(*this);
+}
+
 bool Robot::isAlive() const {
     return !toBeJunked;
 }

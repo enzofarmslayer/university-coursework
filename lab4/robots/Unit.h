@@ -26,12 +26,11 @@ public:
     */
     Unit(const Point& p);
 
-    virtual ~Unit(){}
 
     /*
      * Create a unit at a random position
      */
-    //virtual clone();
+    virtual Unit* clone() const = 0;
 
     /*
     * Return Point representation of Unit

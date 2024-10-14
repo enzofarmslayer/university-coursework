@@ -13,6 +13,7 @@ class Hero : public Unit {
     bool toBeJunked = false;
 
 public:
+    virtual Hero* clone() const override;
 
     /*
      * did not crash yet

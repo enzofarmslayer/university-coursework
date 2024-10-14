@@ -15,7 +15,7 @@ GameState::GameState(int numberOfRobots) {
         Unit* robot = new Robot();
         while(!isEmpty(*robot)){
             delete robot;
-            robot = new Robot();
+            robot = new Robot;
         }
         units.push_back(robot);
         //delete robot;
@@ -32,16 +32,47 @@ GameState::GameState(int numberOfRobots) {
     teleportHero();
 }
 
+
+GameState::GameState(const GameState& that) {
+    hero = that.hero->clone();
+
+    for (const Unit* unit : units) {
+        units.push_back(unit->clone());
+    }
+}
+
+
+GameState& GameState::operator=(const GameState& that) {
+    if (this != &that) {
+        hero = that.hero->clone();
+
+        deleteUnits();
+
+        for (const Unit* unit : units) {
+            units.push_back(unit->clone());
+        }
+    }
+    return *this;
+}
+
+
 GameState::~GameState() {
-//    for (Unit* unit : units) {
-//        delete unit;
-//    }
+    deleteUnits();
+}
+
+
+void GameState::deleteUnits() {
+    for (Unit* unit : units) {
+        delete unit;
+    }
+    units.clear();
+    delete hero;
 }
 
 
 void GameState::draw(QGraphicsScene *scene) const {
     scene->clear();
-    hero.draw(scene);
+    hero->draw(scene);
 
     for (const Unit* unit: units)
             unit->draw(scene);
@@ -55,17 +86,17 @@ void GameState::draw(QGraphicsScene *scene) const {
 }
 
 void GameState::teleportHero() {
-    do hero.teleport();
-    while (!isEmpty(hero));
+    do hero->teleport();
+    while (!isEmpty(*hero));
 }
 
 void GameState::moveRobots() {
 //    for(Robot& robot: robots)
-//        robot.moveTowards(hero.asPoint());
+//        robot.moveTowards(hero->asPoint());
 
     for(Unit* unit: units)
 //        if (unit.isRobot()) {
-            unit->moveTowards(hero.asPoint());
+            unit->moveTowards(hero->asPoint());
 //        }
 
 }
@@ -150,18 +181,18 @@ bool GameState::someRobotsAlive() const {
 bool GameState::heroDead() const {
     for (const Unit* unit: units)
     {
-        if (hero.at(unit)){
+        if (hero->at(unit)){
             return true;
         }
     }
 
 //    for(const Robot& robot: robots){
-//        if(hero.at(robot)){
+//        if(hero->at(robot)){
 //            return true;
 //        }
 //    }
 //    for(const Junk& junk: junks){
-//        if(hero.at(junk)){
+//        if(hero->at(junk)){
 //            return true;
 //        }
 //    }
@@ -170,11 +201,11 @@ bool GameState::heroDead() const {
 
 
 void GameState::moveHeroTowards(const Point& dir) {
-    hero.moveTowards(dir);
+    hero->moveTowards(dir);
 }
 
 Point GameState::getHeroAsPoint() const {
-    return hero.asPoint();
+    return hero->asPoint();
 }
 
 /*

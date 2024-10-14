@@ -6,6 +6,10 @@
 #include "Hero.h"
 #include "constants.h"
 
+Hero* Hero::clone() const {
+    return new Hero(*this);
+}
+
 bool Hero::isAlive() const {
     return !toBeJunked;
 }
