@@ -12,11 +12,13 @@
 
 GameState::GameState(int numberOfRobots) {
    for (int i = 0; i < numberOfRobots; i++) {
-        Unit* robot;
+        Unit* robot = new Robot();
         while(!isEmpty(*robot)){
+            delete robot;
             robot = new Robot();
         }
         units.push_back(robot);
+        //delete robot;
     }
 
 //   for (int i = 0; i < numberOfRobots; i++) {
@@ -92,7 +94,7 @@ void GameState::updateCrashes() {
 int GameState::countToBeJunked()const{
     int numberDestroyed =0;
 
-    for(unsigned i=1; i < units.size(); ++i) {
+    for(unsigned i=0; i < units.size(); ++i) {
         Unit* temp = units[i];
         if(units[i]->isToBeJunked())
             numberDestroyed++;
