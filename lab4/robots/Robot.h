@@ -15,7 +15,7 @@ class Robot : public Unit {
 public:
 
     virtual Robot* clone() const override;
-     ~Robot() override = default;
+     //~Robot() override = default;
     /*
      * did not crash yet
      */
