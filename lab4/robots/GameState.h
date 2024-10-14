@@ -79,13 +79,13 @@ public:
     Point getHeroAsPoint () const;
 
 private:
-    std::vector<Unit> units;
-    std::vector<Robot> robots;  // the robots
-    std::vector<Junk> junks;    // robots that have turned to junk
-    Hero hero;                  // the hero
+    std::vector<Unit*> units;
+//    std::vector<Robot> robots;  // the robots
+//    std::vector<Junk> junks;    // robots that have turned to junk
+    Hero* hero;                  // the hero
 
     // private helpers
-    bool isEmpty(const Unit& unit) const;
+    bool isEmpty(const Unit* unit) const;
 
 };
 

@@ -23,8 +23,8 @@ Point Unit::asPoint() const {
     return Point{x, y};
 }
 
-bool Unit::at(const Unit& u) const {
-    return (x == u.x && y == u.y);
+bool Unit::at(const Unit* u) const {
+    return (x == u->x && y == u->y);
 }
 
 
