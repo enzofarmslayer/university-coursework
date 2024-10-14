@@ -25,10 +25,9 @@ public:
      */
     GameState(int numberOfRobots);
 
-    ~GameState();
-    GameState& operator=(const GameState& that);
-
-    GameState(const GameState& that);
+//    ~GameState();
+//    GameState& operator=(const GameState& that);
+//    GameState(const GameState& that);
 
     /*
      * Clear and redraw entire playing field
@@ -84,10 +83,10 @@ private:
     std::vector<Unit*> units;
 //    std::vector<Robot> robots;  // the robots
 //    std::vector<Junk> junks;    // robots that have turned to junk
-    Hero* hero = new Hero;                  // the hero
+    Hero hero;               // the hero
 
     // private helpers
-    void deleteUnits();
+//    void deleteUnits();
     bool isEmpty(const Unit& unit) const;
 
 };
