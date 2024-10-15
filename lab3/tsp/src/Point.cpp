@@ -1,8 +1,6 @@
 /*
- * TDDD86 TSP
  * This file contains the implementation of the Point structure.
  * See Point.h for comments about each member.
- * Your code should work properly with an unmodified version of this file.
  */
 
 #include <iomanip>

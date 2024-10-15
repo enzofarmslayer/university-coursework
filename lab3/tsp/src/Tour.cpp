@@ -1,8 +1,7 @@
-// This is the .cpp file you will edit and turn in.
-// We have provided a skeleton for you,
-// but you must finish it as described in the spec.
-// Also remove these comments here and add your own.
-// TODO: remove this comment header
+/*
+ * This file contains the implementation of the Tour structure.
+ * See Tour.h for comments about each member.
+ */
 
 #include <iostream>
 #include "Tour.h"
@@ -10,12 +9,6 @@
 #include "Point.h"
 
 
-// Constructor
-Tour::Tour() {
-    //first = nullptr;
-}
-
-// Destructor
 Tour::~Tour() {
     // Check if a node exists
     if (first != nullptr) {
@@ -35,7 +28,6 @@ Tour::~Tour() {
 }
 
 
-// Shows all points
 void Tour::show() {
     // Check if a node exists
     if (first != nullptr) {
@@ -50,17 +42,16 @@ void Tour::show() {
 }
 
 
-// Draws the points with QGraphics
 void Tour::draw(QGraphicsScene *scene) {
     // Check if a node exists
     if (first == nullptr) {
         return;
     }
+    // The case with only 1 node
     else if (first->next == first){
         first->point.draw(scene);
     }
-    else
-    {
+    else {
         Node* temp = first;
 
         // Loop through all points and draw them out
@@ -72,7 +63,6 @@ void Tour::draw(QGraphicsScene *scene) {
 }
 
 
-// Returns the amount of points
 int Tour::size() {
     int size = 0;
 
@@ -91,7 +81,6 @@ int Tour::size() {
 }
 
 
-// Returns the distance of the tour
 double Tour::distance() {
     double distance = 0;
 
@@ -111,9 +100,7 @@ double Tour::distance() {
 }
 
 
-// Inserts a new point after the one its nearest
 void Tour::insertNearest(Point p) {
-
     // Check if a node exists
     if (first != nullptr) {
         Node* closestNode = first;
@@ -141,7 +128,6 @@ void Tour::insertNearest(Point p) {
 }
 
 
-// Adds a point in a way that makes minimal change in the tour distance
 void Tour::insertSmallest(Point p) {
     // Check if a node exists
     if (first != nullptr) {
@@ -167,6 +153,7 @@ void Tour::insertSmallest(Point p) {
 
             // Check if the new tour distance is smaller
             double currentTourDistance = this->distance();
+
             if(shortestTourDistance > currentTourDistance){
                 bestNode = temp;
                 shortestTourDistance = currentTourDistance;
@@ -189,5 +176,4 @@ void Tour::insertSmallest(Point p) {
         first = new Node(p);
         first->next = first;
     }
-
 }

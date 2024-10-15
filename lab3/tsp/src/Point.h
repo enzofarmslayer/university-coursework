@@ -1,8 +1,6 @@
 /*
- * TDDD86 TSP
  * This file contains the declaration of the Point structure.
  * See Point.cpp for implementation of each member.
- * Your code should work properly with an unmodified version of this file.
  */
 
 #ifndef POINT_H
