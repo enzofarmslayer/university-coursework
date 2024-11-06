@@ -107,6 +107,7 @@ void GameState::junkTheCrashed(){
     for(unsigned i=0; i < units.size(); ++i){
         if (units[i]->isToBeJunked()) {
             units.push_back(new Junk(units[i]->asPoint()));
+            delete units[i];
             units[i] = units[units.size()-1];
             units.pop_back();
         }
