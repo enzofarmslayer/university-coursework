@@ -13,7 +13,7 @@ class Junk : public Unit {
 public:
     Junk(const Point& p): Unit(p){}
     virtual Junk* clone() const override;
-    ~Junk() override = default;
+    //~Junk() override = default;
 
     /*
     * Draws this junk onto the given QGraphicsScene.

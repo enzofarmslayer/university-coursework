@@ -25,9 +25,21 @@ public:
      */
     GameState(int numberOfRobots);
 
+    /*
+     * Deletes all units to free allocated memory from heap and clears units
+     */
    ~GameState();
+
+    /*
+     * Creates a
+     */
    GameState& operator=(const GameState& that);
+
    GameState(const GameState& that);
+
+   GameState(GameState&& that);
+
+   GameState& operator=(GameState&&);
 
     /*
      * Clear and redraw entire playing field

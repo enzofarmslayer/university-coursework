@@ -2,7 +2,8 @@
  * TDDD86 Robots
  * This client program contains the 'main' function to set up the overall
  * program's graphical user interface.
- * Your code should work properly with an unmodified version of this file.
+ *
+ * Developers: kevma271, enzcu445
  */
 
 #include <QApplication>

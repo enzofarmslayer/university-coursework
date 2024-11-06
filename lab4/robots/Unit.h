@@ -26,12 +26,6 @@ public:
     */
     Unit(const Point& p);
 
-    virtual ~Unit() = default;
-    /*
-     * Create a unit at a random position
-     */
-    virtual Unit* clone() const = 0;
-
     /*
     * Return Point representation of Unit
     */
@@ -59,13 +53,30 @@ public:
     */
     double distanceTo(const Unit& u) const;
 
+    /*
+     * Draws the scene
+     */
+    virtual void draw(QGraphicsScene*) const = 0;
 
+    /*
+     * Create a unit at a random position
+     */
+    virtual Unit* clone() const = 0;
 
-    virtual bool isAlive() const;
-    virtual void doCrash();
-    virtual bool isToBeJunked() const;
-    virtual void draw(QGraphicsScene*) const;
+    /*
+     * Returns whether unit's alive
+     */
+    virtual bool isAlive() const = 0;
 
+    /*
+     * Sets the object to crash
+     */
+    virtual void doCrash() = 0;
+
+    /*
+     * Returns whether unit should be junked
+     */
+    virtual bool isToBeJunked() const = 0;
 
 
 private:
