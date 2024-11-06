@@ -28,13 +28,14 @@ int main() {
 
     //play games repeatedly until user decides to quit
     Boggle boggle;
-    while (true) {
-        playOneGame(boggle);
-        cout << endl;
-        if (!yesOrNo("Play again (Y/N)? ")) {
-            break;
-        }
-    }
+    playOneGame(boggle);
+    // while (true) {
+    //     playOneGame(boggle);
+    //     cout << endl;
+    //     if (!yesOrNo("Play again (Y/N)? ")) {
+    //         break;
+    //     }
+    // }
 
     cout << "Have a nice day." << endl;
     return 0;
@@ -52,8 +53,8 @@ void intro() {
     cout << "If only YOU had a gig of RAM!" << endl;
     cout << endl;
     cout << "Press Enter to begin the game ... ";
-    string line;
-    getline(cin, line);
+    // string line;
+    // getline(cin, line);
 }
 
 /*

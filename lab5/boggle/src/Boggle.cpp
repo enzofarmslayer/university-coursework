@@ -45,7 +45,7 @@ void Boggle::createBoard() {
 
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
-            int randomSide = randomInteger(0, CUBE_SIDES-1);
+            int randomSide = rand() % CUBE_SIDES;
             board[i][j] = cubes[i][j][randomSide];
         }
     }

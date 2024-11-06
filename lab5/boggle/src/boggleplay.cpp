@@ -33,6 +33,7 @@ void playOneGame(Boggle& boggle) {
     //     boggle.createBoardMan(input);
     // }
 
+    boggle.createBoard();
     clearConsole();
     cout << "Current Boggle Board:" << endl;
     boggle.printBoard();
