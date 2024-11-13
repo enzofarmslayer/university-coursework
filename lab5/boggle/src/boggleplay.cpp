@@ -48,7 +48,6 @@ void playOneGame(Boggle& boggle) {
         input = askForWord();
 
         if (input.length() == 0) {
-            cout << "End" << endl;
             break;
         }
 
@@ -74,16 +73,25 @@ void playOneGame(Boggle& boggle) {
         }
 
         else {
-            cout << "Good job!" << endl;
             boggle.addWord(input);
             score += input.length()-3;
+            cout << "Your words (" << boggle.getWords() << ")";
+            boggle.printWords();
             cout << score << endl;
         }
     }
 
+    int compScore = 0;
     cout << "It's my turn!" << endl;
-    unordered_set foundWords = boggle.findAllWords();
-    cout << "My words" << foundWords.size() << ": " << endl;
+    unordered_set foundWords = boggle.findAllWords(compScore);
+    cout << "My words (" << foundWords.size() << "): ";
+    boggle.printCompWords();
+
+    if (compScore > score) {
+        cout << "My score : " << compScore << endl;
+        cout << "Ha ha ha, I destroyed you. Better luck next time, puny human!" << endl << endl;
+    }
+
 
 
 }

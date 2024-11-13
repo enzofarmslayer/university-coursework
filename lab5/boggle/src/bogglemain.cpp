@@ -35,6 +35,7 @@ int main() {
         if (!yesOrNo("Play again (Y/N)? ")) {
             break;
         }
+        boggle.clearWords();
     }
 
     cout << "Have a nice day." << endl;

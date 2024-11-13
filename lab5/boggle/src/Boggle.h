@@ -41,13 +41,17 @@ public:
     void printBoard();
     void addWord(const string& input);
     void clearTraverse();
+    void printWords();
+    void clearWords();
+    void printCompWords();
+    int getWords();
     bool isWord(const string& currWord);
     bool validateWordLength(const string& input);
     bool validateUsedWord(const string& input);
     bool validateWord(const string& input);
     bool findWord(const string& input);
-    unordered_set<string> findAllWords();
-    unordered_set<string> recurse2(const int i, const int j, string& currWord);
+    unordered_set<string> findAllWords(int& score);
+    unordered_set<string> recurse2(const int i, const int j, string& currWord, int& score);
 
     // TODO: decide the public member functions and declare them
 

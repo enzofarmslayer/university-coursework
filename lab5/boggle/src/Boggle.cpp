@@ -77,6 +77,41 @@ void Boggle::addWord(const string &input) {
 }
 
 
+int Boggle::getWords() {
+    return usedWords.size();
+}
+
+void Boggle::printWords() {
+    cout << "{";
+    for (auto i = usedWords.begin(); i != usedWords.end(); i++) {
+        if (i == usedWords.begin()) {
+            cout << "''" << *i << "''";
+        } else {
+            cout << ", ''" << *i << "''";
+        }
+    }
+    cout << "}" << endl;
+}
+
+
+void Boggle::printCompWords() {
+    cout << "{";
+    for (auto i = usedCompWords.begin(); i != usedCompWords.end(); i++) {
+        if (i == usedCompWords.begin()) {
+            cout << "''" << *i << "''";
+        } else {
+            cout << ", ''" << *i << "''";
+        }
+    }
+    cout << "}" << endl;
+}
+
+void Boggle::clearWords() {
+    usedWords.clear();
+    usedCompWords.clear();
+}
+
+
 bool Boggle::validateWordLength(const string& input) {
     return input.size() > 3 && input.size() < 17;
 }
@@ -138,7 +173,7 @@ void Boggle::clearTraverse() {
 }
 
 
-unordered_set<string> Boggle::findAllWords(){
+unordered_set<string> Boggle::findAllWords(int &score){
     clearTraverse();
     unordered_set<string> tempWordlist;
     unordered_set<string> wordList;
@@ -149,12 +184,14 @@ unordered_set<string> Boggle::findAllWords(){
             currWord = board[i][j];
             if(lexicon.containsPrefix(currWord)){
                 isVisited[i][j] = true;
-                tempWordlist = recurse2(i,j,currWord);
+                tempWordlist = recurse2(i,j,currWord, score);
                 isVisited[i][j] = false;
             }
             // lägg till t lista och unmark
             for(auto i = tempWordlist.begin(); i != tempWordlist.end(); ++i) {
                 wordList.insert(*i);
+                score += i->length()-3;
+
             }
 
         }
@@ -162,7 +199,7 @@ unordered_set<string> Boggle::findAllWords(){
     return wordList;
 }
 
-unordered_set<string> Boggle::recurse2(const int i, const int j, string &currWord){
+unordered_set<string> Boggle::recurse2(const int i, const int j, string &currWord, int& score){
     unordered_set<string> tempWordlist;
     unordered_set<string> wordList;
 
@@ -174,12 +211,11 @@ unordered_set<string> Boggle::recurse2(const int i, const int j, string &currWor
                 if(isWord(currWord)) { // reset used
                     wordList.insert(currWord);
                     usedCompWords.insert(currWord);
-                    cout << currWord << endl;
                 }
 
                 if(lexicon.containsPrefix(currWord)){
                     isVisited[m][n] = true;
-                    tempWordlist = recurse2(m,n,currWord);
+                    tempWordlist = recurse2(m,n,currWord, score);
                     isVisited[m][n] = false;
 
                 }
