@@ -44,8 +44,13 @@ void playOneGame(Boggle& boggle) {
     string input;
     bool validWord = false;
 
-    while(input.length() != 0) {
+    while(!validWord) {
         input = askForWord();
+
+        if (input.length() == 0) {
+            cout << "End" << endl;
+            break;
+        }
 
         if(!boggle.validateWordLength(input)) {
             cout << "Word must be at least 4 characters and max 16." << endl;
@@ -75,6 +80,8 @@ void playOneGame(Boggle& boggle) {
             cout << score << endl;
         }
     }
+
+    cout << "It's my turn!" << endl;
 
 
 }

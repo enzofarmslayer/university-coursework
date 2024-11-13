@@ -44,6 +44,8 @@ public:
     bool validateUsedWord(const string& input);
     bool validateWord(const string& input);
     bool findWord(const string& input);
+    unordered_set<string> findAllWords();
+    unordered_set<string> recurse2(const int i, const int j, string& currWord);
 
     // TODO: decide the public member functions and declare them
 
@@ -55,24 +57,7 @@ private:
     unordered_set<string> usedWords;
     unordered_set<pair<int,int>, pair_hash> traversedCubes;
     void loadLexicon();
-    string recurse(const int i, const int j, const string& input) {
-        if (input == ""){
-            return "";
-        }
-
-        for (int m = i-1; m < i+2; ++m) {
-            for (int n = j-1; n < j+2; ++n) {
-                if (board.inBounds(m,n) && !traversedCubes.count({m,n})) {
-                    if(board[m][n] == input[0]){
-                        traversedCubes.insert({m, n});
-                        return input[0] + recurse(m,n,input.substr(1));
-                    }
-                }
-            }
-        }
-
-        return "";
-    }
+    string recurse(const int i, const int j, const string& input);
 
 };
 

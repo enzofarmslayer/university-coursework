@@ -130,3 +130,32 @@ string Boggle::recurse(const int i, const int j, const string& input) {
 void Boggle::clearTraversed() {
     traversedCubes.clear();
 }
+
+unordered_set<string> Boggle::findAllWords(){
+    traversedCubes.clear();
+    unordered_set<string> tempWordlist;
+    string currWord;
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            currWord = board[i][j];
+            if(lexicon.containsPrefix(currWord)){
+                traversedCubes.insert({i, j});
+                tempWordlist = recurse2(i,j,currWord);
+            }
+
+        }
+    }
+}
+
+unordered_set<string> Boggle::recurse2(const int i, const int j, string &currWord){
+    for (int m = i-1; m < i+2; ++m) {
+        for (int n = j-1; n < j+2; ++n) {
+            if (board.inBounds(m,n) && !traversedCubes.count({m,n})) {
+                currWord += board[m][n];
+                if(lexicon.containsPrefix(currWord)){
+
+                    traversedCubes.insert({m, n});
+
+                    return unordered_set
+            }
+}
