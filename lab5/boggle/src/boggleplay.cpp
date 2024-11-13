@@ -82,6 +82,8 @@ void playOneGame(Boggle& boggle) {
     }
 
     cout << "It's my turn!" << endl;
+    unordered_set foundWords = boggle.findAllWords();
+    cout << "My words" << foundWords.size() << ": " << endl;
 
 
 }

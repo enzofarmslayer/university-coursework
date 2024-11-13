@@ -13,6 +13,7 @@
 #include <lexicon.h>
 #include <unordered_set>
 #include <utility>
+#include <stack>
 
 // TODO: include any other header files you need
 
@@ -39,7 +40,8 @@ public:
     void createBoardMan(const string& boardInput);
     void printBoard();
     void addWord(const string& input);
-    void clearTraversed();
+    void clearTraverse();
+    bool isWord(const string& currWord);
     bool validateWordLength(const string& input);
     bool validateUsedWord(const string& input);
     bool validateWord(const string& input);
@@ -53,9 +55,11 @@ private:
     // TODO: decide the private member variables/functions and declare them
     Grid<char> board;
     Grid<string> cubes;
+    Grid<bool> isVisited;
     Lexicon lexicon;
     unordered_set<string> usedWords;
-    unordered_set<pair<int,int>, pair_hash> traversedCubes;
+    unordered_set<string> usedCompWords;
+
     void loadLexicon();
     string recurse(const int i, const int j, const string& input);
 

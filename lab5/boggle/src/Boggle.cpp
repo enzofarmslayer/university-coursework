@@ -25,6 +25,7 @@ static string CUBES[NUM_CUBES] = {        // the letters on all 6 sides of every
 Boggle::Boggle()  {
     board.resize(BOARD_SIZE, BOARD_SIZE);
     cubes.resize(BOARD_SIZE,BOARD_SIZE);
+    isVisited.resize(BOARD_SIZE, BOARD_SIZE);
     loadLexicon();
 
 
@@ -92,11 +93,11 @@ bool Boggle::validateWord(const string& input) {
 
 
 bool Boggle::findWord(const string& input) {
-    clearTraversed();
+    clearTraverse();
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             if (board[i][j] == input[0]) {
-                traversedCubes.insert({i, j});
+                isVisited[i][j] = true;
                 string recursiveWord = recurse(i,j,input.substr(1));
                 if (input.substr(1) == recursiveWord) {
                     return true;
@@ -115,9 +116,9 @@ string Boggle::recurse(const int i, const int j, const string& input) {
 
     for (int m = i-1; m < i+2; ++m) {
         for (int n = j-1; n < j+2; ++n) {
-            if (board.inBounds(m,n) && !traversedCubes.count({m,n})) {
+            if (board.inBounds(m,n) && !isVisited[m][n]) {
                 if(board[m][n] == input[0]){
-                    traversedCubes.insert({m, n});
+                    isVisited[m][n] = true;
                     return input[0] + recurse(m,n,input.substr(1));
                 }
             }
@@ -127,35 +128,77 @@ string Boggle::recurse(const int i, const int j, const string& input) {
     return "";
 }
 
-void Boggle::clearTraversed() {
-    traversedCubes.clear();
-}
-
-unordered_set<string> Boggle::findAllWords(){
-    traversedCubes.clear();
-    unordered_set<string> tempWordlist;
-    string currWord;
+void Boggle::clearTraverse() {
+    //traversedCubes.clear();
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
-            currWord = board[i][j];
-            if(lexicon.containsPrefix(currWord)){
-                traversedCubes.insert({i, j});
-                tempWordlist = recurse2(i,j,currWord);
-            }
-
+            isVisited[i][j] = false;
         }
     }
 }
 
+
+unordered_set<string> Boggle::findAllWords(){
+    clearTraverse();
+    unordered_set<string> tempWordlist;
+    unordered_set<string> wordList;
+    string currWord;
+
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            currWord = board[i][j];
+            if(lexicon.containsPrefix(currWord)){
+                isVisited[i][j] = true;
+                tempWordlist = recurse2(i,j,currWord);
+                isVisited[i][j] = false;
+            }
+            // lägg till t lista och unmark
+            for(auto i = tempWordlist.begin(); i != tempWordlist.end(); ++i) {
+                wordList.insert(*i);
+            }
+
+        }
+    }
+    return wordList;
+}
+
 unordered_set<string> Boggle::recurse2(const int i, const int j, string &currWord){
+    unordered_set<string> tempWordlist;
+    unordered_set<string> wordList;
+
     for (int m = i-1; m < i+2; ++m) {
         for (int n = j-1; n < j+2; ++n) {
-            if (board.inBounds(m,n) && !traversedCubes.count({m,n})) {
+            if (board.inBounds(m,n) && !isVisited[m][n]){
                 currWord += board[m][n];
+
+                if(isWord(currWord)) { // reset used
+                    wordList.insert(currWord);
+                    usedCompWords.insert(currWord);
+                    cout << currWord << endl;
+                }
+
                 if(lexicon.containsPrefix(currWord)){
+                    isVisited[m][n] = true;
+                    tempWordlist = recurse2(m,n,currWord);
+                    isVisited[m][n] = false;
 
-                    traversedCubes.insert({m, n});
+                }
+                for(auto i = tempWordlist.begin(); i != tempWordlist.end(); ++i) {
+                    wordList.insert(*i);
+                }
 
-                    return unordered_set
+                currWord.pop_back();
             }
+
+        }
+    }
+    return wordList;
+}
+
+
+bool Boggle::isWord(const string& currWord) {
+    if (lexicon.contains(currWord) && !usedCompWords.count(currWord) && validateWordLength(currWord)) {
+        return true;
+    }
+    return false;
 }
