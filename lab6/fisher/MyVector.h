@@ -22,7 +22,6 @@ public:
 
     MyVector& operator =(const MyVector& other);
 
-
     void push_back(const T&);
 
     void pop_back();
@@ -41,40 +40,60 @@ public:
 
     unsigned size()const;
 
+
+    unsigned capacity = 0;
+    unsigned numberOfElements = 0;
+
 private:
-
-    // private members?
-
+    void expandCapacity();
+    T* storage;
 };
 
 template<typename T>
-MyVector<T>::MyVector(){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+MyVector<T>::MyVector() : capacity(1), numberOfElements(0) {
+     storage = new T[capacity];
 }
 
 template<typename T>
 MyVector<T>::~MyVector(){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    delete[] storage;
 }
 
 template<typename T>
-MyVector<T>::MyVector(const MyVector& other){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+MyVector<T>::MyVector(const MyVector& other) : capacity(other.capacity), numberOfElements(other.numberOfElements) {
+    storage = new T[capacity];
+
+    for (unsigned i = 0; i < other.numberOfElements; i++) {
+        storage[i] = other.storage[i];
+    }
 }
 
 template<typename T>
 MyVector<T>& MyVector<T>::operator =(const MyVector& other){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+
+    if(this != other){
+        delete[] storage;
+        capacity = other.capacity;
+        numberOfElements = other.numberOfElements;
+
+        for (unsigned i = 0; i < other.numberOfElements; i++) {
+            storage[i] = other.storage[i];
+        }
+    }
+    return *this;
 }
 
 template<typename T>
 void MyVector<T>::push_back(const T& e){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    if (capacity == numberOfElements) {
+        expandCapacity();
+        T* big = new T[capacity];
+        big = storage;
+        delete[] storage;
+        storage = big;
+
+    }
+
 }
 
 template<typename T>
@@ -82,6 +101,7 @@ void MyVector<T>::pop_back(){
     // TODO: replace the code below with your code for this member
     MYEXCEPTION("unimplemented method");
 }
+
 
 template<typename T>
 T& MyVector<T>::operator[](unsigned i){
@@ -123,6 +143,11 @@ template<typename T>
 T* MyVector<T>::end(){
     // TODO: replace the code below with your code for this member
     MYEXCEPTION("unimplemented method");
+}
+
+template<typename T>
+void MyVector<T>::expandCapacity(){
+    capacity *= 2;
 }
 
 #endif // MY_VECTOR_H

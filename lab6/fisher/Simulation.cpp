@@ -15,7 +15,7 @@ Simulation::~Simulation(){
     assert(eventQueue.empty());
     for(unsigned i=0; i < allTheFish.size(); ++i){
         assert(! allTheFish[i]->isCaught());
-        delete allTheFish[i];
+       // delete allTheFish[i];
     }
 }
 

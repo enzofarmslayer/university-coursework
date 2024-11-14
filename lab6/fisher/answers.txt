@@ -4,6 +4,16 @@ anvands. Vilken funktion har de?
 
 > Svar:
 
+~Simulation() - Destructor, ser till att radera alla fiskar i alltheFish som inte är fångade.
+
+run() - Körs så länge eventQueue inte är tom. Då tar den eventet på toppen av eventStack och hanterar det eventet om tiden för eventet inte är längre än den återstående, annars återkallar. Slutligen raderar sedan den eventet.
+
+scheduleEvent() - Lägger till event till kön.
+
+harvestTonnageNow() - går igenom alla fiskar. Ifall fisken är död raderas den, annars läggs den till bland de levande fiskarna. Sedan rensas listan med alla fiskar. Loopar igenom alla fiskar som lever medans tiden inte överskrider den vi satt upp. Om en fisk går att fånga, alltså har rätt storlek, och anpassar befolkning för den grupp fisken tillhör. Slutligen läggs alla levande fiskar återigen till alla fiskar.
+
+addFish() - lägger till fisken till samlingen av alla fiskar.
+
 
 2) Experimentera med olika värden för parametrarna "LANDING" och
   "MIN_CATCHABLE_AGE". Fiskbeståndet kollapsar när antalet fisk blir
@@ -18,8 +28,7 @@ anvands. Vilken funktion har de?
   experiment som förklarar relationen mellan produktionen ("LANDING")
   och storleken på näten ("MIN_CATCHABLE_AGE").
 
-> Svar:
-
+> Svar: Hållbarheten påverkas av båda. Om min_catchable_age är för låg (<335~) kommer fiskar att fångas upp innan de hinner lägga ägg och fiskarna dör ut för tidigt. Man vill ha en landing som inte är för stort för att inte få scenariot i kanadas östkust på 90-talet då allt för många fiskar fiskas och de hinner inte reproducera. Vi kom fram till ett intervall på 335-550 för min_catchable och 70000-90000 för landing för maximal hållbarhet.
 
 
 
@@ -31,14 +40,12 @@ anvands. Vilken funktion har de?
   
   a. Upptäcker Valgrind några minnesläckor?
 
-  > Svar:
-
-
+  > Svar: Nej
 
   b. Kan du skapa minnesläckor igenom att kommentera en rad i koden? I
   så fall vilken rad i vilken fil? Argumentera annars.
 
-  > Svar:
+  > Svar: Ja, t.ex. rad 18 i Simulation. 
 
 
 4) Jämför effektivitet: Jämför skillnad i hur långt tid det
