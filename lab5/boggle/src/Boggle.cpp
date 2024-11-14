@@ -95,6 +95,12 @@ void Boggle::printWords() {
     cout << "}" << endl;
 }
 
+// Add word to guessed computer words
+void Boggle::addCompWord(const string &currWord, unordered_set<string>* wordList) {
+    wordList->insert(currWord);
+    usedCompWords.insert(currWord);
+}
+
 // Print all words that computer guessed
 void Boggle::printCompWords() {
     cout << "{";
@@ -134,6 +140,7 @@ bool Boggle::findWord(const string& input) {
     clearTraverse();
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
+
             if (board[i][j] == input[0]) {
                 isVisited[i][j] = true;
                 string recursiveWord = findInputWordHelper(i,j,input.substr(1));
@@ -157,7 +164,7 @@ string Boggle::findInputWordHelper(const int i, const int j, const string& input
             if (board.inBounds(m,n) && !isVisited[m][n]) {
                 if(board[m][n] == input[0]){
                     isVisited[m][n] = true;
-                    return input[0] + recurse(m,n,input.substr(1));
+                    return input[0] + findInputWordHelper(m,n,input.substr(1));
                 }
             }
         }
@@ -197,7 +204,6 @@ unordered_set<string> Boggle::findAllWords(int &score){
         }
     }
     for(auto i = wordList.begin(); i != wordList.end(); ++i) {
-        //wordList.insert(*i);
         score += i->length()-3;
     }
     return wordList;
@@ -208,13 +214,13 @@ void Boggle::findAllWordsHelper(const int i, const int j, string &currWord, int&
     // Loop through a neighbours of a given position
     for (int m = i-1; m < i+2; ++m) {
         for (int n = j-1; n < j+2; ++n) {
+
             if (board.inBounds(m,n) && !isVisited[m][n]){
                 currWord += board[m][n];
 
                 // If we found a word, insert it to the found ones
                 if(isWord(currWord)) {
-                    wordList.insert(currWord);
-                    usedCompWords.insert(currWord);
+                    addCompWord(currWord, &wordList);
                 }
 
                 // If the current word is the beginning of a word

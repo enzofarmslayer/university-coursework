@@ -44,6 +44,7 @@ public:
     void printWords();
     void clearWords();
     void printCompWords();
+    void addCompWord(const string &currWord, unordered_set<string>* wordList);
     int getWords();
     bool isWord(const string& currWord);
     bool validateWordLength(const string& input);
