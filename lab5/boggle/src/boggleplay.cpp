@@ -1,6 +1,5 @@
-// You will edit and turn in this CPP file.
-// Also remove these comments here and add your own.
-// TODO: remove this comment header and replace with your own
+// The file that handles communication between the game and user.
+// Takes in inputs and prints the game.
 
 #include <cstdlib>
 #include <iostream>
@@ -9,7 +8,6 @@
 #include "Boggle.h"
 #include "bogglemain.h"
 #include "strlib.h"
-// TODO: include any other header files you need
 
 string askForWord();
 
@@ -18,6 +16,8 @@ string askForWord();
  */
 void playOneGame(Boggle& boggle) {
     // TODO: implement this function (and add any other functions you like to help you)
+    //clearConsole();
+
     string choice;
     cout << "Do you want to generate a random board? (Y/N): ";
     getline(cin, choice);
@@ -35,8 +35,6 @@ void playOneGame(Boggle& boggle) {
         boggle.createBoardMan(input);
     }
 
-    //boggle.createBoard();
-    //clearConsole();
     cout << "Current Boggle Board:" << endl;
     boggle.printBoard();
     int score = 0;
@@ -90,13 +88,11 @@ void playOneGame(Boggle& boggle) {
     if (compScore > score) {
         cout << "My score : " << compScore << endl;
         cout << "Ha ha ha, I destroyed you. Better luck next time, puny human!" << endl << endl;
+        return;
     }
-
-
-
 }
 
-
+// Asks for an input word from user
 string askForWord() {
     cout << "Enter a word or press Enter: ";
 
@@ -105,6 +101,7 @@ string askForWord() {
 
     return input;
 }
+
 
 /*
  * Erases all currently visible text from the output console.

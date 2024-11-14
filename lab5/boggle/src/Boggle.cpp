@@ -1,8 +1,5 @@
-// This is the .cpp file you will edit and turn in.
-// We have provided a minimal skeleton for you,
-// but you must finish it as described in the spec.
-// Also remove these comments here and add your own.
-// TODO: remove this comment header and replace it with your own
+// The file that contains functionality for finding words in the boggle.
+// Developers: kevma271, enzcu445
 
 #include <sstream>
 #include "Boggle.h"
@@ -21,7 +18,7 @@ static string CUBES[NUM_CUBES] = {        // the letters on all 6 sides of every
 };
 
 
-// TODO: implement the members you declared in Boggle.h
+// Constructor that fixes the board
 Boggle::Boggle()  {
     board.resize(BOARD_SIZE, BOARD_SIZE);
     cubes.resize(BOARD_SIZE,BOARD_SIZE);
@@ -37,11 +34,12 @@ Boggle::Boggle()  {
     }
 }
 
-
+// Load lexicon
 void Boggle::loadLexicon() {
     lexicon.addWordsFromFile(DICTIONARY_FILE);
 }
 
+// Create board
 void Boggle::createBoard() {
     shuffle(cubes);
 
@@ -54,6 +52,7 @@ void Boggle::createBoard() {
 
 }
 
+// Create board manually
 void Boggle::createBoardMan(const string& boardInput){
     int index = 0;
     for (int i = 0; i < BOARD_SIZE; ++i) {
@@ -63,6 +62,7 @@ void Boggle::createBoardMan(const string& boardInput){
     }
 }
 
+// Prints board
 void Boggle::printBoard(){
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
@@ -72,15 +72,17 @@ void Boggle::printBoard(){
     }
 }
 
+// Add word to used
 void Boggle::addWord(const string &input) {
     usedWords.insert(input);
 }
 
-
+// Return the amount of words that the user guessed
 int Boggle::getWords() {
     return usedWords.size();
 }
 
+// Print all words that user guessed
 void Boggle::printWords() {
     cout << "{";
     for (auto i = usedWords.begin(); i != usedWords.end(); i++) {
@@ -93,7 +95,13 @@ void Boggle::printWords() {
     cout << "}" << endl;
 }
 
+// Add word to guessed computer words
+void Boggle::addCompWord(const string &currWord, unordered_set<string>* wordList) {
+    wordList->insert(currWord);
+    usedCompWords.insert(currWord);
+}
 
+// Print all words that computer guessed
 void Boggle::printCompWords() {
     cout << "{";
     for (auto i = usedCompWords.begin(); i != usedCompWords.end(); i++) {
@@ -106,34 +114,36 @@ void Boggle::printCompWords() {
     cout << "}" << endl;
 }
 
+// Clears lists containing guessed words
 void Boggle::clearWords() {
     usedWords.clear();
     usedCompWords.clear();
 }
 
-
+// Check that input has correct length
 bool Boggle::validateWordLength(const string& input) {
     return input.size() > 3 && input.size() < 17;
 }
 
-
+// Check that input hasn't been guessed
 bool Boggle::validateUsedWord(const string& input) {
     return usedWords.count(input);
 }
 
-
+// Check that word is in lexicon
 bool Boggle::validateWord(const string& input) {
     return lexicon.contains(input);
 }
 
-
+// Takes in user input and loops through the board to find it
 bool Boggle::findWord(const string& input) {
     clearTraverse();
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
+
             if (board[i][j] == input[0]) {
                 isVisited[i][j] = true;
-                string recursiveWord = recurse(i,j,input.substr(1));
+                string recursiveWord = findInputWordHelper(i,j,input.substr(1));
                 if (input.substr(1) == recursiveWord) {
                     return true;
                 }
@@ -143,8 +153,8 @@ bool Boggle::findWord(const string& input) {
     return false;
 }
 
-
-string Boggle::recurse(const int i, const int j, const string& input) {
+// Recursive helper to find all neighbours of letters
+string Boggle::findInputWordHelper(const int i, const int j, const string& input) {
     if (input == ""){
         return "";
     }
@@ -154,17 +164,19 @@ string Boggle::recurse(const int i, const int j, const string& input) {
             if (board.inBounds(m,n) && !isVisited[m][n]) {
                 if(board[m][n] == input[0]){
                     isVisited[m][n] = true;
-                    return input[0] + recurse(m,n,input.substr(1));
+                    return input[0] + findInputWordHelper(m,n,input.substr(1));
                 }
             }
         }
     }
 
+    // If the current position didn't yeild any word
+    isVisited[i][j] = false;
     return "";
 }
 
+// Loops through all positions and sets them as not visited
 void Boggle::clearTraverse() {
-    //traversedCubes.clear();
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             isVisited[i][j] = false;
@@ -172,66 +184,62 @@ void Boggle::clearTraverse() {
     }
 }
 
-
+// Loops through each position on the board and calls
+// the recursive helper on each
 unordered_set<string> Boggle::findAllWords(int &score){
     clearTraverse();
-    unordered_set<string> tempWordlist;
+    //unordered_set<string> tempWordlist;
     unordered_set<string> wordList;
     string currWord;
 
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             currWord = board[i][j];
+
             if(lexicon.containsPrefix(currWord)){
                 isVisited[i][j] = true;
-                tempWordlist = recurse2(i,j,currWord, score);
+                findAllWordsHelper(i,j,currWord, score, wordList);
                 isVisited[i][j] = false;
             }
-            // lägg till t lista och unmark
-            for(auto i = tempWordlist.begin(); i != tempWordlist.end(); ++i) {
-                wordList.insert(*i);
-                score += i->length()-3;
-
-            }
-
         }
+    }
+    for(auto i = wordList.begin(); i != wordList.end(); ++i) {
+        score += i->length()-3;
     }
     return wordList;
 }
 
-unordered_set<string> Boggle::recurse2(const int i, const int j, string &currWord, int& score){
-    unordered_set<string> tempWordlist;
-    unordered_set<string> wordList;
-
+// Recursive function for finding all words that start with a given letter.
+void Boggle::findAllWordsHelper(const int i, const int j, string &currWord, int& score, unordered_set<string>& wordList){
+    // Loop through a neighbours of a given position
     for (int m = i-1; m < i+2; ++m) {
         for (int n = j-1; n < j+2; ++n) {
+
             if (board.inBounds(m,n) && !isVisited[m][n]){
                 currWord += board[m][n];
 
-                if(isWord(currWord)) { // reset used
-                    wordList.insert(currWord);
-                    usedCompWords.insert(currWord);
+                // If we found a word, insert it to the found ones
+                if(isWord(currWord)) {
+                    addCompWord(currWord, &wordList);
                 }
 
+                // If the current word is the beginning of a word
+                // in the lexicon, recurse in it
                 if(lexicon.containsPrefix(currWord)){
                     isVisited[m][n] = true;
-                    tempWordlist = recurse2(m,n,currWord, score);
+                    findAllWordsHelper(m,n,currWord, score, wordList);
                     isVisited[m][n] = false;
-
-                }
-                for(auto i = tempWordlist.begin(); i != tempWordlist.end(); ++i) {
-                    wordList.insert(*i);
                 }
 
+                // Pop back the last letter so we can continue with next neuighbour
                 currWord.pop_back();
             }
-
         }
     }
-    return wordList;
+    return;
 }
 
-
+// Validates a word, if it is english, hasn't been used and is at least 4 chars
 bool Boggle::isWord(const string& currWord) {
     if (lexicon.contains(currWord) && !usedCompWords.count(currWord) && validateWordLength(currWord)) {
         return true;

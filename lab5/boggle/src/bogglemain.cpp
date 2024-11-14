@@ -36,6 +36,7 @@ int main() {
             break;
         }
         boggle.clearWords();
+
     }
 
     cout << "Have a nice day." << endl;
@@ -54,8 +55,8 @@ void intro() {
     cout << "If only YOU had a gig of RAM!" << endl;
     cout << endl;
     cout << "Press Enter to begin the game ... ";
-    // string line;
-    // getline(cin, line);
+    string line;
+    getline(cin, line);
 }
 
 /*

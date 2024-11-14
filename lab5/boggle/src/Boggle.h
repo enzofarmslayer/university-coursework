@@ -44,6 +44,7 @@ public:
     void printWords();
     void clearWords();
     void printCompWords();
+    void addCompWord(const string &currWord, unordered_set<string>* wordList);
     int getWords();
     bool isWord(const string& currWord);
     bool validateWordLength(const string& input);
@@ -51,7 +52,7 @@ public:
     bool validateWord(const string& input);
     bool findWord(const string& input);
     unordered_set<string> findAllWords(int& score);
-    unordered_set<string> recurse2(const int i, const int j, string& currWord, int& score);
+    void findAllWordsHelper(const int i, const int j, string& currWord, int& score, unordered_set<string>& wordList);
 
     // TODO: decide the public member functions and declare them
 
@@ -65,7 +66,7 @@ private:
     unordered_set<string> usedCompWords;
 
     void loadLexicon();
-    string recurse(const int i, const int j, const string& input);
+    string findInputWordHelper(const int i, const int j, const string& input);
 
 };
 
