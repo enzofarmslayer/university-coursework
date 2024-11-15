@@ -91,13 +91,19 @@ void MyVector<T>::push_back(const T& e){
         big = storage;
         delete[] storage;
         storage = big;
-
     }
+    storage[numberOfElements++] = e;
 
 }
 
 template<typename T>
 void MyVector<T>::pop_back(){
+    if (numberOfElements > 0){
+        delete storage[numberOfElements-1];
+        numberOfElements--;
+    }
+
+    // göra något mer?
     // TODO: replace the code below with your code for this member
     MYEXCEPTION("unimplemented method");
 }
@@ -105,6 +111,7 @@ void MyVector<T>::pop_back(){
 
 template<typename T>
 T& MyVector<T>::operator[](unsigned i){
+
     // TODO: replace the code below with your code for this member
     MYEXCEPTION("unimplemented method");
 }
@@ -117,8 +124,9 @@ const T& MyVector<T>::operator[](unsigned i)const{
 
 template<typename T>
 bool MyVector<T>::empty()const{
+    return (numberOfElements == 0)
     // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    //MYEXCEPTION("unimplemented method");
 }
 
 template<typename T>
@@ -129,6 +137,7 @@ void MyVector<T>::clear(){
 
 template<typename T>
 unsigned MyVector<T>::size()const{
+    return numberOfElements;
     // TODO: replace the code below with your code for this member
     MYEXCEPTION("unimplemented method");
 }
