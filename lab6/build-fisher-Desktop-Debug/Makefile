@@ -55,11 +55,11 @@ OBJECTS_DIR   = ./
 SOURCES       = ../fisher/Event.cpp \
 		../fisher/Fish.cpp \
 		../fisher/Simulation.cpp \
-		../fisher/main.cpp 
+		../fisher/test-harness-myvector.cpp 
 OBJECTS       = Event.o \
 		Fish.o \
 		Simulation.o \
-		main.o
+		test-harness-myvector.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -128,6 +128,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf \
+		../fisher/.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
@@ -150,7 +151,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		Simulation.h ../fisher/Event.cpp \
 		../fisher/Fish.cpp \
 		../fisher/Simulation.cpp \
-		../fisher/main.cpp
+		../fisher/test-harness-myvector.cpp
 QMAKE_TARGET  = fisher
 DESTDIR       = 
 TARGET        = fisher
@@ -230,6 +231,7 @@ Makefile: ../fisher/fisher.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/q
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
@@ -313,6 +315,7 @@ Makefile: ../fisher/fisher.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/q
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf:
@@ -392,14 +395,9 @@ Simulation.o: ../fisher/Simulation.cpp ../fisher/Simulation.h \
 		../fisher/MyException.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Simulation.o ../fisher/Simulation.cpp
 
-main.o: ../fisher/main.cpp ../fisher/Event.h \
-		../fisher/Fish.h \
-		../fisher/config.h \
-		../fisher/Simulation.h \
-		../fisher/MyPriorityQueue.h \
-		../fisher/MyVector.h \
+test-harness-myvector.o: ../fisher/test-harness-myvector.cpp ../fisher/MyVector.h \
 		../fisher/MyException.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../fisher/main.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test-harness-myvector.o ../fisher/test-harness-myvector.cpp
 
 ####### Install
 

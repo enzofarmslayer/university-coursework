@@ -46,38 +46,38 @@ public:
 
 private:
     void expandCapacity();
-    T* storage;
+    T* vector_array;
 };
 
 template<typename T>
 MyVector<T>::MyVector() : capacity(1), numberOfElements(0) {
-     storage = new T[capacity];
+     vector_array = new T[capacity];
 }
 
 template<typename T>
 MyVector<T>::~MyVector(){
-    delete[] storage;
+    delete[] vector_array;
 }
 
 template<typename T>
 MyVector<T>::MyVector(const MyVector& other) : capacity(other.capacity), numberOfElements(other.numberOfElements) {
-    storage = new T[capacity];
+    vector_array = new T[capacity];
 
     for (unsigned i = 0; i < other.numberOfElements; i++) {
-        storage[i] = other.storage[i];
+        vector_array[i] = other.vector_array[i];
     }
 }
 
 template<typename T>
 MyVector<T>& MyVector<T>::operator =(const MyVector& other){
 
-    if(this != other){
-        delete[] storage;
+    if(this != &other){
+        delete[] vector_array;
         capacity = other.capacity;
         numberOfElements = other.numberOfElements;
-
+        vector_array = new T[capacity];
         for (unsigned i = 0; i < other.numberOfElements; i++) {
-            storage[i] = other.storage[i];
+            vector_array[i] = other.vector_array[i];
         }
     }
     return *this;
@@ -86,72 +86,67 @@ MyVector<T>& MyVector<T>::operator =(const MyVector& other){
 template<typename T>
 void MyVector<T>::push_back(const T& e){
     if (capacity == numberOfElements) {
-        expandCapacity();
-        T* big = new T[capacity];
-        big = storage;
-        delete[] storage;
-        storage = big;
+        //expandCapacity();
+        T* big = new T[capacity*2];
+        for (unsigned i = 0; i < numberOfElements; i++) {
+               big[i] = vector_array[i];
+        }
+        delete[] vector_array;
+        vector_array = big;
+        capacity *= 2;
     }
-    storage[numberOfElements++] = e;
+    vector_array[numberOfElements++] = e;
 
 }
 
 template<typename T>
 void MyVector<T>::pop_back(){
     if (numberOfElements > 0){
-        delete storage[numberOfElements-1];
+        //delete storage[numberOfElements-1];
         numberOfElements--;
     }
-
-    // göra något mer?
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
 }
 
 
 template<typename T>
 T& MyVector<T>::operator[](unsigned i){
-
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    return vector_array[i];
 }
 
 template<typename T>
 const T& MyVector<T>::operator[](unsigned i)const{
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    return vector_array[i];
 }
 
 template<typename T>
 bool MyVector<T>::empty()const{
-    return (numberOfElements == 0)
-    // TODO: replace the code below with your code for this member
-    //MYEXCEPTION("unimplemented method");
+    return (numberOfElements == 0);
 }
 
 template<typename T>
 void MyVector<T>::clear(){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+//    for(int i = 0; i < numberOfElements; ++i){
+//        delete storage[i];
+//    }
+    delete[] vector_array;
+    capacity = 1;
+    numberOfElements = 0;
+    vector_array = new T[capacity];
 }
 
 template<typename T>
 unsigned MyVector<T>::size()const{
     return numberOfElements;
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
 }
 
 template<typename T>
 T* MyVector<T>::begin(){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    return vector_array;
 }
 
 template<typename T>
 T* MyVector<T>::end(){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    return vector_array + numberOfElements;
 }
 
 template<typename T>

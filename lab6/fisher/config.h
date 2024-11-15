@@ -22,7 +22,7 @@ const unsigned MIN_KEPT_AGE = 600;
 const unsigned LANDING = 12000; //70000 89845
 
 // Simulation: duration and printing
-const unsigned SIMULATION_HORIZON=1200; //8000
+const unsigned SIMULATION_HORIZON=1200; //8000 1200
 const unsigned PRINT_PERIOD=20;
 
 

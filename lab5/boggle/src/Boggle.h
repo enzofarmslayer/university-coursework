@@ -1,8 +1,6 @@
-// This is the .h file you will edit and turn in.
-// We have provided a minimal skeleton for you,
-// but you must finish it as described in the spec.
-// Also remove these comments here and add your own, as well as on the members.
-// TODO: remove this comment header and replace it with your own
+// Boggle.h
+// Header file for the Boggle game class.
+// Developers: kevma271, enzcu445
 
 #ifndef _boggle_h
 #define _boggle_h
@@ -15,7 +13,6 @@
 #include <utility>
 #include <stack>
 
-// TODO: include any other header files you need
 
 using namespace std;
 

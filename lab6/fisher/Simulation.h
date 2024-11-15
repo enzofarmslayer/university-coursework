@@ -46,8 +46,8 @@ private:
                       vector<Event *, allocator<Event*> >,
                       EventComparator> eventQueue;
 
-//  MyVector<Fish*> allTheFish;
-  std::vector<Fish*> allTheFish;
+  MyVector<Fish*> allTheFish;
+  //std::vector<Fish*> allTheFish;
 
 
   unsigned simulationTime;
