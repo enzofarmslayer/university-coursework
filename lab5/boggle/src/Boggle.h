@@ -16,16 +16,6 @@
 
 using namespace std;
 
-struct pair_hash {
-    template <typename T1, typename T2>
-    size_t operator ()(const pair<T1, T2>& p) const {
-        auto h1 = hash<T1>{}(p.first);  // Hash the first element
-        auto h2 = hash<T2>{}(p.second); // Hash the second element
-        // Combine the two hash values using XOR and bit shifting
-        return h1 ^ (h2 << 1);
-    }
-};
-
 class Boggle {
 public:
     const string DICTIONARY_FILE = "EnglishWords.dat";
@@ -51,10 +41,7 @@ public:
     unordered_set<string> findAllWords(int& score);
     void findAllWordsHelper(const int i, const int j, string& currWord, int& score, unordered_set<string>& wordList);
 
-    // TODO: decide the public member functions and declare them
-
 private:
-    // TODO: decide the private member variables/functions and declare them
     Grid<char> board;
     Grid<string> cubes;
     Grid<bool> isVisited;

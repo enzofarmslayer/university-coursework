@@ -30,52 +30,117 @@ public:
 
     bool empty()const;
 
-  unsigned size() const;
+    unsigned size() const;
+
+
 
 private:
     // Other private members?
+    void heapifyUp(int index);
+    void heapifyDown(int index);
 };
 
 template <typename T, typename C>
 MyPriorityQueue<T,C>::MyPriorityQueue(){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
 }
 
 template <typename T, typename C>
 MyPriorityQueue<T,C>::~MyPriorityQueue(){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
 }
 
 template <typename T, typename C>
 void MyPriorityQueue<T,C>::push(const T& t){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    //lägg till
+    vector_array.push_back(t);
+
+    //återskap heapstrukt
+    heapifyUp(vector_array.size()-1);
 }
 
 template <typename T, typename C>
 T MyPriorityQueue<T,C>::top()const{
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    if (!vector_array.empty()){
+        return vector_array[0];
+    }
 }
 
 template <typename T, typename C>
 void MyPriorityQueue<T,C>::pop(){
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    if(!vector_array.empty()){
+
+        // ta bort högst prio
+        vector_array[0] = vector_array.back();
+        vector_array.pop_back();
+
+        // återskapa heap-struktur
+        if (!vector_array.empty()) {
+            heapifyDown(0);
+        }
+    }
 }
 
 template <typename T, typename C>
 bool MyPriorityQueue<T,C>::empty()const{
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    return vector_array.empty();
 }
 
 template <typename T, typename C>
 unsigned MyPriorityQueue<T,C>::size()const{
-    // TODO: replace the code below with your code for this member
-    MYEXCEPTION("unimplemented method");
+    return vector_array.size();
+}
+
+template <typename T, typename C>
+void MyPriorityQueue<T, C>::heapifyUp(int index) {
+    int parent;
+    while (index > 0) {
+        if (index % 2 == 0){
+            parent = (index - 2) / 2;
+        }
+        else if (index % 2 == 1){
+            parent = (index - 1) / 2;
+        }
+
+        if (strictly_larger_operator(vector_array[parent], vector_array[index])) {
+            //swap
+            T temp = vector_array[parent];
+            vector_array[parent] = vector_array[index];
+            vector_array[index] = temp;
+
+            index = parent;
+            }
+        else {
+            break;
+        }
+
+    }
+}
+
+template <typename T, typename C>
+void MyPriorityQueue<T, C>::heapifyDown(int index) {
+    int size = vector_array.size();
+    while (true) {
+        int left_child = 2 * index + 1;
+        int right_child = 2 * index + 2;
+        int smallest = index;
+
+        if (left_child < size && strictly_larger_operator(vector_array[smallest], vector_array[left_child])) {
+            smallest = left_child;
+        }
+        if (right_child < size && strictly_larger_operator(vector_array[smallest], vector_array[right_child])) {
+            smallest = right_child;
+        }
+
+        if (smallest != index) {
+            // swap
+            T temp = vector_array[index];
+            vector_array[index] = vector_array[smallest];
+            vector_array[smallest] = temp;
+
+            index = smallest;
+        } else {
+            break;
+        }
+    }
 }
 
 #endif // MY_PRIORITY_QUEUE_H
