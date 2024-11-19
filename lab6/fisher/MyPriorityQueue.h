@@ -36,8 +36,8 @@ public:
 
 private:
     // Other private members?
-    void heapifyUp(int index);
-    void heapifyDown(int index);
+    void heapifyFromBottom();
+    void heapifyFromTop();
 };
 
 template <typename T, typename C>
@@ -54,7 +54,7 @@ void MyPriorityQueue<T,C>::push(const T& t){
     vector_array.push_back(t);
 
     //återskap heapstrukt
-    heapifyUp(vector_array.size()-1);
+    heapifyFromBottom();
 }
 
 template <typename T, typename C>
@@ -74,7 +74,7 @@ void MyPriorityQueue<T,C>::pop(){
 
         // återskapa heap-struktur
         if (!vector_array.empty()) {
-            heapifyDown(0);
+            heapifyFromTop();
         }
     }
 }
@@ -90,8 +90,10 @@ unsigned MyPriorityQueue<T,C>::size()const{
 }
 
 template <typename T, typename C>
-void MyPriorityQueue<T, C>::heapifyUp(int index) {
+void MyPriorityQueue<T, C>::heapifyFromBottom() {
     int parent;
+    int index = vector_array.size()-1;
+
     while (index > 0) {
         if (index % 2 == 0){
             parent = (index - 2) / 2;
@@ -116,18 +118,20 @@ void MyPriorityQueue<T, C>::heapifyUp(int index) {
 }
 
 template <typename T, typename C>
-void MyPriorityQueue<T, C>::heapifyDown(int index) {
+void MyPriorityQueue<T, C>::heapifyFromTop() {
     int size = vector_array.size();
+    int index = 0;
+
     while (true) {
-        int left_child = 2 * index + 1;
-        int right_child = 2 * index + 2;
+        int leftChildIndex = 2 * index + 1;
+        int rightChildIndex = 2 * index + 2;
         int smallest = index;
 
-        if (left_child < size && strictly_larger_operator(vector_array[smallest], vector_array[left_child])) {
-            smallest = left_child;
+        if (leftChildIndex < size && strictly_larger_operator(vector_array[smallest], vector_array[leftChildIndex])) {
+            smallest = leftChildIndex;
         }
-        if (right_child < size && strictly_larger_operator(vector_array[smallest], vector_array[right_child])) {
-            smallest = right_child;
+        if (rightChildIndex < size && strictly_larger_operator(vector_array[smallest], vector_array[rightChildIndex])) {
+            smallest = rightChildIndex;
         }
 
         if (smallest != index) {
