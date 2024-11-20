@@ -45,7 +45,7 @@ public:
     unsigned numberOfElements = 0;
 
 private:
-    void expandCapacity();
+//    void expandCapacity();
     T* vector_array;
 };
 
@@ -85,6 +85,7 @@ MyVector<T>& MyVector<T>::operator =(const MyVector& other){
 
 template<typename T>
 void MyVector<T>::push_back(const T& e){
+
     if (capacity == numberOfElements) {
         //expandCapacity();
         T* big = new T[capacity*2];
@@ -93,7 +94,7 @@ void MyVector<T>::push_back(const T& e){
         }
         delete[] vector_array;
         vector_array = big;
-        capacity *= 2;
+        capacity *= 2;        
     }
     vector_array[numberOfElements++] = e;
 
@@ -149,9 +150,9 @@ T* MyVector<T>::end(){
     return vector_array + numberOfElements;
 }
 
-template<typename T>
-void MyVector<T>::expandCapacity(){
-    capacity *= 2;
-}
+//template<typename T>
+//void MyVector<T>::expandCapacity(){
+//    capacity *= 2;
+//}
 
 #endif // MY_VECTOR_H

@@ -53,7 +53,7 @@ void MyPriorityQueue<T,C>::push(const T& t){
     //lägg till
     vector_array.push_back(t);
 
-    //återskap heapstrukt
+    //återskap heapstruktur
     heapifyFromBottom();
 }
 
@@ -69,7 +69,8 @@ void MyPriorityQueue<T,C>::pop(){
     if(!vector_array.empty()){
 
         // ta bort högst prio
-        vector_array[0] = vector_array.back();
+        vector_array[0] = vector_array[vector_array.size()-1];
+        //vector_array[0] = vector_array.begin() + vector_array.size();
         vector_array.pop_back();
 
         // återskapa heap-struktur
@@ -123,8 +124,8 @@ void MyPriorityQueue<T, C>::heapifyFromTop() {
     int index = 0;
 
     while (true) {
-        int leftChildIndex = 2 * index + 1;
-        int rightChildIndex = 2 * index + 2;
+        int leftChildIndex = (2 * index) + 1;
+        int rightChildIndex = (2 * index) + 2;
         int smallest = index;
 
         if (leftChildIndex < size && strictly_larger_operator(vector_array[smallest], vector_array[leftChildIndex])) {
