@@ -86,6 +86,18 @@ MyVector<T>& MyVector<T>::operator =(const MyVector& other){
 template<typename T>
 void MyVector<T>::push_back(const T& e){
 
+    // if (capacity == numberOfElements) {
+    //     int newCapacity = capacity + 1;
+
+    //     T* big = new T[newCapacity];
+    //     for (unsigned i = 0; i < numberOfElements; i++) {
+    //         big[i] = vector_array[i];
+    //     }
+    //     delete[] vector_array;
+    //     vector_array = big;
+    //     capacity = newCapacity;
+    // }
+
     if (capacity == numberOfElements) {
         //expandCapacity();
         T* big = new T[capacity*2];
