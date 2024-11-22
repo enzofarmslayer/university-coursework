@@ -1,6 +1,5 @@
 QT += widgets
-SOURCES = $$files($$PWD/src/*.cpp) \
-    src/fast.cpp
+SOURCES = $$files($$PWD/src/*.cpp)
 
 HEADERS = $$files($$PWD/src/*.h)
 
