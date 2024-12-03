@@ -21,7 +21,6 @@ void Robot::doCrash() {
 
 bool Robot::isToBeJunked() const {
     return toBeJunked;
-
 }
 
 void Robot::draw(QGraphicsScene *scene) const {
