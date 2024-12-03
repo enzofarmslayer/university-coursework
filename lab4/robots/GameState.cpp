@@ -33,19 +33,18 @@ GameState::GameState(const GameState& that){
 }
 
 
-GameState::GameState(GameState&& that) : units(that.units), hero(that.hero) {
-    for (auto a = units.begin(); a!=units.end(); a++) {
-        *a=nullptr;
-    }
+GameState::GameState(GameState&& that) : units(std::move(that.units)), hero(std::move(that.hero)) {
 }
 
-GameState& GameState::operator=(GameState&& that)  {
-    units = that.units;
-    hero = that.hero;
-    for (auto a = units.begin(); a!=units.end(); a++) {
-        *a=nullptr;
+GameState& GameState::operator=(GameState&& that) {
+    if (this != &that) {
+        // Move the smart pointers instead of copying
+        hero = std::move(that.hero);
+        units = std::move(that.units);
     }
+    return *this;
 }
+
 
 GameState& GameState::operator=(const GameState& that)  {
    if (this != &that) {
