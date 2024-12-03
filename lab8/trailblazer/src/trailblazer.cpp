@@ -11,16 +11,28 @@ using namespace std;
 
 vector<Node *> depthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) {
     vector<Vertex*> path;
-//    stack<Vertex*> stack;
+    stack<Vertex*> stack;
 
-//    stack.push(start);
-//    start->visited = true;
+    stack.push(start);
+    start->visited = true;
 
-//    while (stack.top() != end){
-//        if(stack.top->arcs.first()->finish
-//    }
+    while (stack.top() != end){
 
-//    start->arcs.first()->finish
+        for(auto i = stack.top()->arcs.begin(); i != stack.top()->arcs.end(); ++i){
+            if((*i)->finish != nullptr && (*i)->finish->visited == false){
+                stack.push((*i)->finish);
+                (*i)->visited = true;
+                continue;
+             }
+        }
+        stack.top()->setColor(GRAY);
+        stack.pop();
+    }
+    while (stack.top() != nullptr) {
+        auto it = path.begin();
+        path.insert(it, stack.top());
+        stack.pop();
+    }
 
     return path;
 }

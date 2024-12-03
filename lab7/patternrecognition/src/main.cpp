@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     // open file
-    string filename = "grid6x6.txt";
+    string filename = "input400.txt";
     ifstream input;
     input.open(filename);
 
@@ -79,21 +79,21 @@ int main(int argc, char *argv[]) {
     auto begin = chrono::high_resolution_clock::now();
 
 
-    // for (int i = 0 ; i < N-3 ; ++i) {
-    //     for (int j = i+1 ; j < N-2 ; ++j) {
-    //         for (int k = j+1 ; k < N-1 ; ++k) {
-    //             //only consider fourth point if first three are collinear
-    //             if (points.at(i).slopeTo(points.at(j)) == points.at(i).slopeTo(points.at(k))) {
-    //                 for (int m{k+1} ; m < N ; ++m) {
-    //                     if (points.at(i).slopeTo(points.at(j)) == points.at(i).slopeTo(points.at(m))) {
-    //                         render_line(scene, points.at(i), points.at(m));
-    //                         a.processEvents(); // show rendered line
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+//     for (int i = 0 ; i < N-3 ; ++i) {
+//         for (int j = i+1 ; j < N-2 ; ++j) {
+//             for (int k = j+1 ; k < N-1 ; ++k) {
+//                 //only consider fourth point if first three are collinear
+//                 if (points.at(i).slopeTo(points.at(j)) == points.at(i).slopeTo(points.at(k))) {
+//                     for (int m{k+1} ; m < N ; ++m) {
+//                         if (points.at(i).slopeTo(points.at(j)) == points.at(i).slopeTo(points.at(m))) {
+//                             render_line(scene, points.at(i), points.at(m));
+//                             a.processEvents(); // show rendered line
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
 
     std::unordered_map<double, priority_queue<int>> slopeMap; //max-heap
 
@@ -110,7 +110,6 @@ int main(int argc, char *argv[]) {
                 render_line(scene, points.at(i), points.at(furthestPointIndex));
             }
         }
-
         slopeMap.clear();
     }
     a.processEvents();

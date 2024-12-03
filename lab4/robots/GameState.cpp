@@ -18,9 +18,7 @@ GameState::GameState(int numberOfRobots) {
             robot = new Robot;
         }
         units.push_back(robot);
-
     }
-
     teleportHero();
 }
 
@@ -33,14 +31,20 @@ GameState::GameState(const GameState& that){
 }
 
 
-GameState::GameState(GameState&& that) : units(std::move(that.units)), hero(std::move(that.hero)) {
+GameState::GameState(GameState&& that) :
+    units(std::move(that.units)), hero(std::move(that.hero)) {
 }
 
 GameState& GameState::operator=(GameState&& that) {
     if (this != &that) {
-        // Move the smart pointers instead of copying
+        // Move the pointers instead of copying
         hero = std::move(that.hero);
         units = std::move(that.units);
+
+        for (Unit* unit : that.units) {
+            delete unit;
+        }
+        that.units.clear();
     }
     return *this;
 }
