@@ -90,6 +90,7 @@ vector<Vertex*> breadthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end
             break;
         }
 
+        //samma som dfs ingen break
         for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
             Vertex* neighbor = (*i)->finish;
             if (neighbor != nullptr && !neighbor->visited) {
@@ -121,7 +122,7 @@ vector<Node*> dijkstrasAlgorithm(BasicGraph& graph, Node* start, Node* end) {
     while (!pq.isEmpty()) {
         Node* current = pq.dequeue();
 
-        // Mark node as finalized
+        //Markera finalized
         if (current->visited) continue;
         current->visited = true;
         current->setColor(GREEN);
@@ -137,19 +138,19 @@ vector<Node*> dijkstrasAlgorithm(BasicGraph& graph, Node* start, Node* end) {
 
         for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
             Node* neighbor = (*i)->finish;
-            double newCost = current->cost + (*i)->cost;  // Calculate newcost
+            double newCost = current->cost + (*i)->cost;  //Calculate newcost
 
             if (!neighbor->visited || newCost < neighbor->cost) {
-                // If a shorter path to the neighbor is found
+                // om en billagre path hitaas t neigbour
                 if (newCost < neighbor->cost) {
                     neighbor->cost = newCost;
                     neighbor->previous = current;
-                    pq.enqueue(neighbor, newCost);  // Add to priority queue
+                    pq.enqueue(neighbor, newCost);
                     neighbor->setColor(YELLOW);
                 }
                 else {
-                    // If the cost has been updated, we need to change the priority
-                    pq.changePriority(neighbor, newCost);  // Update priority in the queue
+                    // om kostnad redan updaterad måste prioritetskö ändras accrodinly
+                    pq.changePriority(neighbor, newCost);
                 }
             }
         }
