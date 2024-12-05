@@ -168,7 +168,7 @@ vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
         node->visited = false;
     }
 
-    // Set the starting node's cost and heuristic
+    //set start
     start->cost = 0;
     pq.enqueue(start, start->cost + start->heuristic(end));  //f(n)=g(n)+h(n)
     start->setColor(YELLOW);
@@ -176,7 +176,7 @@ vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
     while (!pq.isEmpty()) {
         Node* current = pq.dequeue();
 
-        // Mark node as finalized
+        // Markera hanterad
         if (current->visited) continue;
         current->visited = true;
         current->setColor(GREEN);
@@ -193,7 +193,7 @@ vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
 
         for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
             Node* neighbor = (*i)->finish;
-            double newCost = current->cost + (*i)->cost;  // g(n) kosntad att komma t nod
+            double newCost = current->cost + (*i)->cost;  //g(n) kosntad att komma t nod
 
             if (!neighbor->visited || newCost < neighbor->cost) {
                 // Updatera cost o previous
