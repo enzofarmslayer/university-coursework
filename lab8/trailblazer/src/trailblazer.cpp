@@ -10,6 +10,10 @@
 #include <unordered_map>
 #include <queue>
 #include <pqueue.h>
+#include <limits>
+#include <vector>
+#include <queue>
+#include <cmath>
 // TODO: include any other headers you need; remove this comment
 using namespace std;
 
@@ -40,14 +44,14 @@ vector<Vertex*> depthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) 
             }
         }
 
-        //dead end
+        //deadend
         if (!pushed) {
             stack.pop();
             current->setColor(GRAY);
         }
     }
 
-    // copy elements onto path
+    // copy elements to path
     while (!stack.empty()) {
         path.push_back(stack.top());
         stack.top()->setColor(GREEN);
@@ -77,7 +81,7 @@ vector<Vertex*> breadthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end
         current->setColor(GREEN);
 
         if (current == end) {
-            // Återbygg vägen
+            // copy t path
             while (current != nullptr) {
                 path.push_back(current);
                 current = parent[current];
@@ -132,8 +136,8 @@ vector<Node*> dijkstrasAlgorithm(BasicGraph& graph, Node* start, Node* end) {
         }
 
         for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
-            Node* neighbor = (*i)->finish;  // Get neighbor from arc
-            double newCost = current->cost + (*i)->cost;  // Calculate new cost
+            Node* neighbor = (*i)->finish;
+            double newCost = current->cost + (*i)->cost;  // Calculate newcost
 
             if (!neighbor->visited || newCost < neighbor->cost) {
                 // If a shorter path to the neighbor is found
@@ -153,19 +157,11 @@ vector<Node*> dijkstrasAlgorithm(BasicGraph& graph, Node* start, Node* end) {
     return path;
 }
 
-
-
-#include <limits>
-#include <vector>
-#include <queue>
-#include <cmath>
-
 vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
     vector<Node*> path;
     PriorityQueue<Node*> pq;
     graph.resetData();
 
-    // Initialize all nodes with infinity cost
     for (Node* node : graph.getNodeSet()) {
         node->cost = std::numeric_limits<double>::infinity();
         node->previous = nullptr;
@@ -174,7 +170,7 @@ vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
 
     // Set the starting node's cost and heuristic
     start->cost = 0;
-    pq.enqueue(start, start->cost + start->heuristic(end));  // f(n) = g(n) + h(n)
+    pq.enqueue(start, start->cost + start->heuristic(end));  //f(n)=g(n)+h(n)
     start->setColor(YELLOW);
 
     while (!pq.isEmpty()) {
@@ -186,7 +182,7 @@ vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
         current->setColor(GREEN);
 
         if (current == end) {
-            // Reconstruct the path from end to start
+            //copy to paht
             while (current != nullptr) {
                 path.push_back(current);
                 current = current->previous;
@@ -197,10 +193,10 @@ vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
 
         for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
             Node* neighbor = (*i)->finish;
-            double newCost = current->cost + (*i)->cost;  // g(n) = cost to reach this node
+            double newCost = current->cost + (*i)->cost;  // g(n) kosntad att komma t nod
 
             if (!neighbor->visited || newCost < neighbor->cost) {
-                // Update cost and previous pointer
+                // Updatera cost o previous
                 neighbor->cost = newCost;
                 neighbor->previous = current;
 
