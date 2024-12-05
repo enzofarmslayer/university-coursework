@@ -6,60 +6,209 @@
 #include "costs.h"
 #include "trailblazer.h"
 #include <stack>
+#include <algorithm>
+#include <unordered_map>
+#include <queue>
+#include <pqueue.h>
 // TODO: include any other headers you need; remove this comment
 using namespace std;
 
-vector<Node *> depthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) {
+vector<Vertex*> depthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) {
     vector<Vertex*> path;
     stack<Vertex*> stack;
+
+    graph.resetData();
 
     stack.push(start);
     start->visited = true;
 
-    while (stack.top() != end){
+    //dfs
+    while (!stack.empty()) {
+        Vertex* current = stack.top();
 
-        for(auto i = stack.top()->arcs.begin(); i != stack.top()->arcs.end(); ++i){
-            if((*i)->finish != nullptr && (*i)->finish->visited == false){
-                stack.push((*i)->finish);
-                (*i)->visited = true;
-                continue;
-             }
+        if (current == end) {
+            break;
         }
-        stack.top()->setColor(GRAY);
+
+        bool pushed = false;
+        for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
+            if ((*i)->finish != nullptr && !(*i)->finish->visited) {
+                stack.push((*i)->finish);
+                (*i)->finish->visited = true;
+                pushed = true;
+                break;
+            }
+        }
+
+        //dead end
+        if (!pushed) {
+            stack.pop();
+            current->setColor(GRAY);
+        }
+    }
+
+    // copy elements onto path
+    while (!stack.empty()) {
+        path.push_back(stack.top());
+        stack.top()->setColor(GREEN);
         stack.pop();
     }
-    while (stack.top() != nullptr) {
-        auto it = path.begin();
-        path.insert(it, stack.top());
-        stack.pop();
+
+    reverse(path.begin(), path.end());
+
+    return path;
+}
+
+vector<Vertex*> breadthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) {
+    vector<Vertex*> path;
+    queue<Vertex*> q;
+
+    graph.resetData();
+
+    q.push(start);
+    start->visited = true;
+    start->setColor(YELLOW);
+
+    unordered_map<Vertex*, Vertex*> parent;
+
+    while (!q.empty()) {
+        Vertex* current = q.front();
+        q.pop();
+        current->setColor(GREEN);
+
+        if (current == end) {
+            // Återbygg vägen
+            while (current != nullptr) {
+                path.push_back(current);
+                current = parent[current];
+            }
+            reverse(path.begin(), path.end());
+            break;
+        }
+
+        for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
+            Vertex* neighbor = (*i)->finish;
+            if (neighbor != nullptr && !neighbor->visited) {
+                q.push(neighbor);
+                neighbor->visited = true;
+                neighbor->setColor(YELLOW);
+                parent[neighbor] = current;
+            }
+        }
     }
 
     return path;
 }
 
-vector<Node *> breadthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) {
-    // TODO: implement this function; remove these comments
-    //       (The function body code provided below is just a stub that returns
-    //        an empty vector so that the overall project will compile.
-    //        You should remove that code and replace it with your implementation.)
-    vector<Vertex*> path;
+
+vector<Node*> dijkstrasAlgorithm(BasicGraph& graph, Node* start, Node* end) {
+    vector<Node*> path;
+    PriorityQueue<Node*> pq;
+    graph.resetData();
+
+    for (Node* node : graph.getNodeSet()) {
+        node->cost = numeric_limits<double>::infinity();
+    }
+
+    start->cost = 0;
+    pq.enqueue(start, start->cost);
+    start->setColor(YELLOW);
+
+    while (!pq.isEmpty()) {
+        Node* current = pq.dequeue();
+
+        // Mark node as finalized
+        if (current->visited) continue;
+        current->visited = true;
+        current->setColor(GREEN);
+
+        if (current == end) {
+            while (current != nullptr) {
+                path.push_back(current);
+                current = current->previous;
+            }
+            reverse(path.begin(), path.end());
+            break;
+        }
+
+        for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
+            Node* neighbor = (*i)->finish;  // Get neighbor from arc
+            double newCost = current->cost + (*i)->cost;  // Calculate new cost
+
+            if (!neighbor->visited || newCost < neighbor->cost) {
+                // If a shorter path to the neighbor is found
+                if (newCost < neighbor->cost) {
+                    neighbor->cost = newCost;
+                    neighbor->previous = current;
+                    pq.enqueue(neighbor, newCost);  // Add to priority queue
+                    neighbor->setColor(YELLOW);
+                }
+                else {
+                    // If the cost has been updated, we need to change the priority
+                    pq.changePriority(neighbor, newCost);  // Update priority in the queue
+                }
+            }
+        }
+    }
     return path;
 }
 
-vector<Node *> dijkstrasAlgorithm(BasicGraph& graph, Vertex* start, Vertex* end) {
-    // TODO: implement this function; remove these comments
-    //       (The function body code provided below is just a stub that returns
-    //        an empty vector so that the overall project will compile.
-    //        You should remove that code and replace it with your implementation.)
-    vector<Vertex*> path;
-    return path;
-}
 
-vector<Node *> aStar(BasicGraph& graph, Vertex* start, Vertex* end) {
-    // TODO: implement this function; remove these comments
-    //       (The function body code provided below is just a stub that returns
-    //        an empty vector so that the overall project will compile.
-    //        You should remove that code and replace it with your implementation.)
-    vector<Vertex*> path;
+
+#include <limits>
+#include <vector>
+#include <queue>
+#include <cmath>
+
+vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
+    vector<Node*> path;
+    PriorityQueue<Node*> pq;
+    graph.resetData();
+
+    // Initialize all nodes with infinity cost
+    for (Node* node : graph.getNodeSet()) {
+        node->cost = std::numeric_limits<double>::infinity();
+        node->previous = nullptr;
+        node->visited = false;
+    }
+
+    // Set the starting node's cost and heuristic
+    start->cost = 0;
+    pq.enqueue(start, start->cost + start->heuristic(end));  // f(n) = g(n) + h(n)
+    start->setColor(YELLOW);
+
+    while (!pq.isEmpty()) {
+        Node* current = pq.dequeue();
+
+        // Mark node as finalized
+        if (current->visited) continue;
+        current->visited = true;
+        current->setColor(GREEN);
+
+        if (current == end) {
+            // Reconstruct the path from end to start
+            while (current != nullptr) {
+                path.push_back(current);
+                current = current->previous;
+            }
+            reverse(path.begin(), path.end());
+            break;
+        }
+
+        for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
+            Node* neighbor = (*i)->finish;
+            double newCost = current->cost + (*i)->cost;  // g(n) = cost to reach this node
+
+            if (!neighbor->visited || newCost < neighbor->cost) {
+                // Update cost and previous pointer
+                neighbor->cost = newCost;
+                neighbor->previous = current;
+
+                pq.enqueue(neighbor, neighbor->cost + neighbor->heuristic(end));
+                neighbor->setColor(YELLOW);
+            }
+        }
+    }
+
     return path;
 }

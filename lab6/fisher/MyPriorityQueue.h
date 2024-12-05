@@ -9,6 +9,7 @@
 
 #include "MyVector.h"
 #include "MyException.h"
+#include <iostream>
 
 
 template <typename T, typename C>
@@ -116,6 +117,8 @@ void MyPriorityQueue<T, C>::heapifyFromBottom() {
         }
 
     }
+
+
 }
 
 template <typename T, typename C>
