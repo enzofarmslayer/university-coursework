@@ -1,25 +1,104 @@
-// This is the CPP file you will edit and turn in.
-// Also remove these comments here and add your own, along with
-// comments on every function and on complex code sections.
-// TODO: remove this comment header
+/*
+ * Developers: kevma271, enzcu445
+ */
 
 #include "encoding.h"
-// TODO: include any other headers you need
+#include "bitstream.h"
+#include <queue>
 
+
+/**
+ * @brief buildFrequencyTable reads all characters
+ * from the given file and
+ * maps them to a number indicating frequency.
+ *
+ * @param input - the file to read from
+ * @return freqTable - every letter mapped to frequency
+ */
 map<int, int> buildFrequencyTable(istream& input) {
-    // TODO: implement this function
     map<int, int> freqTable;
+
+    int charFromFile;
+    bool fileNotEmpty = true;
+
+    while (fileNotEmpty) {
+        charFromFile = input.get();
+
+        // Check if we've read entire file
+        if (input.fail()) {
+            freqTable[PSEUDO_EOF] = 1;
+            fileNotEmpty = false;
+        }
+
+        // If char hasn't been read before
+        else if (freqTable.count(charFromFile) == 0) {
+            freqTable[charFromFile] = 1;
+        }
+
+        // Otherwise the char has been read before
+        else {
+            freqTable[charFromFile] += 1;
+        }
+    }
+
     return freqTable;
 }
 
+
+/**
+ * @brief buildEncodingTree takes all letters and
+ * their respective frequency and makes a huffman
+ * tree of them.
+ *
+ * @param freqTable frequency table
+ * @return pointer to root
+ */
 HuffmanNode* buildEncodingTree(const map<int, int> &freqTable) {
-    // TODO: implement this function
-    return nullptr;
+    priority_queue<HuffmanNode*> encodingTree;
+
+    // Initalize relevant variables to avoid abundancy
+    HuffmanNode* newNode;
+    HuffmanNode* leftChild;
+    HuffmanNode* rightChild;
+    HuffmanNode* combinedNode;
+
+    int newCount;
+
+    // Create nodes for all chars
+    for (auto it = freqTable.begin(); it != freqTable.end(); ++it) {
+        newNode = new HuffmanNode(it->first, it->second, nullptr, nullptr);
+        encodingTree.push(newNode);
+    }
+
+    // Combine two lowest nodes and create a tree
+    while (encodingTree.size() > 1) {
+        leftChild = encodingTree.top();
+        encodingTree.pop();
+
+        rightChild = encodingTree.top();
+        encodingTree.pop();
+
+        newCount = leftChild->count+rightChild->count;
+
+        combinedNode = new HuffmanNode(NOT_A_CHAR, newCount, leftChild, rightChild);
+        encodingTree.push(combinedNode);
+    }
+    //cout << encodingTree.top();
+
+    return encodingTree.top();
 }
 
+
+/**
+ * @brief buildEncodingMap
+ * @param encodingTree
+ * @return
+ */
 map<int, string> buildEncodingMap(HuffmanNode* encodingTree) {
-    // TODO: implement this function
     map<int, string> encodingMap;
+
+
+
     return encodingMap;
 }
 
