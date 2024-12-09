@@ -95,15 +95,19 @@ int main(int argc, char *argv[]) {
 //         }
 //     }
 
+    // Store key as slope and all points on the slope as value
     std::unordered_map<double, priority_queue<int>> slopeMap; //max-heap
 
+    // Loop through all points and set them as orego
     for (int i = 0; i < N; ++i) {
+        // After origo is chosen, find all different slopes
         for (int j = i + 1; j < N; ++j) {
             double slope = points.at(i).slopeTo(points.at(j));
-            // sorteras enligt max heap
+            // Sort according to max heap
             slopeMap[slope].push(j);
         }
 
+        // Loop through all slopes and draw those that are the furthest
         for (auto mapIt = slopeMap.begin(); mapIt != slopeMap.end(); ++mapIt) {
             if (mapIt->second.size() > 2) {
                 int furthestPointIndex = mapIt->second.top();
@@ -113,6 +117,7 @@ int main(int argc, char *argv[]) {
         slopeMap.clear();
     }
     a.processEvents();
+
 
     auto end = chrono::high_resolution_clock::now();
     cout << "Computing line segments took "
