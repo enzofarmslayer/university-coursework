@@ -1,11 +1,11 @@
 /**********************************************************************
- *  Mönsterigenkänning readme.txt
+ *  Mï¿½nsterigenkï¿½nning readme.txt
  **********************************************************************/
 
 /**********************************************************************
- *  Empirisk    Fyll i tabellen nedan med riktiga körtider i sekunder
- *  analys      när det känns vettigt att vänta på hela beräkningen.
- *              Ge uppskattningar av körtiden i övriga fall.
+ *  Empirisk    Fyll i tabellen nedan med riktiga kï¿½rtider i sekunder
+ *  analys      nï¿½r det kï¿½nns vettigt att vï¿½nta pï¿½ hela berï¿½kningen.
+ *              Ge uppskattningar av kï¿½rtiden i ï¿½vriga fall.
  *
  **********************************************************************/
     
@@ -23,11 +23,13 @@
 
 
 /**********************************************************************
- *  Teoretisk   Ge ordo-uttryck för värstafallstiden för programmen som
+ *  Teoretisk   Ge ordo-uttryck fï¿½r vï¿½rstafallstiden fï¿½r programmen som
  *  analys      en funktion av N. Ge en kort motivering.
  *
  **********************************************************************/
 
-Brute: N^4: fyra nästlade for loopar där 
+Brute: N^4: fyra nï¿½stlade for loopar dï¿½r lÃ¤ngden av varje loop Ã¤r beroende av N.
+UppmÃ¤rksamma, de inre loopar Ã¤r kanske inte N, men subtraktion av mindre tal kan 
+fÃ¶rsummas dÃ¥ dessa har ej betydelse nÃ¤r N Ã¤r vÃ¤ldigt stort.
 
 Sortering: N^2logN
