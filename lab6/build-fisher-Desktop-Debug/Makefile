@@ -37,7 +37,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = fisher1.0.0
-DISTDIR = /home/kevma271/tddd86-ht24-enzcu445-kevma271/lab6/build-fisher-Desktop-Debug/.tmp/fisher1.0.0
+DISTDIR = /home/enzcu445/Desktop/tddd86-ht24-enzcu445-kevma271/lab6/build-fisher-Desktop-Debug/.tmp/fisher1.0.0
 LINK          = g++
 LFLAGS        = 
 LIBS          = $(SUBLIBS)    
@@ -55,11 +55,11 @@ OBJECTS_DIR   = ./
 SOURCES       = ../fisher/Event.cpp \
 		../fisher/Fish.cpp \
 		../fisher/Simulation.cpp \
-		../fisher/test-harness-myprio.cpp 
+		../fisher/main.cpp 
 OBJECTS       = Event.o \
 		Fish.o \
 		Simulation.o \
-		test-harness-myprio.o
+		main.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -151,7 +151,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		Simulation.h ../fisher/Event.cpp \
 		../fisher/Fish.cpp \
 		../fisher/Simulation.cpp \
-		../fisher/test-harness-myprio.cpp
+		../fisher/main.cpp
 QMAKE_TARGET  = fisher
 DESTDIR       = 
 TARGET        = fisher
@@ -395,10 +395,14 @@ Simulation.o: ../fisher/Simulation.cpp ../fisher/Simulation.h \
 		../fisher/MyException.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Simulation.o ../fisher/Simulation.cpp
 
-test-harness-myprio.o: ../fisher/test-harness-myprio.cpp ../fisher/MyPriorityQueue.h \
+main.o: ../fisher/main.cpp ../fisher/Event.h \
+		../fisher/Fish.h \
+		../fisher/config.h \
+		../fisher/Simulation.h \
+		../fisher/MyPriorityQueue.h \
 		../fisher/MyVector.h \
 		../fisher/MyException.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test-harness-myprio.o ../fisher/test-harness-myprio.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../fisher/main.cpp
 
 ####### Install
 

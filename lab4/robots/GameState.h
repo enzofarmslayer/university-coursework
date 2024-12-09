@@ -31,14 +31,24 @@ public:
    ~GameState();
 
     /*
-     * Creates a
+     * Assignment operator used to copy data from one instance to another
      */
    GameState& operator=(const GameState& that);
 
+   /*
+    * Copy constructor that initializes an instance using another
+    */
    GameState(const GameState& that);
 
+   /*
+    * Move constructor, "steals" pointers from instance sent
+    */
    GameState(GameState&& that);
 
+   /*
+    * Move assignment operator, same as the constructor but used when
+    * temporary values are used as parameters
+    */
    GameState& operator=(GameState&&);
 
     /*

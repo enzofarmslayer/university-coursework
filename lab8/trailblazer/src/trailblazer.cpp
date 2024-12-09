@@ -140,11 +140,11 @@ vector<Node*> dijkstrasAlgorithm(BasicGraph& graph, Node* start, Node* end) {
             Node* neighbor = (*i)->finish;
             double newCost = current->cost + (*i)->cost;  //Calculate newcost
 
-            if (!neighbor->visited || newCost < neighbor->cost) {
+            if (newCost < neighbor->cost) {
+                neighbor->cost = newCost;
+                neighbor->previous = current;
                 // om en billagre path hitaas t neigbour
-                if (newCost < neighbor->cost) {
-                    neighbor->cost = newCost;
-                    neighbor->previous = current;
+                if (!neighbor->visited) {
                     pq.enqueue(neighbor, newCost);
                     neighbor->setColor(YELLOW);
                 }
@@ -195,15 +195,29 @@ vector<Node*> aStar(BasicGraph& graph, Node* start, Node* end) {
         for (auto i = current->arcs.begin(); i != current->arcs.end(); ++i) {
             Node* neighbor = (*i)->finish;
             double newCost = current->cost + (*i)->cost;  //g(n) kosntad att komma t nod
+                if(newCost < neighbor->cost){
 
-            if (!neighbor->visited || newCost < neighbor->cost) {
-                // Updatera cost o previous
-                neighbor->cost = newCost;
-                neighbor->previous = current;
+                    neighbor->cost = newCost;
+                    neighbor->previous = current;
+//            if (!neighbor->visited || newCost < neighbor->cost) {
+//                // Updatera cost o previous
+//                neighbor->cost = newCost;
+//                neighbor->previous = current;
 
+//                pq.enqueue(neighbor, neighbor->cost + neighbor->heuristic(end));
+//                neighbor->setColor(YELLOW);
+//            }
+
+            // om en billagre path hitaas t neigbour
+            if (!neighbor->visited) {
                 pq.enqueue(neighbor, neighbor->cost + neighbor->heuristic(end));
                 neighbor->setColor(YELLOW);
             }
+            else {
+                // om kostnad redan updaterad måste prioritetskö ändras accrodinly
+                pq.changePriority(neighbor, neighbor->cost + neighbor->heuristic(end));
+            }
+                }
         }
     }
 

@@ -2,6 +2,8 @@
  * TDDD86 Robots
  * This file contains the implementation of the mainwindow class.
  * See mainwindow.h for comments about each member.
+ *
+ * Developers: kevma271, enzcu445
  */
 
 #include <algorithm>

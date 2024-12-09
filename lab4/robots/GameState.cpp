@@ -37,14 +37,11 @@ GameState::GameState(GameState&& that) :
 
 GameState& GameState::operator=(GameState&& that) {
     if (this != &that) {
+        deleteUnits();
+
         // Move the pointers instead of copying
         hero = std::move(that.hero);
         units = std::move(that.units);
-
-        for (Unit* unit : that.units) {
-            delete unit;
-        }
-        that.units.clear();
     }
     return *this;
 }

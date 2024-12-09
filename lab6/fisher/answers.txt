@@ -58,5 +58,5 @@ addFish() - lägger till fisken till samlingen av alla fiskar.
   under "Build" i Qt Creator för att säkerställa att ändringar
   i header filer tas hänsyn till.) 
 
-> Svar: 
+> Svar: O(1) tog 5 sekunder. O(N) var mycket långsammare till den grad att vi inte orkade vänta längre >60 sek. 
 
