@@ -5,6 +5,7 @@
 #include "encoding.h"
 #include "bitstream.h"
 #include <queue>
+#include <stack>
 
 
 /**
@@ -53,39 +54,32 @@ map<int, int> buildFrequencyTable(istream& input) {
  * @param freqTable frequency table
  * @return pointer to root
  */
-HuffmanNode* buildEncodingTree(const map<int, int> &freqTable) {
-    priority_queue<HuffmanNode*> encodingTree;
+HuffmanNode* buildEncodingTree(const std::map<int, int>& freqTable) {
+    priority_queue<HuffmanNode> encodingTree;
 
-    // Initalize relevant variables to avoid abundancy
-    HuffmanNode* newNode;
-    HuffmanNode* leftChild;
-    HuffmanNode* rightChild;
-    HuffmanNode* combinedNode;
-
-    int newCount;
-
-    // Create nodes for all chars
+    // Dynamically create nodes for all characters
     for (auto it = freqTable.begin(); it != freqTable.end(); ++it) {
-        newNode = new HuffmanNode(it->first, it->second, nullptr, nullptr);
-        encodingTree.push(newNode);
+        encodingTree.push(HuffmanNode(it->first, it->second, nullptr, nullptr));
     }
 
-    // Combine two lowest nodes and create a tree
+    // Combine two lowest nodes and create the tree
     while (encodingTree.size() > 1) {
-        leftChild = encodingTree.top();
+        HuffmanNode leftChild = encodingTree.top();
         encodingTree.pop();
 
-        rightChild = encodingTree.top();
+        HuffmanNode rightChild = encodingTree.top();
         encodingTree.pop();
 
-        newCount = leftChild->count+rightChild->count;
-
-        combinedNode = new HuffmanNode(NOT_A_CHAR, newCount, leftChild, rightChild);
-        encodingTree.push(combinedNode);
+        encodingTree.push(HuffmanNode(NOT_A_CHAR,
+            leftChild.count + rightChild.count,
+            new HuffmanNode(leftChild),
+            new HuffmanNode(rightChild)
+            ));
     }
-    //cout << encodingTree.top();
 
-    return encodingTree.top();
+    // Get the final top node (root of the tree)
+    HuffmanNode* root = new HuffmanNode(encodingTree.top());
+    return root;
 }
 
 
@@ -97,25 +91,232 @@ HuffmanNode* buildEncodingTree(const map<int, int> &freqTable) {
 map<int, string> buildEncodingMap(HuffmanNode* encodingTree) {
     map<int, string> encodingMap;
 
+    if (encodingTree == nullptr) {
+        return encodingMap;
+    }
 
+    stack<pair<HuffmanNode*, string>> nodeStack;
+
+    nodeStack.push({encodingTree, ""});
+
+    while (!nodeStack.empty()) {
+        pair<HuffmanNode*, string> current = nodeStack.top();
+        nodeStack.pop();
+        HuffmanNode* node = current.first;
+        string code = current.second;
+
+        if (node->character != NOT_A_CHAR) {
+            encodingMap[node->character] = code;
+        }
+
+        if (node->zero != nullptr) {
+            nodeStack.push({node->zero, code + "0"});
+        }
+
+        if (node->one != nullptr) {
+            nodeStack.push({node->one, code + "1"});
+        }
+    }
 
     return encodingMap;
 }
 
+
+/**
+ * @brief encodeData makes characters into binary representations
+ *        that are not ASCI, but considers frequency instead
+ * @param input
+ * @param encodingMap
+ * @param output
+ */
 void encodeData(istream& input, const map<int, string> &encodingMap, obitstream& output) {
-    // TODO: implement this function
+    char character;
+
+    // Read from file
+    while (input.get(character)) {
+
+        string encodedBits = encodingMap.at(character);
+
+        for (char bit : encodedBits) {
+            if (bit == '1') {
+                output.writeBit(1);
+            } else {
+                output.writeBit(0);
+            }
+        }
+    }
+
+    string pseudoEofBits = encodingMap.at(PSEUDO_EOF);
+    for (char bit : pseudoEofBits) {
+        if (bit == '1') {
+            output.writeBit(1);
+        } else {
+            output.writeBit(0);
+        }
+    }
 }
 
+
+/**
+ * @brief decodeData
+ * @param input
+ * @param encodingTree
+ * @param output
+ */
 void decodeData(ibitstream& input, HuffmanNode* encodingTree, ostream& output) {
-    // TODO: implement this function
+        HuffmanNode* current = encodingTree;
+
+        while (true) {
+            int bit = input.readBit();
+
+            if (bit == 0) {
+                current = current->zero;
+            }
+            else if (bit == 1) {
+                current = current->one;
+            }
+
+            if (current->zero == nullptr && current->one == nullptr) {
+                if (current->character == PSEUDO_EOF) {
+                    break;
+                }
+
+                output.put(current->character);
+                current = encodingTree;
+            }
+        }
 }
 
+
+/**
+ * @brief mapToString takes in a map and turns it
+ *        into a string.
+ * @param freqTable the map we will convert
+ * @return the map in string format
+ */
+template <typename T>
+string mapToString(const map<T, T>& freqTable) {
+    string stringifiedMap;
+    stringifiedMap.append("{");
+
+    for (auto it = freqTable.begin(); it != freqTable.end(); ++it) {
+        // Append each digit of the key (it->first) as a separate character
+        for (char ch : to_string(it->first)) {
+            stringifiedMap.append(1, ch);  // Append one character
+        }
+
+        stringifiedMap.append(":");
+
+        // Append each digit of the value (it->second) as a separate character
+        for (char ch : to_string(it->second)) {
+            stringifiedMap.append(1, ch);  // Append one character
+        }
+
+        // Add a comma if it's not the last element
+        if (next(it) != freqTable.end()) {
+            stringifiedMap.append(",");
+            stringifiedMap.append(" ");
+        }
+    }
+    stringifiedMap.append("}");
+
+    return stringifiedMap;
+}
+
+
+/**
+ * @brief compress Reads a file and writes to another
+ *        with a header and characters converted
+ *        with huffman structure
+ * @param input file to read from
+ * @param output convertred file
+ */
 void compress(istream& input, obitstream& output) {
-    // TODO: implement this function
+    const map<int, int> freqTable = buildFrequencyTable(input);
+
+    // Serialize the frequency table
+    string freqTableString = mapToString(freqTable);
+    for (char c : freqTableString) {
+        output.put(c);
+    }
+
+    // Reset input stream to read again for encoding
+    input.clear();
+    input.seekg(0);
+
+    HuffmanNode* root = buildEncodingTree(freqTable);
+
+    map<int, string> encodingMap = buildEncodingMap(root);
+
+    encodeData(input, encodingMap, output);
 }
 
+
+
+/**
+ * @brief fromStringToMap
+ * @param input
+ * @return
+ */
+map<int, int> fromStringToMap(const string& freqString) {
+    map<int, int> freqTable;
+    string currAsci;
+    string currFreq;
+    bool asci;
+
+    for (auto it = freqString.begin(); it != freqString.end(); ++it) {
+        if (*it == '{' || *it == ' ') {
+            asci = true;
+            continue;
+        }
+
+        if (*it == ',') {
+            freqTable[stoi(currAsci)] = stoi(currFreq);
+            currAsci.clear();
+            currFreq.clear();
+            continue;
+        }
+
+        if (*it == ':' || *it == '}') {
+            asci = false;
+            continue;
+        }
+
+        if (asci) {
+            currAsci += *it;
+        }
+        else {
+            currFreq += *it;
+        }
+    }
+    freqTable[PSEUDO_EOF] = 1;
+    return freqTable;
+}
+
+
+/**
+ * @brief decompress
+ * @param input
+ * @param output
+ */
 void decompress(ibitstream& input, ostream& output) {
-    // TODO: implement this function
+    string freqString;
+    string readByte;
+
+    while (true) {
+        readByte = input.get(); // Read a byte from the input stream
+        if (readByte == "}") {  // Stop if the terminating character is reached
+            freqString += readByte; // Append '}' to the frequency string
+            break;
+        }
+        freqString += readByte; // Append the character to the frequency string
+    }
+
+    const map<int, int> freqTable = fromStringToMap(freqString);
+
+    HuffmanNode* root = buildEncodingTree(freqTable);
+
+    decodeData(input, root, output);
 }
 
 void freeTree(HuffmanNode* node) {
