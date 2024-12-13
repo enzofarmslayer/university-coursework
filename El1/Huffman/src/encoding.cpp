@@ -1,4 +1,7 @@
 /*
+ * Code for reading a text file and coverting it to huffman. Can be used later to write the
+ * same huffman file and convert it back to a normal text file.
+ *
  * Developers: kevma271, enzcu445
  */
 
@@ -84,9 +87,9 @@ HuffmanNode* buildEncodingTree(const std::map<int, int>& freqTable) {
 
 
 /**
- * @brief buildEncodingMap
+ * @brief buildEncodingMap map each character with a "01" sequence string
  * @param encodingTree
- * @return
+ * @return the map
  */
 map<int, string> buildEncodingMap(HuffmanNode* encodingTree) {
     map<int, string> encodingMap;
@@ -146,8 +149,8 @@ void encodeData(istream& input, const map<int, string> &encodingMap, obitstream&
         }
     }
 
-    string pseudoEofBits = encodingMap.at(PSEUDO_EOF);
-    for (char bit : pseudoEofBits) {
+    string EofBits = encodingMap.at(PSEUDO_EOF);
+    for (char bit : EofBits) {
         if (bit == '1') {
             output.writeBit(1);
         } else {
@@ -158,7 +161,7 @@ void encodeData(istream& input, const map<int, string> &encodingMap, obitstream&
 
 
 /**
- * @brief decodeData
+ * @brief decodeData read the huffman converted file and decode it
  * @param input
  * @param encodingTree
  * @param output
@@ -166,6 +169,7 @@ void encodeData(istream& input, const map<int, string> &encodingMap, obitstream&
 void decodeData(ibitstream& input, HuffmanNode* encodingTree, ostream& output) {
         HuffmanNode* current = encodingTree;
 
+        //current->character == PSEUDO_EOF
         while (true) {
             int bit = input.readBit();
 
@@ -240,13 +244,12 @@ void compress(istream& input, obitstream& output) {
         output.put(c);
     }
 
-    // Reset input stream to read again for encoding
-    input.clear();
-    input.seekg(0);
-
     HuffmanNode* root = buildEncodingTree(freqTable);
 
     map<int, string> encodingMap = buildEncodingMap(root);
+
+    input.clear();
+    input.seekg(0);
 
     encodeData(input, encodingMap, output);
 
@@ -256,7 +259,7 @@ void compress(istream& input, obitstream& output) {
 
 
 /**
- * @brief fromStringToMap
+ * @brief fromStringToMap convert the stringified header to a map again
  * @param input
  * @return
  */
@@ -297,7 +300,7 @@ map<int, int> fromStringToMap(const string& freqString) {
 
 
 /**
- * @brief decompress
+ * @brief decompress calls relevant methods to decompress a huf file
  * @param input
  * @param output
  */
@@ -306,12 +309,12 @@ void decompress(ibitstream& input, ostream& output) {
     string readByte;
 
     while (true) {
-        readByte = input.get(); // Read a byte from the input stream
+        readByte = input.get();
         if (readByte == "}") {  // Stop if the terminating character is reached
-            freqString += readByte; // Append '}' to the frequency string
+            freqString += readByte;
             break;
         }
-        freqString += readByte; // Append the character to the frequency string
+        freqString += readByte;
     }
 
     const map<int, int> freqTable = fromStringToMap(freqString);
@@ -323,6 +326,11 @@ void decompress(ibitstream& input, ostream& output) {
     freeTree(root);
 }
 
+
+/**
+ * @brief freeTree free all allocated memoery by the huffman tree
+ * @param node
+ */
 void freeTree(HuffmanNode* node) {
     if (node == nullptr) {
         return;
