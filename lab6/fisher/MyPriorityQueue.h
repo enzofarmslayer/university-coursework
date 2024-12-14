@@ -1,8 +1,8 @@
-// This is the second .h file you will edit
-// We have provided a skeleton for you,
-// but you must finish it as described in the spec.
-// Also remove these comments here and add your own, as well as on the members.
-// TODO: remove this comment header
+/**
+ * The priority queue that implements our vector implementation.
+ *
+ * Developers: kevma271, enzcu445
+ */
 
 #ifndef MY_PRIORITY_QUEUE_H
 #define MY_PRIORITY_QUEUE_H
@@ -11,7 +11,6 @@
 #include "MyException.h"
 #include <iostream>
 
-
 template <typename T, typename C>
 class MyPriorityQueue
 {
@@ -19,20 +18,43 @@ class MyPriorityQueue
     C strictly_larger_operator;
 
 public:
+    /**
+     * @brief MyPriorityQueue is the constructor
+     */
     MyPriorityQueue();
 
+    /**
+     * @brief ~MyPriorityQueue is the destructor
+     */
     ~MyPriorityQueue();
 
+    /**
+     * @brief push inserts an elemnt in the right position.
+     *        We utilize the push_back method of our vector.
+     * @param t element to be inserted.
+     */
     void push(const T& t);
 
+    /**
+     * @brief top returns the top element
+     */
     T top()const;
 
+    /**
+     * @brief pop removes the last element
+     */
     void pop();
 
+    /**
+     * @brief empty returns whether pq is empty
+     * @return boolean
+     */
     bool empty()const;
 
+    /**
+     * @brief size counts the amount of elements
+     */
     unsigned size() const;
-
 
 
 private:
@@ -41,22 +63,24 @@ private:
     void heapifyFromTop();
 };
 
+
 template <typename T, typename C>
 MyPriorityQueue<T,C>::MyPriorityQueue(){
 }
+
 
 template <typename T, typename C>
 MyPriorityQueue<T,C>::~MyPriorityQueue(){
 }
 
+
 template <typename T, typename C>
 void MyPriorityQueue<T,C>::push(const T& t){
-    //lägg till
     vector_array.push_back(t);
 
-    //återskap heapstruktur
     heapifyFromBottom();
 }
+
 
 template <typename T, typename C>
 T MyPriorityQueue<T,C>::top()const{
@@ -65,31 +89,34 @@ T MyPriorityQueue<T,C>::top()const{
     }
 }
 
+
 template <typename T, typename C>
 void MyPriorityQueue<T,C>::pop(){
     if(!vector_array.empty()){
 
-        // ta bort högst prio
+        // Remove highest priority
         vector_array[0] = vector_array[vector_array.size()-1];
-        //vector_array[0] = vector_array.begin() + vector_array.size();
         vector_array.pop_back();
 
-        // återskapa heap-struktur
+        // Re-create the heap structure
         if (!vector_array.empty()) {
             heapifyFromTop();
         }
     }
 }
 
+
 template <typename T, typename C>
 bool MyPriorityQueue<T,C>::empty()const{
     return vector_array.empty();
 }
 
+
 template <typename T, typename C>
 unsigned MyPriorityQueue<T,C>::size()const{
     return vector_array.size();
 }
+
 
 template <typename T, typename C>
 void MyPriorityQueue<T, C>::heapifyFromBottom() {
@@ -115,11 +142,9 @@ void MyPriorityQueue<T, C>::heapifyFromBottom() {
         else {
             break;
         }
-
     }
-
-
 }
+
 
 template <typename T, typename C>
 void MyPriorityQueue<T, C>::heapifyFromTop() {

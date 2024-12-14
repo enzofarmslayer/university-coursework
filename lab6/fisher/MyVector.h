@@ -1,8 +1,8 @@
-// This is the first .h file you will edit
-// We have provided a skeleton for you,
-// but you must finish it as described in the spec.
-// Also remove these comments here and add your own, as well as on the members.
-// TODO: remove this comment header
+/**
+ * All methods for our own vector that has a better time complexity for push back.
+ *
+ * Developers: kevma271, enzcu445
+ */
 
 #ifndef MY_VECTOR_H
 #define MY_VECTOR_H
@@ -14,38 +14,82 @@ class MyVector
 {
 
 public:
+    /**
+     * @brief MyVector is the constructor
+     */
     MyVector();
-
+    /**
+     * @brief ~MyVector is the destructor
+     */
     ~MyVector();
 
+    /**
+     * @brief MyVector is the copy constructor
+     * @param other vector instance to copy from
+     */
     MyVector(const MyVector& other);
 
+    /**
+     * @brief operator = is our own assignment operator
+     * @param other vector instance to instanciate
+     * @return the new vector instance
+     */
     MyVector& operator =(const MyVector& other);
 
+    /**
+     * @brief push_back an improved time complexity of O(n^2 logn).
+     *        Which is obtained by increasing capacity of the vector
+     *        with 2 when it gets full. This way we don't have to
+     *        copy values to a new vector as often.
+     */
     void push_back(const T&);
 
+    /**
+     * @brief pop_back removes the last element
+     */
     void pop_back();
 
+    /**
+     * @brief operator [] used to index the vector
+     */
     T& operator[](unsigned i);
 
+    /**
+     * @brief operator [] indexing the vector with
+     *        a const parameter
+     */
     const T& operator[](unsigned i)const;
 
+    /**
+     * @brief empty returns whether vector contains anything
+     * @return boolean
+     */
     bool empty()const;
 
+    /**
+     * @brief begin returns a pointer to the first element
+     */
     T* begin();
 
+    /**
+     * @brief end returns a pointer to the last element
+     */
     T* end();
 
+    /**
+     * @brief clear cleans all the elements from the vector
+     */
     void clear();
 
+    /**
+     * @brief size retrievs the size of the vector
+     */
     unsigned size()const;
-
 
     unsigned capacity = 0;
     unsigned numberOfElements = 0;
 
 private:
-//    void expandCapacity();
     T* vector_array;
 };
 
@@ -85,19 +129,6 @@ MyVector<T>& MyVector<T>::operator =(const MyVector& other){
 
 template<typename T>
 void MyVector<T>::push_back(const T& e){
-
-//     if (capacity == numberOfElements) {
-//         int newCapacity = capacity + 1;
-
-//         T* big = new T[newCapacity];
-//         for (unsigned i = 0; i < numberOfElements; i++) {
-//             big[i] = vector_array[i];
-//         }
-//         delete[] vector_array;
-//         vector_array = big;
-//         capacity = newCapacity;
-//     }
-
     if (capacity == numberOfElements) {
         //expandCapacity();
         T* big = new T[capacity*2];
@@ -107,10 +138,10 @@ void MyVector<T>::push_back(const T& e){
         delete[] vector_array;
         vector_array = big;
         capacity *= 2;
-//    }
+    }
     vector_array[numberOfElements++] = e;
-
 }
+
 
 template<typename T>
 void MyVector<T>::pop_back(){
@@ -126,6 +157,7 @@ T& MyVector<T>::operator[](unsigned i){
     return vector_array[i];
 }
 
+
 template<typename T>
 const T& MyVector<T>::operator[](unsigned i)const{
     return vector_array[i];
@@ -138,9 +170,6 @@ bool MyVector<T>::empty()const{
 
 template<typename T>
 void MyVector<T>::clear(){
-//    for(int i = 0; i < numberOfElements; ++i){
-//        delete storage[i];
-//    }
     delete[] vector_array;
     capacity = 1;
     numberOfElements = 0;
@@ -161,10 +190,5 @@ template<typename T>
 T* MyVector<T>::end(){
     return vector_array + numberOfElements;
 }
-
-//template<typename T>
-//void MyVector<T>::expandCapacity(){
-//    capacity *= 2;
-//}
 
 #endif // MY_VECTOR_H
