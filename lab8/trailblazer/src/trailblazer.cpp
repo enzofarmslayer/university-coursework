@@ -165,19 +165,12 @@ vector<Node*> dijkstrasAlgorithm(BasicGraph& graph, Node* start, Node* end) {
             Node* neighbor = (*i)->finish;
             double newCost = current->cost + (*i)->cost;  //Calculate newcost
 
-<<<<<<< HEAD
-            if (!neighbor->visited || newCost < neighbor->cost) {
-                // If a cheaper cost is found to the node
-                if (newCost < neighbor->cost) {
-                    neighbor->cost = newCost;
-                    neighbor->previous = current;
-=======
+
             if (newCost < neighbor->cost) {
                 neighbor->cost = newCost;
                 neighbor->previous = current;
                 // om en billagre path hitaas t neigbour
                 if (!neighbor->visited) {
->>>>>>> 4243911e85481c31c503919bfeac80d599bc1168
                     pq.enqueue(neighbor, newCost);
                     neighbor->setColor(YELLOW);
                 }
