@@ -84,6 +84,8 @@ void clear(struct list_item *first) {
         free(current);
         current = next;
     } while (current != NULL);
+
+    first->next = NULL;
     
 }
 

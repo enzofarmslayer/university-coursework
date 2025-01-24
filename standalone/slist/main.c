@@ -13,9 +13,10 @@ int main()
 	append(&root, 3);
 	append(&root, 5);
 	input_sorted(&root, 1);
+	//clear(&root);
 	print(&root);
 	clear(&root);
-
+	print(&root);
 
 	/* Write your test cases here */
 	return 0;
