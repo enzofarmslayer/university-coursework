@@ -217,6 +217,8 @@ bool load(const char* file_name, void (**eip)(void), void** esp)
 	off_t file_ofs;
 	bool success = false;
 	int i;
+	char file_name_only[strlen(file_name) + 1]; 
+	char *program_name, *save_ptr;
 
 	/* Allocate and activate page directory. */
 	t->pagedir = pagedir_create();
@@ -224,8 +226,15 @@ bool load(const char* file_name, void (**eip)(void), void** esp)
 		goto done;
 	process_activate();
 
+	/* Copy file_name into file_name_only so that it becomes a modifiable string*/
+	strlcpy(file_name_only, file_name, strlen(file_name) + 1);
+
+	/* Extract only program name*/
+	program_name = strtok_r(file_name_only, " ", &save_ptr);
+
+
 	/* Open executable file. */
-	file = filesys_open(file_name);
+	file = filesys_open(program_name);
 	if (file == NULL) {
 		printf("load: %s: open failed\n", file_name);
 		goto done;
@@ -433,10 +442,14 @@ static bool setup_stack(void** esp)
 	if (kpage != NULL) {
 		success = install_page(((uint8_t*) PHYS_BASE) - PGSIZE, kpage, true);
 		if (success)
-			*esp = PHYS_BASE - 12;
+			*esp = PHYS_BASE;
 		else
 			palloc_free_page(kpage);
 	}
+	
+	char* c[32];
+	
+	dump_stack(esp);
 	return success;
 }
 
