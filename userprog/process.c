@@ -61,9 +61,11 @@ static void start_process(void* cmd_line_)
 	if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
 	if_.cs = SEL_UCSEG;
 	if_.eflags = FLAG_IF | FLAG_MBS;
-	
+
 	// Note: load requires the file name only, not the entire cmd_line
 	success = load(t->name, &if_.eip, &if_.esp);
+
+	
 
 	/* If load failed, quit. */
 	palloc_free_page(cmd_line);
@@ -217,8 +219,6 @@ bool load(const char* file_name, void (**eip)(void), void** esp)
 	off_t file_ofs;
 	bool success = false;
 	int i;
-	char file_name_only[strlen(file_name) + 1]; 
-	char *program_name, *save_ptr;
 
 	/* Allocate and activate page directory. */
 	t->pagedir = pagedir_create();
@@ -226,6 +226,10 @@ bool load(const char* file_name, void (**eip)(void), void** esp)
 		goto done;
 	process_activate();
 
+
+	char file_name_only[strlen(file_name) + 1]; 
+	char *program_name, *save_ptr;
+	
 	/* Copy file_name into file_name_only so that it becomes a modifiable string*/
 	strlcpy(file_name_only, file_name, strlen(file_name) + 1);
 
@@ -448,6 +452,8 @@ static bool setup_stack(void** esp)
 	}
 	
 	char* c[32];
+
+	
 	
 	dump_stack(esp);
 	return success;
