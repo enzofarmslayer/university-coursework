@@ -53,6 +53,7 @@ static void start_process(void* cmd_line_)
 {
 	char* cmd_line = cmd_line_;
 	struct intr_frame if_;
+	struct thread *t = thread_current();
 	bool success;
 
 	/* Initialize interrupt frame and load executable. */
@@ -62,7 +63,7 @@ static void start_process(void* cmd_line_)
 	if_.eflags = FLAG_IF | FLAG_MBS;
 	
 	// Note: load requires the file name only, not the entire cmd_line
-	success = load(cmd_line, &if_.eip, &if_.esp);
+	success = load(t->name, &if_.eip, &if_.esp);
 
 	/* If load failed, quit. */
 	palloc_free_page(cmd_line);
