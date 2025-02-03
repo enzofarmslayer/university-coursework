@@ -23,6 +23,7 @@
 static thread_func start_process NO_RETURN;
 static bool load(const char* file_name, void (**eip)(void), void** esp);
 static void dump_stack(const void* esp);
+static void setup_main_stack(void* cmd_line_, void** esp);
 
 /* Starts a new thread running a user program loaded from
 	CMD_LINE.  The new thread may be scheduled (and may even exit)
@@ -48,9 +49,58 @@ tid_t process_execute(const char* cmd_line)
 }
 
 /*hej*/
-static void setup_main_stack(void* cmd_line_, void** esp)
+static void setup_main_stack(void* cmd_line, void** esp)
 {
+	*esp = PHYS_BASE;
 
+	char *argv[32];    // Pekare till argument
+    int argc = 0;
+    char *token, *save_ptr;
+
+	for (token = strtok_r(cmd_line, " ", &save_ptr); token != NULL;
+         token = strtok_r(NULL, " ", &save_ptr)) {
+        argv[argc++] = token;
+        if (argc >= 32) break;
+    }
+    argv[argc] = NULL;
+
+	/* Lägg argumentsträngarna på stacken (i omvänd ordning) */
+    char *arg_addrs[32]; // Sparar minnesadresser till argument
+    for (int i = argc - 1; i >= 0; i--) {
+        *esp -= strlen(argv[i]) + 1;
+        memcpy(*esp, argv[i], strlen(argv[i]) + 1);
+        arg_addrs[i] = *esp;
+    }
+
+    /* Word-align (justera stacken till multipel av 4) */
+    while ((uintptr_t)*esp % 4 != 0) {
+        *esp -= 1;
+        *(uint8_t *)(*esp) = 0;
+    }
+
+    /* Lägg pekarna till argumenten (argv[i]) */
+    *esp -= sizeof(char *);
+    *(char **)(*esp) = NULL;  // argv[argc] = NULL (null pointer sentinel)
+
+    for (int i = argc - 1; i >= 0; i--) {
+        *esp -= sizeof(char *);
+        *(char **)(*esp) = arg_addrs[i];  // Pekare till varje argument
+    }
+
+    /* Lägg in argv-pekaren */
+    char **argv_ptr = *esp;
+    *esp -= sizeof(char **);
+    *(char ***)(*esp) = argv_ptr;
+
+    /* Lägg in argc */
+    *esp -= sizeof(int);
+    *(int *)(*esp) = argc;
+
+    /* Lägg in en fake return address */
+    *esp -= sizeof(void *);
+    *(void **)(*esp) = NULL;
+
+    return;
 }
 
 /* A thread function that loads a user process and starts it
@@ -71,7 +121,10 @@ static void start_process(void* cmd_line_)
 	// Note: load requires the file name only, not the entire cmd_line
 	success = load(t->name, &if_.eip, &if_.esp);
 
-	
+	if(success){
+		setup_main_stack(cmd_line, &if_.esp);
+		dump_stack(if_.esp);
+	}
 
 	/* If load failed, quit. */
 	palloc_free_page(cmd_line);
@@ -225,16 +278,16 @@ bool load(const char* file_name, void (**eip)(void), void** esp)
 	off_t file_ofs;
 	bool success = false;
 	int i;
+	//hehejhe
+	char file_name_only[strlen(file_name) + 1]; 
+	char *program_name, *save_ptr;
+	
 
 	/* Allocate and activate page directory. */
 	t->pagedir = pagedir_create();
 	if (t->pagedir == NULL)
 		goto done;
 	process_activate();
-
-
-	char file_name_only[strlen(file_name) + 1]; 
-	char *program_name, *save_ptr;
 	
 	/* Copy file_name into file_name_only so that it becomes a modifiable string*/
 	strlcpy(file_name_only, file_name, strlen(file_name) + 1);
@@ -456,12 +509,6 @@ static bool setup_stack(void** esp)
 		else
 			palloc_free_page(kpage);
 	}
-	
-	char* c[32];
-
-	
-	
-	dump_stack(esp);
 	return success;
 }
 
