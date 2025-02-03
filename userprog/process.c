@@ -47,6 +47,12 @@ tid_t process_execute(const char* cmd_line)
 	return tid;
 }
 
+/*hej*/
+static void setup_main_stack(void* cmd_line_, void** esp)
+{
+
+}
+
 /* A thread function that loads a user process and starts it
 	running. */
 static void start_process(void* cmd_line_)
