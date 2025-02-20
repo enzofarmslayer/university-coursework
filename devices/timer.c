@@ -27,6 +27,10 @@ static void busy_wait(int64_t loops);
 static void real_time_sleep(int64_t num, int32_t denom);
 static void real_time_delay(int64_t num, int32_t denom);
 
+// Vår kod för labb3 + deklaration av compare_wakeup
+static struct list sleeping_list;
+bool compare_wakeup(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
+
 /* Sets up the timer to interrupt TIMER_FREQ times per second,
 	and registers the corresponding interrupt. */
 void timer_init(const uint16_t timer_freq)
@@ -34,6 +38,8 @@ void timer_init(const uint16_t timer_freq)
 	TIMER_FREQ = timer_freq;
 	pit_configure_channel(0, 2, TIMER_FREQ);
 	intr_register_ext(0x20, timer_interrupt, "8254 Timer");
+
+  	list_init(&sleeping_list);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -81,10 +87,26 @@ int64_t timer_elapsed(int64_t then)
 	be turned on. */
 void timer_sleep(int64_t ticks)
 {
-	int64_t start = timer_ticks();
-
 	ASSERT(intr_get_level() == INTR_ON);
-	while (timer_elapsed(start) < ticks) thread_yield();
+
+	enum intr_level old_level;
+	old_level = intr_disable();
+
+	struct thread *cur = thread_current();
+
+    cur->wakeup_time = timer_ticks() + ticks;
+	//printf("Wakeup time: %" PRId64 "\n", cur->wakeup_time);
+    list_insert_ordered(&sleeping_list, &cur->elem, (list_less_func *) compare_wakeup, NULL);
+	thread_block();
+	intr_set_level(old_level);  
+}
+
+bool compare_wakeup(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED)
+{
+    struct thread *ta = list_entry(a, struct thread, elem);
+    struct thread *tb = list_entry(b, struct thread, elem);
+
+    return ta->wakeup_time < tb->wakeup_time;
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -154,6 +176,20 @@ void timer_print_stats(void)
 static void timer_interrupt(struct intr_frame* args UNUSED)
 {
 	ticks++;
+
+    while (!list_empty(&sleeping_list)) {
+        struct list_elem *e = list_begin(&sleeping_list);
+        struct thread *t = list_entry(e, struct thread, elem);
+
+        if (ticks < t->wakeup_time) {
+            break;
+        }
+
+
+        list_remove(e);
+        thread_unblock(t);
+    }
+
 	thread_tick();
 }
 

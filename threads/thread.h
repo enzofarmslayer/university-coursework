@@ -90,19 +90,19 @@ struct thread {
 	uint8_t* stack;				/* Saved stack pointer. */
 	int priority;					/* Priority. */
 	struct list_elem allelem;	/* List element for all threads list. */
-
+	
+	//Lab 3 stuffs:
+	int64_t wakeup_time;
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem; /* List element. */
-
 	
-
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint32_t* pagedir; /* Page directory. */
-#endif
+	struct file *open_files[MAX_FILES];
 	
-	struct file *open_files[MAX_FILES]; //SKA DE HÄR IN IN #ifdef USERPROG?
+#endif
 
 	/* Owned by thread.c. */
 	unsigned magic; /* Detects stack overflow. */
@@ -145,4 +145,3 @@ int thread_get_recent_cpu(void);
 int thread_get_load_avg(void);
 
 #endif /* threads/thread.h */
-
