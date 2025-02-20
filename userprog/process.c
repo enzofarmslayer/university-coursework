@@ -65,6 +65,11 @@ static void start_process(void* cmd_line_)
 	// Note: load requires the file name only, not the entire cmd_line
 	success = load(t->name, &if_.eip, &if_.esp);
 
+	if(success){
+		setup_main_stack(cmd_line, &if_.esp);
+		//dump_stack(if_.esp);
+	}
+
 	/* If load failed, quit. */
 	palloc_free_page(cmd_line);
 	if (!success)
