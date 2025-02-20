@@ -257,6 +257,7 @@ int sys_read(int fd, void *buffer, unsigned size) {
 
     return -1;
 }
+
 int sys_write(int fd, const void *buffer, unsigned size) {
     if (fd == 1) {  // Writing to STDOUT (console)
         const char *buf = (const char *)buffer;

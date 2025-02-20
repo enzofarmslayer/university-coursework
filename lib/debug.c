@@ -12,25 +12,6 @@
 void
 debug_backtrace (void)
 {
-<<<<<<< HEAD
-	static bool explained;
-	void **frame;
-
-	printf("backtrace");
-	for (frame = __builtin_frame_address(0); frame != NULL && frame[0] != NULL;
-		  frame = frame[0])
-		printf(" %p", frame[1]);
-	printf(".\n");
-
-	if (!explained) {
-		explained = true;
-		printf(
-			 "The `backtrace' program can make call stacks useful.\n"
-			 "Read \"Backtraces\" in the \"Debugging Tools\" chapter\n"
-			 "of the Pintos documentation for more information.\n"
-			 "Simply copy-paste the backtrace command line above.\n");
-	}
-=======
   static bool explained;
   void **frame;
 
@@ -50,7 +31,6 @@ debug_backtrace (void)
               "Simply copy-paste the backtrace command line above.\n"
         );
     }
->>>>>>> e85dd2bc8aba6d5d4e98ffd03f54bab13ee6d7bc
 }
 
 
