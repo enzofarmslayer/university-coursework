@@ -48,7 +48,8 @@ tid_t process_execute(const char* cmd_line)
 	return tid;
 }
 
-/*hej*/
+/*LAB1 */
+/*setup the main func in the stack for a new process*/ 
 static void setup_main_stack(void* cmd_line, void** esp)
 {
 	*esp = PHYS_BASE;
@@ -57,14 +58,16 @@ static void setup_main_stack(void* cmd_line, void** esp)
     int argc = 0;
     char *token, *save_ptr;
 
-	for (token = strtok_r(cmd_line, " ", &save_ptr); token != NULL;
-         token = strtok_r(NULL, " ", &save_ptr)) {
-        argv[argc++] = token;
-        if (argc >= 32) break;
-    }
-    argv[argc] = NULL;
+	
+	token = strtok_r(cmd_line, " ", &save_ptr);
+	while (token != NULL && argc < 32) {
+		argv[argc++] = token;
+		token = strtok_r(NULL, " ", &save_ptr);
+	}
+	argv[argc] = NULL;
 
-	/* Lägg argumentsträngarna på stacken (i omvänd ordning) */
+
+	// Lägg argumentsträngarna på stacken (i omvänd ordning)
     char *arg_addrs[32]; // Sparar minnesadresser till argument
     for (int i = argc - 1; i >= 0; i--) {
         *esp -= strlen(argv[i]) + 1;
@@ -72,13 +75,13 @@ static void setup_main_stack(void* cmd_line, void** esp)
         arg_addrs[i] = *esp;
     }
 
-    /* Word-align (justera stacken till multipel av 4) */
+    // Word-align (justera stacken till multipel av 4) 
     while ((uintptr_t)*esp % 4 != 0) {
         *esp -= 1;
         *(uint8_t *)(*esp) = 0;
     }
 
-    /* Lägg pekarna till argumenten (argv[i]) */
+    // Lägg pekarna till argumenten (argv[i]) 
     *esp -= sizeof(char *);
     *(char **)(*esp) = NULL;  // argv[argc] = NULL (null pointer sentinel)
 
@@ -87,16 +90,16 @@ static void setup_main_stack(void* cmd_line, void** esp)
         *(char **)(*esp) = arg_addrs[i];  // Pekare till varje argument
     }
 
-    /* Lägg in argv-pekaren */
+    // Lägg in argv-pekaren 
     char **argv_ptr = *esp;
     *esp -= sizeof(char **);
     *(char ***)(*esp) = argv_ptr;
 
-    /* Lägg in argc */
+    // Lägg in argc 
     *esp -= sizeof(int);
     *(int *)(*esp) = argc;
 
-    /* Lägg in en fake return address */
+    // Lägg in en fake return address 
     *esp -= sizeof(void *);
     *(void **)(*esp) = NULL;
 
