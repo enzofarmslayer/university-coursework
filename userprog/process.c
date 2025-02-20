@@ -1,5 +1,7 @@
 #include "userprog/process.h"
 
+#include "threads/synch.h"
+
 #include "filesys/directory.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
@@ -20,6 +22,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+// ---------------- LAB4
+
+struct sharedInformation
+{
+	bool loadStatus;
+	char* cmd_line;
+	struct semaphore sem;
+};
+
+
 static thread_func start_process NO_RETURN;
 static bool load(const char* file_name, void (**eip)(void), void** esp);
 static void dump_stack(const void* esp);
@@ -31,22 +43,42 @@ static void setup_main_stack(void* cmd_line_, void** esp);
 	thread id, or TID_ERROR if the thread cannot be created. */
 tid_t process_execute(const char* cmd_line)
 {
-	char* cl_copy;
-	tid_t tid;
+    struct sharedInformation *newChild = palloc_get_page(0);
+    if (newChild == NULL) {
+        return TID_ERROR;
+    }
 
-	/* Make a copy of CMD_LINE.
-		Otherwise there's a race between the caller and load(). */
-	cl_copy = palloc_get_page(0);
-	if (cl_copy == NULL)
-		return TID_ERROR;
-	strlcpy(cl_copy, cmd_line, PGSIZE);
+    sema_init(&newChild->sem, 0);
 
-	/* Create a new thread to execute FILE_NAME. */
-	tid = thread_create(cmd_line, PRI_DEFAULT, start_process, cl_copy);
-	if (tid == TID_ERROR)
-		palloc_free_page(cl_copy);
-	return tid;
+    newChild->cmd_line = palloc_get_page(0);
+    if (newChild->cmd_line == NULL) {
+        palloc_free_page(newChild); // Free newChild before returning
+        return TID_ERROR;
+    }
+
+    strlcpy(newChild->cmd_line, cmd_line, PGSIZE);
+
+    tid_t tid = thread_create(cmd_line, PRI_DEFAULT, start_process, newChild);
+
+    if (tid == TID_ERROR) {
+        palloc_free_page(newChild->cmd_line);
+        palloc_free_page(newChild);
+        return TID_ERROR;
+    }
+
+    // Wait for the child process to signal load completion
+    sema_down(&newChild->sem);
+
+    if (!newChild->loadStatus) {
+        tid = TID_ERROR;
+    }
+
+    // Free newChild ONLY AFTER semaphore release
+    palloc_free_page(newChild);
+
+    return tid;
 }
+
 
 /*LAB1 */
 /*setup the main func in the stack for a new process*/ 
@@ -55,10 +87,10 @@ static void setup_main_stack(void* cmd_line, void** esp)
 	*esp = PHYS_BASE;
 
 	char *argv[32];    // Pekare till argument
-    int argc = 0;
-    char *token, *save_ptr;
+	int argc = 0;
+	char *token;
+	char *save_ptr;
 
-	
 	token = strtok_r(cmd_line, " ", &save_ptr);
 	while (token != NULL && argc < 32) {
 		argv[argc++] = token;
@@ -110,7 +142,11 @@ static void setup_main_stack(void* cmd_line, void** esp)
 	running. */
 static void start_process(void* cmd_line_)
 {
-	char* cmd_line = cmd_line_;
+	//LAB 4 CHANGES
+	struct sharedInformation *newChild = (struct sharedInformation*) cmd_line_;
+	//char* cmd_line = cmd_line_;
+	//-------------
+
 	struct intr_frame if_;
 	struct thread *t = thread_current();
 	bool success;
@@ -124,13 +160,19 @@ static void start_process(void* cmd_line_)
 	// Note: load requires the file name only, not the entire cmd_line
 	success = load(t->name, &if_.eip, &if_.esp);
 
+	printf("---------------ASVDASd__________________");
+
 	if(success){
-		setup_main_stack(cmd_line, &if_.esp);
-		dump_stack(if_.esp);
+		setup_main_stack(newChild->cmd_line, &if_.esp);
+		//dump_stack(if_.esp);
 	}
 
+	newChild->loadStatus = success;
+	sema_up(&newChild->sem);
+
+
 	/* If load failed, quit. */
-	palloc_free_page(cmd_line);
+	//palloc_free_page(cmd_line_);
 	if (!success)
 		thread_exit();
 

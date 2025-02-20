@@ -27,6 +27,7 @@ int sys_filesize(int fd);
 int sys_read(int fd, void *buffer, unsigned size);
 int sys_write(int fd, const void *buffer, unsigned size);
 void sys_exit(int status);
+tid_t exec(const char *cmd_line);
 
 //Already implemented
 void shutdown_power_off(void);
@@ -127,7 +128,16 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 		sys_exit(status);
 		break;
 	}
+
+	case SYS_EXEC: {
+		const char* filename = (char*)(*((int*)(f->esp) + 1));
+		f->eax = exec(filename);
 	}
+	}
+}
+
+tid_t exec(const char *cmd_line) {
+	return process_execute(cmd_line);
 }
 
 void sys_sleep(int64_t ticks)
@@ -279,7 +289,7 @@ int sys_write(int fd, const void *buffer, unsigned size) {
 
 void sys_exit(int status) {
 
-	//NÅT SKA HÄNDA MED STATUS MEN INTE NU I LAB 2
+	//status behöver inte hanteras i lab2 men senare
 
     // Terminate the current thread.
     thread_exit();
