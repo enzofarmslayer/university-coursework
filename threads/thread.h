@@ -23,6 +23,8 @@ typedef int tid_t;
 #define PRI_DEFAULT 31 /* Default priority. */
 #define PRI_MAX	  63 /* Highest priority. */
 
+#define MAX_FILES 130 // Starts at 2, + null? = 130 
+
 /* A kernel thread or user process.
 
 	Each thread structure is stored in its own 4 kB page.  The
@@ -89,13 +91,18 @@ struct thread {
 	int priority;					/* Priority. */
 	struct list_elem allelem;	/* List element for all threads list. */
 
+
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem; /* List element. */
+
+	
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint32_t* pagedir; /* Page directory. */
 #endif
+	
+	struct file *open_files[MAX_FILES]; //SKA DE HÄR IN IN #ifdef USERPROG?
 
 	/* Owned by thread.c. */
 	unsigned magic; /* Detects stack overflow. */
@@ -106,7 +113,6 @@ struct thread {
 	Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
-extern int thread_create_limit;
 void thread_init(void);
 void thread_start(void);
 
@@ -138,6 +144,5 @@ void thread_set_nice(int);
 int thread_get_recent_cpu(void);
 int thread_get_load_avg(void);
 
-bool DEBUG_thread_create_simulate_fail(void);
-
 #endif /* threads/thread.h */
+
