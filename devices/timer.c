@@ -83,6 +83,8 @@ int64_t timer_elapsed(int64_t then)
 	return timer_ticks() - then;
 }
 
+//LAB3-----------------------------------------------
+
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
 	be turned on. */
 void timer_sleep(int64_t ticks)
@@ -108,6 +110,7 @@ bool compare_wakeup(const struct list_elem *a, const struct list_elem *b, void *
 
     return ta->wakeup_time < tb->wakeup_time;
 }
+//------------------------------------------------------------
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
 	turned on. */

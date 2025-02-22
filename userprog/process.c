@@ -58,6 +58,7 @@ tid_t process_execute(const char* cmd_line)
 
     strlcpy(newChild->cmd_line, cmd_line, PGSIZE);
 
+	//printf("Parent Process ID: %d\n", thread_current()->tid); prints 3
     tid_t tid = thread_create(cmd_line, PRI_DEFAULT, start_process, newChild);
 
     if (tid == TID_ERROR) {

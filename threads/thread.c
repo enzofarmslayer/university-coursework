@@ -546,6 +546,8 @@ static tid_t allocate_tid(void)
 	tid = next_tid++;
 	lock_release(&tid_lock);
 
+	printf("[DEBUG] Assigning PID: %d to process: %s\n", tid, thread_current()->name);
+
 	return tid;
 }
 
