@@ -119,6 +119,11 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 		exit(status);
 		break;
 	}
+	case SYS_WAIT: { // LAB 5
+		tid_t child_pid = *((int*)(f->esp) + 1);
+		f->eax = wait(child_pid);
+    	break; 
+	}
 	case SYS_EXEC: {
 		const char* filename = (char*)(*((int*)(f->esp) + 1));
 		f->eax = exec(filename);
@@ -281,8 +286,62 @@ int write(int fd, const void *buffer, unsigned size) {
     return -1;
 }
 
+//LAB 5----------------------------------------
+// int wait(tid_t child_tid) {
+//     struct thread *cur = thread_current();
+//     struct list_elem *e;
+//     struct parent_child *child = NULL;
+
+//     // Leta upp barnet i förälderns barnlista
+//     for (e = list_begin(&cur->children); e != list_end(&cur->children); e = list_next(e)) {
+//         struct parent_child *pc = list_entry(e, struct parent_child, elem);
+//         if (pc->child_tid == child_tid) {
+//             child = pc;
+//             break;
+//         }
+//     }
+
+//     if (child == NULL) {
+//         return -1;  // Barnet tillhör inte denna förälder eller är ogiltigt
+//     }
+
+//     // Vänta på att barnet ska avslutas
+//     if (!child->has_exited) {
+//         sema_down(&child->sem);
+//     }
+
+//     // Hämta exit-status
+//     int exit_status = child->exit_status;
+
+//     // Ta bort och frigör barnet från listan
+//     list_remove(&child->elem);
+//     free(child);
+
+//     return exit_status;
+// }
+
+
 void exit(int status) {
 	// status behöver hanteras lab5 ignorera warning
-    // Terminate the current thread.
-    thread_exit();
+    // LAB 5
+	// struct thread *cur = thread_current();
+    // struct list_elem *e;
+
+    // // Uppdatera barnets exit-status i förälderns lista
+    // for (e = list_begin(&cur->parent->children); e != list_end(&cur->parent->children); e = list_next(e)) {
+    //     struct parent_child *pc = list_entry(e, struct parent_child, elem);
+    //     if (pc->child_tid == cur->tid) {
+    //         pc->exit_status = status;
+    //         pc->has_exited = true;
+    //         sema_up(&pc->sem);  // Väcker eventuell väntande förälder
+    //         break;
+    //     }
+    // }
+
+    // printf("%s: exit(%d)\n", cur->name, status);
+
+    // // Stäng alla öppna filer och frigör resurser
+    // process_exit();
+
+	thread_exit();
 }

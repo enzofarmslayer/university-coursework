@@ -22,6 +22,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+//------------------ LAB5
+struct parent_child {
+    tid_t child_tid;         // Child's thread ID (TID)
+    int exit_status;         // Child's exit status
+    bool has_exited;         // Has the child exited?
+    struct semaphore sem;    // Semaphore for synchronization
+    struct list_elem elem;   // List element for the parent's child list
+};
+
 // ---------------- LAB4
 struct sharedInformation
 {
@@ -29,7 +38,7 @@ struct sharedInformation
 	char* cmd_line;
 	struct semaphore sem;
 };
-//------------------------
+
 
 static thread_func start_process NO_RETURN;
 static bool load(const char* file_name, void (**eip)(void), void** esp);
