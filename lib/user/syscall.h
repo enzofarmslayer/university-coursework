@@ -19,7 +19,7 @@ typedef int mapid_t;
 #define EXIT_SUCCESS 0 /* Successful execution. */
 #define EXIT_FAILURE 1 /* Unsuccessful execution. */
 
-//Our lab 2 edit:
+//lab2:
 void sleep(int millis);
 
 /* Projects 2 and later. */

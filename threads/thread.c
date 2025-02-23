@@ -435,8 +435,23 @@ static void init_thread(struct thread* t, const char* name, int priority)
 
 	memset(t, 0, sizeof *t);
 	t->status = THREAD_BLOCKED;
+	
+	// Set the thread name to just the first word in name (command_line)
 	strlcpy(t->name, name, sizeof t->name);
-	t->stack = (uint8_t*) t + PGSIZE;
+
+	/* Run a partial strtok_r. Partial in the way that we aren't calling
+	 * strtok_r again, since we only care about having a NULL-char after the
+	 * first word, any potential chars after that doesn't matter.
+	 * Why it doesn't matter is left as an exercise for the reader.
+	 *
+	 * Also, abusing the t->stack pointer to not have to allocate more memory
+	 * for a save_ptr we wouldn't use. Why is this fine?
+	 * Don't abuse pointers like this is your code.
+	 */
+	strtok_r(t->name, " ", (char **) &(t->stack));
+
+	t->stack = (uint8_t *) t + PGSIZE;
+
 	t->priority = priority;
 	t->magic = THREAD_MAGIC;
 
@@ -444,6 +459,7 @@ static void init_thread(struct thread* t, const char* name, int priority)
 	list_push_back(&all_list, &t->allelem);
 	intr_set_level(old_level);
 }
+
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
 	returns a pointer to the frame's base. */
@@ -546,7 +562,7 @@ static tid_t allocate_tid(void)
 	tid = next_tid++;
 	lock_release(&tid_lock);
 
-	printf("[DEBUG] Assigning PID: %d to process: %s\n", tid, thread_current()->name);
+	//printf("[DEBUG] Assigning PID: %d to process: %s\n", tid, thread_current()->name);
 
 	return tid;
 }
@@ -554,3 +570,11 @@ static tid_t allocate_tid(void)
 /* Offset of `stack' member within `struct thread'.
 	Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof(struct thread, stack);
+
+bool DEBUG_thread_create_simulate_fail(void)
+{
+    if (thread_create_limit == 0)
+        return false;
+    else
+        return --thread_create_limit == 0;
+}

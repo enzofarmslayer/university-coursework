@@ -17,6 +17,8 @@ enum {
 	SYS_SEEK,	  /* Change position in a file. */
 	SYS_TELL,	  /* Report current position in a file. */
 	SYS_CLOSE,	  /* Close a file. */
+		/* Vi implementerade*/
+	SYS_SLEEP, /* Sleeps for a given number of milliseconds. nr 13???*/
 
 	/* Project 3 and optionally project 4. */
 	SYS_MMAP,	/* Map a file into memory. */
@@ -28,9 +30,10 @@ enum {
 	SYS_READDIR, /* Reads a directory entry. */
 	SYS_ISDIR,	 /* Tests if a fd represents a directory. */
 	SYS_INUMBER,	 /* Returns the inode number for a fd. */
+	SYS_NUMBER_OF_CALLS /* Needs to be last to be correct */
 
-	/* Our lab 2 stuff: */
-	SYS_SLEEP /* Sleeps for a given number of milliseconds. nr 20*/
+	// /* Vi implementerade*/
+	// SYS_SLEEP /* Sleeps for a given number of milliseconds. nr 20*/
 };
 
 #endif /* lib/syscall-nr.h */

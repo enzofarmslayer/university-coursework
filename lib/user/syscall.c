@@ -156,7 +156,7 @@ int inumber(int fd)
 	return syscall1(SYS_INUMBER, fd);
 }
 
-/* Our lab 2 stuff: */
+/*lab2 */
 void sleep(int millis)
 {
 	syscall1(SYS_SLEEP, millis);
