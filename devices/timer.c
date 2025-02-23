@@ -39,7 +39,7 @@ void timer_init(const uint16_t timer_freq)
 	pit_configure_channel(0, 2, TIMER_FREQ);
 	intr_register_ext(0x20, timer_interrupt, "8254 Timer");
 
-  	list_init(&sleeping_list);
+  	list_init(&sleeping_list); //3
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -84,7 +84,6 @@ int64_t timer_elapsed(int64_t then)
 }
 
 //LAB3-----------------------------------------------
-
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
 	be turned on. */
 void timer_sleep(int64_t ticks)
@@ -180,6 +179,7 @@ static void timer_interrupt(struct intr_frame* args UNUSED)
 {
 	ticks++;
 
+	//3
     while (!list_empty(&sleeping_list)) {
         struct list_elem *e = list_begin(&sleeping_list);
         struct thread *t = list_entry(e, struct thread, elem);

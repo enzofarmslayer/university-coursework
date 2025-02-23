@@ -91,7 +91,7 @@ struct thread {
 	int priority;					/* Priority. */
 	struct list_elem allelem;	/* List element for all threads list. */
 	
-	//Lab 3 stuffs:
+	//3:
 	int64_t wakeup_time;
 
 	/* Shared between thread.c and synch.c. */
