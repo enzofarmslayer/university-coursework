@@ -120,8 +120,8 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 		break;
 	}
 	case SYS_WAIT: { // LAB 5
-		tid_t child_pid = *((int*)(f->esp) + 1);
-		f->eax = wait(child_pid);
+		// tid_t child_pid = *((int*)(f->esp) + 1);
+		// f->eax = wait(child_pid);
     	break; 
 	}
 	case SYS_EXEC: {

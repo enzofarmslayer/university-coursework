@@ -170,7 +170,7 @@ static void start_process(void* cmd_line_)
 
 	if(success){
 		setup_main_stack(newChild->cmd_line, &if_.esp);
-		//dump_stack(if_.esp);
+		dump_stack(if_.esp);
 	}
 
 	newChild->loadStatus = success;
