@@ -23,7 +23,8 @@ typedef int tid_t;
 #define PRI_DEFAULT 31 /* Default priority. */
 #define PRI_MAX	  63 /* Highest priority. */
 
-#define MAX_FILES 130 // Starts at 2, + null? = 130 
+//lab2
+#define MAX_FILES 130 // 0 and 1 for read write + 128 files.
 
 /* A kernel thread or user process.
 
@@ -93,6 +94,9 @@ struct thread {
 	
 	//lab3:
 	int64_t wakeup_time;
+
+	//lab5:
+	// struct parent_child
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem; /* List element. */

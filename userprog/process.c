@@ -22,16 +22,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-//------------------ LAB5
+//------------------ LAB5 to wait for child to exit ??
 struct parent_child {
-    tid_t child_tid;         // Child's thread ID (TID)
-    int exit_status;         // Child's exit status
-    bool has_exited;         // Has the child exited?
+    tid_t child_tid;         
+    int exit_status;         
+    bool has_exited;         // Has child exited
     struct semaphore sem;    // Semaphore for synchronization
-    struct list_elem elem;   // List element for the parent's child list
+    struct list_elem elem;   // parents child list
 };
 
-// ---------------- LAB4
+// ------------LAB4 to wait for child to load
 struct sharedInformation
 {
 	bool loadStatus;
@@ -51,39 +51,39 @@ static void setup_main_stack(void* cmd_line_, void** esp);
 	thread id, or TID_ERROR if the thread cannot be created. */
 tid_t process_execute(const char* cmd_line)
 {
-    struct sharedInformation *newChild = palloc_get_page(0);
-    if (newChild == NULL) {
+    struct sharedInformation *sharedInfo = palloc_get_page(0);
+    if (sharedInfo == NULL) {
         return TID_ERROR;
     }
 
-    sema_init(&newChild->sem, 0);
+    sema_init(&sharedInfo->sem, 0);
 
-    newChild->cmd_line = palloc_get_page(0);
-    if (newChild->cmd_line == NULL) {
-        palloc_free_page(newChild); // Free newChild before returning
+    sharedInfo->cmd_line = palloc_get_page(0);
+    if (sharedInfo->cmd_line == NULL) {
+        palloc_free_page(sharedInfo); // Free sharedInfo before returning
         return TID_ERROR;
     }
 
-    strlcpy(newChild->cmd_line, cmd_line, PGSIZE);
+    strlcpy(sharedInfo->cmd_line, cmd_line, PGSIZE);
 
-	//printf("Parent Process ID: %d\n", thread_current()->tid); prints 3
-    tid_t tid = thread_create(cmd_line, PRI_DEFAULT, start_process, newChild);
+	//printf("Parent Process ID: %d\n", thread_current()->tid); //prints 3
+    tid_t tid = thread_create(cmd_line, PRI_DEFAULT, start_process, sharedInfo);
 
     if (tid == TID_ERROR) {
-        palloc_free_page(newChild->cmd_line);
-        palloc_free_page(newChild);
+        palloc_free_page(sharedInfo->cmd_line);
+        palloc_free_page(sharedInfo);
         return TID_ERROR;
     }
 
-    // Wait for the child process to signal load completion
-    sema_down(&newChild->sem);
+    // Wait for the child process to signal load success
+    sema_down(&sharedInfo->sem);
 
-    if (!newChild->loadStatus) {
+    if (!sharedInfo->loadStatus) {
         tid = TID_ERROR;
     }
 
-    // Free newChild ONLY AFTER semaphore release
-    palloc_free_page(newChild);
+    // Free sharedInfo after semaphore released
+    palloc_free_page(sharedInfo);
 
     return tid;
 }
@@ -95,7 +95,8 @@ static void setup_main_stack(void* cmd_line, void** esp)
 {
 	*esp = PHYS_BASE;
 
-	char *argv[32];    // Pekare till argument
+	//Pointers to args
+	char *argv[32]; 
 	int argc = 0;
 	char *token;
 	char *save_ptr;
@@ -108,39 +109,39 @@ static void setup_main_stack(void* cmd_line, void** esp)
 	argv[argc] = NULL;
 
 
-	// Lägg argumentsträngarna på stacken (i omvänd ordning)
-    char *arg_addrs[32]; // Sparar minnesadresser till argument
+	// Put argument strings onto stack in reverse order
+    char *arg_addrs[32]; // save memoryadress to args
     for (int i = argc - 1; i >= 0; i--) {
         *esp -= strlen(argv[i]) + 1;
         memcpy(*esp, argv[i], strlen(argv[i]) + 1);
         arg_addrs[i] = *esp;
     }
 
-    // Word-align (justera stacken till multipel av 4) 
+    // Word-align (justera stacken multipel 4) 
     while ((uintptr_t)*esp % 4 != 0) {
         *esp -= 1;
         *(uint8_t *)(*esp) = 0;
     }
 
-    // Lägg pekarna till argumenten (argv[i]) 
+    // (argv[i]) pointers to args 
     *esp -= sizeof(char *);
-    *(char **)(*esp) = NULL;  // argv[argc] = NULL (null pointer sentinel)
+    *(char **)(*esp) = NULL;  // argv[argc] = null
 
     for (int i = argc - 1; i >= 0; i--) {
         *esp -= sizeof(char *);
-        *(char **)(*esp) = arg_addrs[i];  // Pekare till varje argument
+        *(char **)(*esp) = arg_addrs[i];  
     }
 
-    // Lägg in argv-pekaren 
+    // argv-pointer
     char **argv_ptr = *esp;
     *esp -= sizeof(char **);
     *(char ***)(*esp) = argv_ptr;
 
-    // Lägg in argc 
+    // arg-c
     *esp -= sizeof(int);
     *(int *)(*esp) = argc;
 
-    // Lägg in en fake return address 
+    // fake return address 
     *esp -= sizeof(void *);
     *(void **)(*esp) = NULL;
 
@@ -152,7 +153,7 @@ static void setup_main_stack(void* cmd_line, void** esp)
 static void start_process(void* cmd_line_)
 {
 	//LAB 4 CHANGES
-	struct sharedInformation *newChild = (struct sharedInformation*) cmd_line_;
+	struct sharedInformation *sharedInfo = (struct sharedInformation*) cmd_line_;
 	//char* cmd_line = cmd_line_;
 
 	struct intr_frame if_;
@@ -169,12 +170,13 @@ static void start_process(void* cmd_line_)
 	success = load(t->name, &if_.eip, &if_.esp);
 
 	if(success){
-		setup_main_stack(newChild->cmd_line, &if_.esp);
-		dump_stack(if_.esp);
+		setup_main_stack(sharedInfo->cmd_line, &if_.esp);
+		//dump_stack(if_.esp); // for lab 1 demo
 	}
 
-	newChild->loadStatus = success;
-	sema_up(&newChild->sem);
+	// We have loaded succesfuly
+	sharedInfo->loadStatus = success;
+	sema_up(&sharedInfo->sem);
 
 	/* If load failed, quit. */
 	//palloc_free_page(cmd_line_);
@@ -202,9 +204,40 @@ static void start_process(void* cmd_line_)
 	does nothing. */
 int process_wait(tid_t child_tid UNUSED)
 {
+ 	//given infinite loop
 	for (;;) {
 
 	}
+
+	// struct thread *cur = thread_current();
+    // struct list_elem *e;
+    // struct parent_child *child = NULL;
+
+    // // Find the child in the parent's child list
+    // for (e = list_begin(&cur->children); e != list_end(&cur->children); e = list_next(e)) {
+    //     struct parent_child *pc = list_entry(e, struct parent_child, elem);
+    //     if (pc->child_tid == child_tid) {
+    //         child = pc;
+    //         break;
+    //     }
+    // }
+
+    // if (child == NULL) {
+    //     return -1;  // If the process is not a child
+    // }
+
+    // // Wait for the child to exit
+    // if (!child->has_exited) {
+    //     sema_down(&child->sem);  // Block until the child exits
+    // }
+
+    // int exit_status = child->exit_status;
+
+    // // Remove child from list and free memory
+    // list_remove(&child->elem);
+    // free(child);
+
+    // return exit_status;
 }
 
 /* Free the current process's resources. */

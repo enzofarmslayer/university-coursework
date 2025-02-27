@@ -89,9 +89,9 @@ int64_t timer_elapsed(int64_t then)
 void timer_sleep(int64_t ticks)
 {
 	ASSERT(intr_get_level() == INTR_ON);
-
+	
 	enum intr_level old_level;
-	old_level = intr_disable();
+	old_level = intr_disable(); // causes external interrupt to be postponed and returns previous state 
 
 	struct thread *cur = thread_current();
 
@@ -187,7 +187,6 @@ static void timer_interrupt(struct intr_frame* args UNUSED)
         if (ticks < t->wakeup_time) {
             break;
         }
-
 
         list_remove(e);
         thread_unblock(t);

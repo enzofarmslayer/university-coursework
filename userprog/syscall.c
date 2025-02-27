@@ -121,7 +121,7 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 	}
 	case SYS_WAIT: { // LAB 5
 		// tid_t child_pid = *((int*)(f->esp) + 1);
-		// f->eax = wait(child_pid);
+		// f->eax = process_wait(child_pid);
     	break; 
 	}
 	case SYS_EXEC: {
@@ -138,7 +138,6 @@ tid_t exec(const char *cmd_line) {
 // Ändrad i lab4
 void sleep(int64_t ticks)
 {
-	
 	timer_sleep(ticks);
 }
 
@@ -151,7 +150,7 @@ bool create(const char* name, unsigned initial_size)
 {
 	struct file *file_ptr = filesys_open(name);
     if (file_ptr != NULL) {
-        // Fil finns redam.
+        // Fil already exists 
         file_close(file_ptr);
         return false;
     }
@@ -217,12 +216,12 @@ void seek(int fd, unsigned position) {
 
 unsigned tell(int fd) {
   if (fd < 2 || fd >= MAX_FILES) {
-      return -1;  // Invalid FD
+      return -1; 
   }
 
   struct file *file_ptr = thread_current()->open_files[fd];
   if (file_ptr != NULL) {
-      return file_tell(file_ptr);  // Correctly return position
+      return file_tell(file_ptr);  
   }
   return -1;
 }
@@ -230,7 +229,7 @@ unsigned tell(int fd) {
 
 int filesize(int fd) {
     if (fd < 2 || fd >= MAX_FILES) {
-        return -1;  // Invalid file descriptor
+        return -1;  
     }
 
     struct file *file_ptr = thread_current()->open_files[fd];
@@ -243,7 +242,6 @@ int filesize(int fd) {
 }
 
 
-
 int read(int fd, void *buffer, unsigned size) {
     if (fd == 0) {
         // Read from the keyboard.
@@ -254,10 +252,10 @@ int read(int fd, void *buffer, unsigned size) {
             if (local_buffer[i] == '\r') {  // Convert '\r' to '\n'
                 local_buffer[i] = '\n';
             }
-			      printf("%c", local_buffer[i]);
+			printf("%c", local_buffer[i]);
         }
         return i;
-    } else if (fd > 1 && fd < MAX_FILES) {
+    } else if (fd > 1 && fd < MAX_FILES) { // read from file 
 		struct file *file_ptr = thread_current()->open_files[fd];
         if (file_ptr != NULL) {
             return file_read(file_ptr, buffer, size);
@@ -268,11 +266,11 @@ int read(int fd, void *buffer, unsigned size) {
 }
 
 int write(int fd, const void *buffer, unsigned size) {
-    if (fd == 1) {  // Writing to STDOUT (console)
+    if (fd == 1) {  // Writing to console
         const char *buf = (const char *)buffer;
         for (unsigned i = 0; i < size; i++) {
             if (buf[i] == '\n') {  
-                putbuf("\r", 1);  // Convert '\n' to '\r' for proper display
+                putbuf("\r", 1);  // Convert '\n' to '\r' for display
             }
             putbuf(&buf[i], 1);
         }
@@ -286,43 +284,8 @@ int write(int fd, const void *buffer, unsigned size) {
     return -1;
 }
 
-//LAB 5----------------------------------------
-// int wait(tid_t child_tid) {
-//     struct thread *cur = thread_current();
-//     struct list_elem *e;
-//     struct parent_child *child = NULL;
-
-//     // Leta upp barnet i förälderns barnlista
-//     for (e = list_begin(&cur->children); e != list_end(&cur->children); e = list_next(e)) {
-//         struct parent_child *pc = list_entry(e, struct parent_child, elem);
-//         if (pc->child_tid == child_tid) {
-//             child = pc;
-//             break;
-//         }
-//     }
-
-//     if (child == NULL) {
-//         return -1;  // Barnet tillhör inte denna förälder eller är ogiltigt
-//     }
-
-//     // Vänta på att barnet ska avslutas
-//     if (!child->has_exited) {
-//         sema_down(&child->sem);
-//     }
-
-//     // Hämta exit-status
-//     int exit_status = child->exit_status;
-
-//     // Ta bort och frigör barnet från listan
-//     list_remove(&child->elem);
-//     free(child);
-
-//     return exit_status;
-// }
-
-
+// status behöver hanteras lab5 ignorera warning
 void exit(int status) {
-	// status behöver hanteras lab5 ignorera warning
     // LAB 5
 	// struct thread *cur = thread_current();
     // struct list_elem *e;
