@@ -448,12 +448,16 @@ static void init_thread(struct thread* t, const char* name, int priority)
 	 * for a save_ptr we wouldn't use. Why is this fine?
 	 * Don't abuse pointers like this is your code.
 	 */
-	strtok_r(t->name, " ", (char **) &(t->stack));
+	strtok_r(t->name, " ", (char **) &(t->stack)); 
 
 	t->stack = (uint8_t *) t + PGSIZE;
 
 	t->priority = priority;
 	t->magic = THREAD_MAGIC;
+
+	#ifdef USERPROG
+    	list_init(&t->children_list);  // lab5
+	#endif
 
 	old_level = intr_disable();
 	list_push_back(&all_list, &t->allelem);

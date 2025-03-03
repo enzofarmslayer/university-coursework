@@ -17,19 +17,6 @@
 
 
 static void syscall_handler(struct intr_frame*);
-// unsigned tell(int fd);
-// void sleep(int64_t ticks);
-// void halt(void);
-// bool create(const char* name, unsigned initial_size); 
-// int open(const char *file);
-// void close(int fd);
-// bool remove(const char *file_name);
-// void seek(int fd, unsigned position);
-// int filesize(int fd);
-// int read(int fd, void *buffer, unsigned size);
-// int write(int fd, const void *buffer, unsigned size);
-// void exit(int status);
-// tid_t exec(const char *cmd_line);
 
 //Fanns sedan innan
 void shutdown_power_off(void);
@@ -45,8 +32,102 @@ void syscall_init(void)
 	intr_register_int(0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
 
+bool is_valid_ptr(const void* ptr) {
+	if (ptr >= PHYS_BASE) {
+		return false;
+	}
+ 
+	// Validate the first page
+	if (pagedir_get_page(thread_current()->pagedir, ptr) == NULL) {
+		return false;
+	}
+
+	int length = sizeof(void*);
+	void* upper_bound = pg_round_up(ptr);
+	void* page;
+
+	// Validate the next pages
+	while ((ptr + length) > upper_bound) {
+
+		// Make sure the next page is valid in pagedir
+		upper_bound++;
+		page = pagedir_get_page(thread_current()->pagedir, upper_bound);
+		if (page == NULL) {
+			return false;
+		}
+
+		// Upper bound is valid page in the pagedir, update upper bound
+		upper_bound = pg_round_up(page);
+	}
+
+	// If we get here, we know all the pages the string spans over are valid
+	return true;
+}
+
+/* Validates if a string has a terminator character */
+bool is_valid_string(const char* s) {
+	bool valid_ptr = is_valid_ptr(s);
+	if (!valid_ptr) return false;
+
+	// Find out the length of the string
+	int length = strlen(s);
+
+	// Find the end of the page
+	void* upper_bound = pg_round_up(s);
+	void* page;
+	bool result = false;
+
+	// Loop while string might be out of the page, but still in a valid page
+	while ((void*)(s + (length * sizeof(char))) > upper_bound) {
+		
+		// Make sure the next page is valid in pagedir
+		upper_bound++;
+		page = pagedir_get_page(thread_current()->pagedir, upper_bound);
+		if (page == NULL) {
+			return false;
+		}
+
+		// Upper bound is a valid page in the pagedir, update the upper_bound
+		upper_bound = pg_round_up(page);
+	}
+
+	// If we get here, we know all the pages the string spans over are valid
+	return true;
+}
+
+bool is_valid_buffer(const void* buffer, unsigned length) {
+
+	bool valid_ptr = is_valid_ptr(buffer);
+	if(!valid_ptr) return false;
+
+	// Find out how long the buffer is
+	unsigned size = length * sizeof(char);
+
+	void* upper_bound = pg_round_up(buffer); 
+	void* page;
+
+	// Loop while buffer might be out of the page, but still in a valid page
+	while ((void*)(buffer + size) > upper_bound) {
+		
+		// Make sure next page is valid in the pagedir
+		upper_bound++;
+		page = pagedir_get_page(thread_current()->pagedir, upper_bound);
+		if (page == NULL) {
+			return false;
+		}
+
+		// Upper bound is a valid page in the pagedir, update the upper_bound
+		upper_bound = pg_round_up(page);
+	}
+
+	// If we get here, we know all the pages the buffer spans over are valid
+	return true;
+}
+
 static void syscall_handler(struct intr_frame* f UNUSED)
 {
+	if(!is_valid_ptr(f->esp)) exit(-1);
+
 	int fd;
 	void *buffer;
 	unsigned size;
@@ -64,13 +145,16 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 		break;
 	}
 	case SYS_CREATE:{
+		if(!is_valid_ptr(f->esp + 8)) exit(-1);
 		const char* name = (char*)(*((int*)(f->esp) + 1));
+		if (!is_valid_string(file)) exit(-1);
 		unsigned initial_size = *((int*)(f->esp) + 2);
 		f->eax = create(name, initial_size);
 		break;
 	}
 	case SYS_OPEN:{
 		const char* file = (char*)(*((int*)(f->esp) + 1));
+		if (!is_valid_string(file)) exit(-1);
 		f->eax = open(file);
 		break;
 	}
@@ -81,7 +165,8 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 	}
 	case SYS_REMOVE:{
 		const char* filename = (char*)(*((int*)(f->esp) + 1));
-        f->eax = remove(filename);
+        if (!is_valid_string(filename)) exit(-1);
+		f->eax = remove(filename);
         break;
 	}
 	case SYS_SEEK: {
@@ -105,12 +190,15 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 		buffer = *((void**)(f->esp) + 2); //andra arg
 		size = *((unsigned*)(f->esp) + 3);// tredje arg
 		f->eax = read(fd, buffer, size);
+		if (!is_valid_buffer(buffer, size)) exit(-1);
 		break;
 	}
 	case SYS_WRITE: {
+		if(!is_valid_ptr(f + 12)) exit(-1);
 		fd = *((int*)(f->esp) + 1);
 		buffer = *((void**)(f->esp) + 2);
 		size = *((unsigned*)(f->esp) + 3);
+		if (!is_valid_buffer(buffer, size)) exit(-1);
 		f->eax = write(fd, buffer, size);
 		break;
 	}
@@ -120,12 +208,14 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 		break;
 	}
 	case SYS_WAIT: { // LAB 5
+		if(!is_valid_ptr(f->esp + 4)) exit(-1);
 		// tid_t child_pid = *((int*)(f->esp) + 1);
 		// f->eax = process_wait(child_pid);
     	break; 
 	}
 	case SYS_EXEC: {
 		const char* filename = (char*)(*((int*)(f->esp) + 1));
+		if (!is_valid_string(filename)) exit(-1);
 		f->eax = exec(filename);
 	}
 	}
@@ -286,6 +376,17 @@ int write(int fd, const void *buffer, unsigned size) {
 
 // status behöver hanteras lab5 ignorera warning
 void exit(int status) {
+
+	// lab5
+	// if (status < 0){
+	// 	status = -1
+	// }
+
+	// for (int i=2; i < MAX_FILES; i++){
+	// 	close(i);
+	// } 
+
+	// thread_current()->child_parent->exit_status = status;
 
 	thread_exit();
 }

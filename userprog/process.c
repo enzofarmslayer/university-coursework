@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <threads/malloc.h> 
+#include <threads/thread.h> 
 
 // ------------LAB4 to wait for child to load
 struct sharedInformation
@@ -46,7 +47,7 @@ static void setup_main_stack(void* cmd_line_, void** esp);
 tid_t process_execute(const char* cmd_line)
 {
     struct sharedInformation *sharedInfo = malloc(sizeof(struct sharedInformation));
-    
+	sharedInfo->loadStatus = false;
 	sema_init(&sharedInfo->load_sem, 0);
 
     sharedInfo->cmd_line = palloc_get_page(0); 
@@ -66,6 +67,8 @@ tid_t process_execute(const char* cmd_line)
         return TID_ERROR;
     }
 
+	//lab5
+	//list_push_back(&thread_current()->children_list, &thread_current()->parent_child->elem);
     // Wait for the child process to signal load success
     sema_down(&sharedInfo->load_sem);
 
@@ -75,8 +78,8 @@ tid_t process_execute(const char* cmd_line)
 
     // Free sharedInfo after semaphore released
     palloc_free_page(sharedInfo->cmd_line);
+	
 	free(sharedInfo);
-
     return tid;
 }
 
@@ -106,9 +109,22 @@ static void start_process(void* cmd_line_)
 		//dump_stack(if_.esp); // for lab 1 demo
 	}
 
+	// lab5
+	// struct parent_child *child_parent = malloc(sizeof(struct parent_child));
+	// sema_init(&child_parent->wait_sem, 0);
+	// lock_init(&child_parent->lock);
+	// child_parent->exit_status = -1;
+	// child_parent->alive_count = 2;
+	
+	// //is this correct?
+	// thread_current()->parent_child = child_parent;
+	// // is this copy correct? 
+	// sharedInfo->parent_child = child_parent;
+	
 	// We have loaded succesfuly
 	sharedInfo->loadStatus = success;
 	sema_up(&sharedInfo->load_sem);
+
 
 	/* If load failed, quit. */
 	//palloc_free_page(cmd_line_);
@@ -141,6 +157,46 @@ int process_wait(tid_t child_tid UNUSED)
 
 	}
 
+	// struct thread *parent = thread_current();
+    // struct parent_child *pc = NULL;
+    
+    // // Search for the child in the parent's children list
+    // struct list_elem *e;
+    // for (e = list_begin(&parent->children_list); e != list_end(&parent->children_list); e = list_next(e))
+    // {
+    //     struct parent_child *entry = list_entry(e, struct parent_child, elem);
+    //     if (entry->child_tid == child_tid)
+    //     {
+    //         pc = entry;
+    //         break;
+    //     }
+    // }
+
+    // if (pc == NULL) {
+    //     return -1; // Child process not found
+    // }
+
+    // lock_acquire(&pc->lock);
+
+    // // Wait for the child to exit (if it hasn't yet)
+    // if (pc->alive_count > 1) {
+    //     sema_down(&pc->wait_sem);
+    // }
+
+    // // Retrieve exit status
+    // int status = pc->exit_status;
+
+    // // Remove child from parent's list and free resources
+    // list_remove(&pc->elem);
+	// pc->alive_count--;
+    // if (pc->alive_count == 0) {
+    //     free(pc);
+    // }
+    
+    // lock_release(&pc->lock);
+    
+    // return status;
+
 }
 
 /* Free the current process's resources. */
@@ -148,6 +204,24 @@ void process_exit(void)
 {
 	struct thread* cur = thread_current();
 	uint32_t* pd;
+
+	// struct parent_child *pc = cur->parent_child;
+
+    // if (pc != NULL)
+    // {
+    //     lock_acquire(&pc->lock);
+    //     pc->exit_status = cur->exit_status;
+
+    //     // Signal the parent that this child has exited
+    //     sema_up(&pc->wait_sem);
+	// 	pc->alive_count--;
+    //     // Reduce alive_count and free if no longer needed
+    //     if (pc->alive_count == 0)
+    //     {
+    //         free(pc);
+    //     }
+    //     lock_release(&pc->lock);
+    // }
 
 	/* Destroy the current process's page directory and switch back
 		to the kernel-only page directory. */
