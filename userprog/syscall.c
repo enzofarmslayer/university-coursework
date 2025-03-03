@@ -16,6 +16,11 @@
 #include "filesys/filesys.h"    // for filesys_create and filesys_open
 
 
+#include "devices/shutdown.h"
+#include "devices/input.h"
+#include "threads/vaddr.h"
+#include <stdlib.h>
+ 
 static void syscall_handler(struct intr_frame*);
 
 //Fanns sedan innan
@@ -124,7 +129,7 @@ bool is_valid_buffer(const void* buffer, unsigned length) {
 	return true;
 }
 
-static void syscall_handler(struct intr_frame* f UNUSED)
+static void syscall_handler(struct intr_frame* f)
 {
 	if(!is_valid_ptr(f->esp)) exit(-1);
 
@@ -132,6 +137,27 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 	void *buffer;
 	unsigned size;
 	
+	switch (*(int*)(f->esp)) {
+		// 3 args
+		case SYS_READ:
+		case SYS_WRITE: if(!is_valid_ptr(f->esp + 12)) exit(-1);
+		// 2 args
+		case SYS_SEEK:
+		case SYS_CREATE: if(!is_valid_ptr(f->esp + 8)) exit(-1);
+		// 1 args
+		case SYS_TELL:
+		case SYS_FILESIZE:
+		case SYS_REMOVE:
+		case SYS_OPEN:
+		case SYS_EXEC:
+		case SYS_EXIT:
+		//case SYS_CLOSE: 
+		case SYS_WAIT: if(!is_valid_ptr(f->esp + 4)) exit(-1);
+		// 0 args
+		default:;
+	}
+
+
 	switch(*(int*)(f->esp))
 	{
 	
@@ -145,16 +171,13 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 		break;
 	}
 	case SYS_CREATE:{
-		if(!is_valid_ptr(f->esp + 8)) exit(-1);
 		const char* name = (char*)(*((int*)(f->esp) + 1));
-		if (!is_valid_string(file)) exit(-1);
 		unsigned initial_size = *((int*)(f->esp) + 2);
 		f->eax = create(name, initial_size);
 		break;
 	}
 	case SYS_OPEN:{
 		const char* file = (char*)(*((int*)(f->esp) + 1));
-		if (!is_valid_string(file)) exit(-1);
 		f->eax = open(file);
 		break;
 	}
@@ -165,7 +188,6 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 	}
 	case SYS_REMOVE:{
 		const char* filename = (char*)(*((int*)(f->esp) + 1));
-        if (!is_valid_string(filename)) exit(-1);
 		f->eax = remove(filename);
         break;
 	}
@@ -186,36 +208,37 @@ static void syscall_handler(struct intr_frame* f UNUSED)
 		break;
 	}
 	case SYS_READ:{
+
 		fd = *((int*)(f->esp) + 1); // första arg
 		buffer = *((void**)(f->esp) + 2); //andra arg
 		size = *((unsigned*)(f->esp) + 3);// tredje arg
 		f->eax = read(fd, buffer, size);
-		if (!is_valid_buffer(buffer, size)) exit(-1);
 		break;
 	}
 	case SYS_WRITE: {
-		if(!is_valid_ptr(f + 12)) exit(-1);
 		fd = *((int*)(f->esp) + 1);
 		buffer = *((void**)(f->esp) + 2);
 		size = *((unsigned*)(f->esp) + 3);
-		if (!is_valid_buffer(buffer, size)) exit(-1);
+
 		f->eax = write(fd, buffer, size);
 		break;
 	}
 	case SYS_EXIT: {
+		if(!is_valid_ptr(*((int*)(f->esp) + 1))) exit(-1);
 		int status = *((int*)(f->esp) + 1);
 		exit(status);
 		break;
 	}
 	case SYS_WAIT: { // LAB 5
-		if(!is_valid_ptr(f->esp + 4)) exit(-1);
+		//if(!is_valid_ptr(*((int*)(f->esp) + 1)) exit(-1);
 		// tid_t child_pid = *((int*)(f->esp) + 1);
 		// f->eax = process_wait(child_pid);
     	break; 
 	}
 	case SYS_EXEC: {
+		//if (!is_valid_string((char*)(*((int*)(f->esp) + 1)))) exit(-1);
+		
 		const char* filename = (char*)(*((int*)(f->esp) + 1));
-		if (!is_valid_string(filename)) exit(-1);
 		f->eax = exec(filename);
 	}
 	}
@@ -238,6 +261,8 @@ void halt(void)
 
 bool create(const char* name, unsigned initial_size)
 {
+	if (!is_valid_string(name)) exit(-1);
+	
 	struct file *file_ptr = filesys_open(name);
     if (file_ptr != NULL) {
         // Fil already exists 
@@ -249,7 +274,9 @@ bool create(const char* name, unsigned initial_size)
 
 int open(const char *file) 
 {
-    struct file *file_ptr = filesys_open(file);
+    if (!is_valid_string(file)) exit(-1);
+	
+	struct file *file_ptr = filesys_open(file);
 
     if (file_ptr == NULL) {
         return -1;
@@ -284,7 +311,9 @@ void close(int fd)
 }
 
 bool remove(const char *file_name) {
-    return filesys_remove(file_name);
+    if (!is_valid_string(file_name)) exit(-1);
+	
+	return filesys_remove(file_name);
 }
 
 void seek(int fd, unsigned position) {
@@ -333,7 +362,9 @@ int filesize(int fd) {
 
 
 int read(int fd, void *buffer, unsigned size) {
-    if (fd == 0) {
+    if (!is_valid_buffer(buffer, size)) exit(-1);
+	
+	if (fd == 0) {
         // Read from the keyboard.
         unsigned i;
         uint8_t* local_buffer = (uint8_t*) buffer;
@@ -356,7 +387,9 @@ int read(int fd, void *buffer, unsigned size) {
 }
 
 int write(int fd, const void *buffer, unsigned size) {
-    if (fd == 1) {  // Writing to console
+	if (!is_valid_buffer(buffer, size)) exit(-1);
+	
+	if (fd == 1) {  // Writing to console
         const char *buf = (const char *)buffer;
         for (unsigned i = 0; i < size; i++) {
             if (buf[i] == '\n') {  
