@@ -14,6 +14,7 @@
 #include "userprog/gdt.h"
 #include "userprog/pagedir.h"
 #include "userprog/tss.h"
+#include "threads/synch.h"
 
 #include <debug.h>
 #include <inttypes.h>
@@ -21,22 +22,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-//------------------ LAB5 to wait for child to exit ??
-struct parent_child {
-    tid_t child_tid;         
-    int exit_status;         
-    bool has_exited;         // Has child exited
-    struct semaphore sem;    // Semaphore for synchronization
-    struct list_elem elem;   // parents child list
-};
+#include <threads/malloc.h> 
 
 // ------------LAB4 to wait for child to load
 struct sharedInformation
 {
 	bool loadStatus;
 	char* cmd_line;
-	struct semaphore sem;
+	struct semaphore load_sem;
+	struct parent_child *parent_child;
 };
 
 
@@ -51,18 +45,15 @@ static void setup_main_stack(void* cmd_line_, void** esp);
 	thread id, or TID_ERROR if the thread cannot be created. */
 tid_t process_execute(const char* cmd_line)
 {
-    struct sharedInformation *sharedInfo = palloc_get_page(0);
-    if (sharedInfo == NULL) {
-        return TID_ERROR;
-    }
+    struct sharedInformation *sharedInfo = malloc(sizeof(struct sharedInformation));
+    
+	sema_init(&sharedInfo->load_sem, 0);
 
-    sema_init(&sharedInfo->sem, 0);
-
-    sharedInfo->cmd_line = palloc_get_page(0);
-    if (sharedInfo->cmd_line == NULL) {
-        palloc_free_page(sharedInfo); // Free sharedInfo before returning
-        return TID_ERROR;
-    }
+    sharedInfo->cmd_line = palloc_get_page(0); 
+    // if (sharedInfo->cmd_line == NULL) {
+    //     free(sharedInfo); // Free sharedInfo before returning
+    //     return TID_ERROR;
+    // }
 
     strlcpy(sharedInfo->cmd_line, cmd_line, PGSIZE);
 
@@ -71,23 +62,109 @@ tid_t process_execute(const char* cmd_line)
 
     if (tid == TID_ERROR) {
         palloc_free_page(sharedInfo->cmd_line);
-        palloc_free_page(sharedInfo);
+        free(sharedInfo);
         return TID_ERROR;
     }
 
     // Wait for the child process to signal load success
-    sema_down(&sharedInfo->sem);
+    sema_down(&sharedInfo->load_sem);
 
     if (!sharedInfo->loadStatus) {
         tid = TID_ERROR;
     }
 
     // Free sharedInfo after semaphore released
-    palloc_free_page(sharedInfo);
+    palloc_free_page(sharedInfo->cmd_line);
+	free(sharedInfo);
 
     return tid;
 }
 
+/* A thread function that loads a user process and starts it
+	running. */
+static void start_process(void* cmd_line_)
+{
+	//LAB 4 CHANGES
+	struct sharedInformation *sharedInfo = (struct sharedInformation*) cmd_line_;
+	//char* cmd_line = cmd_line_;
+
+	struct intr_frame if_;
+	struct thread *t = thread_current();
+	bool success;
+
+	/* Initialize interrupt frame and load executable. */
+	memset(&if_, 0, sizeof if_);
+	if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
+	if_.cs = SEL_UCSEG;
+	if_.eflags = FLAG_IF | FLAG_MBS;
+
+	// Note: load requires the file name only, not the entire cmd_line
+	success = load(t->name, &if_.eip, &if_.esp);
+
+	if(success){
+		setup_main_stack(sharedInfo->cmd_line, &if_.esp);
+		//dump_stack(if_.esp); // for lab 1 demo
+	}
+
+	// We have loaded succesfuly
+	sharedInfo->loadStatus = success;
+	sema_up(&sharedInfo->load_sem);
+
+	/* If load failed, quit. */
+	//palloc_free_page(cmd_line_);
+	if (!success)
+		thread_exit();
+
+	/* Start the user process by simulating a return from an
+		interrupt, implemented by intr_exit (in
+		threads/intr-stubs.S).  Because intr_exit takes all of its
+		arguments on the stack in the form of a `struct intr_frame',
+		we just point the stack pointer (%esp) to our stack frame
+		and jump to it. */
+	asm volatile("movl %0, %%esp; jmp intr_exit" : : "g"(&if_) : "memory");
+	NOT_REACHED();
+}
+
+/* Waits for thread TID to die and returns its exit status.  If
+	it was terminated by the kernel (i.e. killed due to an
+	exception), returns -1.  If TID is invalid or if it was not a
+	child of the calling process, or if process_wait() has already
+	been successfully called for the given TID, returns -1
+	immediately, without waiting.
+
+	This function will be implemented in problem 2-2.  For now, it
+	does nothing. */
+int process_wait(tid_t child_tid UNUSED)
+{
+ 	//given infinite loop
+	for (;;) {
+
+	}
+
+}
+
+/* Free the current process's resources. */
+void process_exit(void)
+{
+	struct thread* cur = thread_current();
+	uint32_t* pd;
+
+	/* Destroy the current process's page directory and switch back
+		to the kernel-only page directory. */
+	pd = cur->pagedir;
+	if (pd != NULL) {
+		/* Correct ordering here is crucial.  We must set
+			cur->pagedir to NULL before switching page directories,
+			so that a timer interrupt can't switch back to the
+			process page directory.  We must activate the base page
+			directory before destroying the process's page
+			directory, or our active page directory will be one
+			that's been freed (and cleared). */
+		cur->pagedir = NULL;
+		pagedir_activate(NULL);
+		pagedir_destroy(pd);
+	}
+}
 
 /*LAB1 */
 /*setup the main func in the stack for a new process*/ 
@@ -146,121 +223,6 @@ static void setup_main_stack(void* cmd_line, void** esp)
     *(void **)(*esp) = NULL;
 
     return;
-}
-
-/* A thread function that loads a user process and starts it
-	running. */
-static void start_process(void* cmd_line_)
-{
-	//LAB 4 CHANGES
-	struct sharedInformation *sharedInfo = (struct sharedInformation*) cmd_line_;
-	//char* cmd_line = cmd_line_;
-
-	struct intr_frame if_;
-	struct thread *t = thread_current();
-	bool success;
-
-	/* Initialize interrupt frame and load executable. */
-	memset(&if_, 0, sizeof if_);
-	if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
-	if_.cs = SEL_UCSEG;
-	if_.eflags = FLAG_IF | FLAG_MBS;
-
-	// Note: load requires the file name only, not the entire cmd_line
-	success = load(t->name, &if_.eip, &if_.esp);
-
-	if(success){
-		setup_main_stack(sharedInfo->cmd_line, &if_.esp);
-		//dump_stack(if_.esp); // for lab 1 demo
-	}
-
-	// We have loaded succesfuly
-	sharedInfo->loadStatus = success;
-	sema_up(&sharedInfo->sem);
-
-	/* If load failed, quit. */
-	//palloc_free_page(cmd_line_);
-	if (!success)
-		thread_exit();
-
-	/* Start the user process by simulating a return from an
-		interrupt, implemented by intr_exit (in
-		threads/intr-stubs.S).  Because intr_exit takes all of its
-		arguments on the stack in the form of a `struct intr_frame',
-		we just point the stack pointer (%esp) to our stack frame
-		and jump to it. */
-	asm volatile("movl %0, %%esp; jmp intr_exit" : : "g"(&if_) : "memory");
-	NOT_REACHED();
-}
-
-/* Waits for thread TID to die and returns its exit status.  If
-	it was terminated by the kernel (i.e. killed due to an
-	exception), returns -1.  If TID is invalid or if it was not a
-	child of the calling process, or if process_wait() has already
-	been successfully called for the given TID, returns -1
-	immediately, without waiting.
-
-	This function will be implemented in problem 2-2.  For now, it
-	does nothing. */
-int process_wait(tid_t child_tid UNUSED)
-{
- 	//given infinite loop
-	for (;;) {
-
-	}
-
-	// struct thread *cur = thread_current();
-    // struct list_elem *e;
-    // struct parent_child *child = NULL;
-
-    // // Find the child in the parent's child list
-    // for (e = list_begin(&cur->children); e != list_end(&cur->children); e = list_next(e)) {
-    //     struct parent_child *pc = list_entry(e, struct parent_child, elem);
-    //     if (pc->child_tid == child_tid) {
-    //         child = pc;
-    //         break;
-    //     }
-    // }
-
-    // if (child == NULL) {
-    //     return -1;  // If the process is not a child
-    // }
-
-    // // Wait for the child to exit
-    // if (!child->has_exited) {
-    //     sema_down(&child->sem);  // Block until the child exits
-    // }
-
-    // int exit_status = child->exit_status;
-
-    // // Remove child from list and free memory
-    // list_remove(&child->elem);
-    // free(child);
-
-    // return exit_status;
-}
-
-/* Free the current process's resources. */
-void process_exit(void)
-{
-	struct thread* cur = thread_current();
-	uint32_t* pd;
-
-	/* Destroy the current process's page directory and switch back
-		to the kernel-only page directory. */
-	pd = cur->pagedir;
-	if (pd != NULL) {
-		/* Correct ordering here is crucial.  We must set
-			cur->pagedir to NULL before switching page directories,
-			so that a timer interrupt can't switch back to the
-			process page directory.  We must activate the base page
-			directory before destroying the process's page
-			directory, or our active page directory will be one
-			that's been freed (and cleared). */
-		cur->pagedir = NULL;
-		pagedir_activate(NULL);
-		pagedir_destroy(pd);
-	}
 }
 
 /* Sets up the CPU for running user code in the current

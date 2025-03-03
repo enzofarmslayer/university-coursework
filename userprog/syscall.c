@@ -20,7 +20,7 @@ static void syscall_handler(struct intr_frame*);
 // unsigned tell(int fd);
 // void sleep(int64_t ticks);
 // void halt(void);
-// bool create(const char* name, unsigned initial_size);
+// bool create(const char* name, unsigned initial_size); 
 // int open(const char *file);
 // void close(int fd);
 // bool remove(const char *file_name);
@@ -286,25 +286,6 @@ int write(int fd, const void *buffer, unsigned size) {
 
 // status behöver hanteras lab5 ignorera warning
 void exit(int status) {
-    // LAB 5
-	// struct thread *cur = thread_current();
-    // struct list_elem *e;
-
-    // // Uppdatera barnets exit-status i förälderns lista
-    // for (e = list_begin(&cur->parent->children); e != list_end(&cur->parent->children); e = list_next(e)) {
-    //     struct parent_child *pc = list_entry(e, struct parent_child, elem);
-    //     if (pc->child_tid == cur->tid) {
-    //         pc->exit_status = status;
-    //         pc->has_exited = true;
-    //         sema_up(&pc->sem);  // Väcker eventuell väntande förälder
-    //         break;
-    //     }
-    // }
-
-    // printf("%s: exit(%d)\n", cur->name, status);
-
-    // // Stäng alla öppna filer och frigör resurser
-    // process_exit();
 
 	thread_exit();
 }
