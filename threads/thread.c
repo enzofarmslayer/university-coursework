@@ -172,6 +172,9 @@ tid_t thread_create(const char* name, int priority, thread_func* function, void*
 
 	ASSERT(function != NULL);
 
+    if (DEBUG_thread_create_simulate_fail())
+        return TID_ERROR;
+
 	/* Allocate thread. */
 	t = palloc_get_page(PAL_ZERO);
 	if (t == NULL)
@@ -431,11 +434,11 @@ static void init_thread(struct thread* t, const char* name, int priority)
 
 	ASSERT(t != NULL);
 	ASSERT(PRI_MIN <= priority && priority <= PRI_MAX);
-	ASSERT(name != NULL);
+	ASSERT(name != NULL); 
 
 	memset(t, 0, sizeof *t);
 	t->status = THREAD_BLOCKED;
-	
+
 	// Set the thread name to just the first word in name (command_line)
 	strlcpy(t->name, name, sizeof t->name);
 
@@ -448,10 +451,10 @@ static void init_thread(struct thread* t, const char* name, int priority)
 	 * for a save_ptr we wouldn't use. Why is this fine?
 	 * Don't abuse pointers like this is your code.
 	 */
-	strtok_r(t->name, " ", (char **) &(t->stack)); 
+	strtok_r(t->name, " ", (char **) &(t->stack));
 
 	t->stack = (uint8_t *) t + PGSIZE;
-
+	
 	t->priority = priority;
 	t->magic = THREAD_MAGIC;
 
@@ -463,7 +466,6 @@ static void init_thread(struct thread* t, const char* name, int priority)
 	list_push_back(&all_list, &t->allelem);
 	intr_set_level(old_level);
 }
-
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
 	returns a pointer to the frame's base. */
@@ -565,8 +567,6 @@ static tid_t allocate_tid(void)
 	lock_acquire(&tid_lock);
 	tid = next_tid++;
 	lock_release(&tid_lock);
-
-	//printf("[DEBUG] Assigning PID: %d to process: %s\n", tid, thread_current()->name);
 
 	return tid;
 }

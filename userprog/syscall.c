@@ -1,6 +1,5 @@
 #include "userprog/syscall.h"
 
-
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
@@ -20,7 +19,7 @@
 #include "devices/input.h"
 #include "threads/vaddr.h"
 #include <stdlib.h>
- 
+
 static void syscall_handler(struct intr_frame*);
 
 //Fanns sedan innan
@@ -83,7 +82,7 @@ bool is_valid_string(const char* s) {
 	bool result = false;
 
 	// Loop while string might be out of the page, but still in a valid page
-	while ((void*)(s + (length * sizeof(char))) > upper_bound) {
+	while ((void*)(s + (length * sizeof(char))) > upper_bound) { 
 		
 		// Make sure the next page is valid in pagedir
 		upper_bound++;
@@ -129,297 +128,292 @@ bool is_valid_buffer(const void* buffer, unsigned length) {
 	return true;
 }
 
-static void syscall_handler(struct intr_frame* f)
-{
+bool is_valid_fd(int fd) {
+	return fd >= 0 && fd < MAX_FILES;
+}
+
+static void syscall_handler(struct intr_frame* f) {
 	if(!is_valid_ptr(f->esp)) exit(-1);
+
+    int syscall_number = *(int*) f->esp;
 
 	int fd;
 	void *buffer;
 	unsigned size;
-	
-	switch (*(int*)(f->esp)) {
-		// 3 args
+	const char* filename;
+
+	switch (syscall_number) {
+		//3 
 		case SYS_READ:
 		case SYS_WRITE: if(!is_valid_ptr(f->esp + 12)) exit(-1);
-		// 2 args
+		//2 
 		case SYS_SEEK:
 		case SYS_CREATE: if(!is_valid_ptr(f->esp + 8)) exit(-1);
-		// 1 args
+		//1 
 		case SYS_TELL:
 		case SYS_FILESIZE:
 		case SYS_REMOVE:
 		case SYS_OPEN:
 		case SYS_EXEC:
 		case SYS_EXIT:
-		//case SYS_CLOSE: 
+		case SYS_CLOSE:
 		case SYS_WAIT: if(!is_valid_ptr(f->esp + 4)) exit(-1);
-		// 0 args
+		// 0 
 		default:;
 	}
 
+    switch (syscall_number) {
+		case SYS_SLEEP:
+			int64_t sleep_duration = *(int*) (f->esp + 4);
+			sleep(sleep_duration);
+			break;
+		case SYS_HALT:
+            halt();
+            break;
+		case SYS_CREATE:
+			const char* name = (const char*) *(int*) (f->esp + 4);
+			unsigned initial_size = *(unsigned*) (f->esp + 8);
+			
+			f->eax = create(name, initial_size);
+			break;
+        case SYS_OPEN:
+			const char* file = (const char*) *(int*) (f->esp + 4);
+            
+			f->eax = open(file);
+            break;
+        case SYS_CLOSE:
+			fd = *(int*) (f->esp + 4);
+            
+			close(fd);
+            break;
+        case SYS_REMOVE:
+			filename = (const char*) *(int*) (f->esp + 4);
+            f->eax = remove(filename);
+            break;
+        case SYS_SEEK:
+            fd = *(int*) (f->esp + 4);
+			unsigned position = *(unsigned*) (f->esp + 8);
+			seek(fd, position);
+            break;
+        case SYS_TELL:
+            fd = *(int*) (f->esp + 4);
+			
+			f->eax = tell(fd);
+            break;
+		case SYS_FILESIZE:
+            fd = *(int*) (f->esp + 4);
+			
+			f->eax = filesize(fd);
+            break;
+		case SYS_READ:
+			fd = *(int*) (f->esp + 4); // första arg
+			buffer = (void*) *(int*) (f->esp + 8); //andra arg
+			size = *(unsigned*) (f->esp + 12);// tredje arg
 
-	switch(*(int*)(f->esp))
-	{
-	
-	case SYS_SLEEP:{
-		int64_t sleep_duration = *((int*)(f->esp) + 1);
-		sleep(sleep_duration);
-		break;
-	}
-	case SYS_HALT:{
-		halt();
-		break;
-	}
-	case SYS_CREATE:{
-		const char* name = (char*)(*((int*)(f->esp) + 1));
-		unsigned initial_size = *((int*)(f->esp) + 2);
-		f->eax = create(name, initial_size);
-		break;
-	}
-	case SYS_OPEN:{
-		const char* file = (char*)(*((int*)(f->esp) + 1));
-		f->eax = open(file);
-		break;
-	}
-	case SYS_CLOSE:{
-		fd = *((int*)(f->esp) + 1);
-		close(fd);
-		break;
-	}
-	case SYS_REMOVE:{
-		const char* filename = (char*)(*((int*)(f->esp) + 1));
-		f->eax = remove(filename);
-        break;
-	}
-	case SYS_SEEK: {
-		fd = *((int*)(f->esp) + 1);
-		unsigned position = *((int*)(f->esp) + 2);
-		seek(fd, position);
-		break;
-	}
-	case SYS_TELL:{
-		fd = *((int*)(f->esp) + 1);
-		f->eax = tell(fd);
-		break;
-	}
-	case SYS_FILESIZE:{
-		fd = *((int*)(f->esp) + 1);
-		f->eax = filesize(fd);
-		break;
-	}
-	case SYS_READ:{
+            f->eax = read(fd, buffer, size);
+            break;
+		case SYS_WRITE:
+            fd = *(int*) (f->esp + 4); // första arg
+			buffer = (void*) *(int*) (f->esp + 8); //andra arg
+			size = *(unsigned*) (f->esp + 12);// tredje arg
+			
+			f->eax = write(fd, buffer, size);
+            break;
+		case SYS_EXIT:
+            int status = *(int*) (f->esp + 4);
+			
+			exit(status);
+            break;
+		case SYS_WAIT: // lab5
+			//if(!is_valid_ptr(*((int*)(f->esp) + 1)) exit(-1);
+			int child_pid = *(int*) (f->esp + 4);
+            f->eax = wait(child_pid);
+            break;
+		case SYS_EXEC:			
+			//if (!is_valid_string((char*)(*((int*)(f->esp) + 1)))) exit(-1);
 
-		fd = *((int*)(f->esp) + 1); // första arg
-		buffer = *((void**)(f->esp) + 2); //andra arg
-		size = *((unsigned*)(f->esp) + 3);// tredje arg
-		f->eax = read(fd, buffer, size);
-		break;
-	}
-	case SYS_WRITE: {
-		fd = *((int*)(f->esp) + 1);
-		buffer = *((void**)(f->esp) + 2);
-		size = *((unsigned*)(f->esp) + 3);
+			filename = (const char*) *(int*) (f->esp + 4);
+			f->eax = exec(filename);
+			break;
+        default:
+            //printf("Unknown system call: %d\n", syscall_number);
+            exit(-1);
 
-		f->eax = write(fd, buffer, size);
-		break;
-	}
-	case SYS_EXIT: {
-		if(!is_valid_ptr(*((int*)(f->esp) + 1))) exit(-1);
-		int status = *((int*)(f->esp) + 1);
-		exit(status);
-		break;
-	}
-	case SYS_WAIT: { // LAB 5
-		//if(!is_valid_ptr(*((int*)(f->esp) + 1)) exit(-1);
-		// tid_t child_pid = *((int*)(f->esp) + 1);
-		// f->eax = process_wait(child_pid);
-    	break; 
-	}
-	case SYS_EXEC: {
-		//if (!is_valid_string((char*)(*((int*)(f->esp) + 1)))) exit(-1);
-		
-		const char* filename = (char*)(*((int*)(f->esp) + 1));
-		f->eax = exec(filename);
-	}
-	}
+    }
 }
 
-tid_t exec(const char *cmd_line) {
-	return process_execute(cmd_line);
+tid_t exec(const char *cmd_line){
+	if (!is_valid_string(cmd_line)) exit(-1);
+	tid_t pid = process_execute(cmd_line);
+	return pid;
 }
 
-// Ändrad i lab4
-void sleep(int64_t ticks)
-{
-	timer_sleep(ticks);
+//ändrad i lab 4
+void sleep(int64_t millis) {
+	timer_msleep(millis);
 }
 
-void halt(void)
-{
+void halt(void){
 	shutdown_power_off();
 }
 
-bool create(const char* name, unsigned initial_size)
-{
+bool create(const char *name, unsigned initial_size) {
 	if (!is_valid_string(name)) exit(-1);
-	
-	struct file *file_ptr = filesys_open(name);
-    if (file_ptr != NULL) {
-        // Fil already exists 
-        file_close(file_ptr);
-        return false;
-    }
+
 	return filesys_create(name, initial_size);
 }
 
-int open(const char *file) 
-{
-    if (!is_valid_string(file)) exit(-1);
-	
-	struct file *file_ptr = filesys_open(file);
+int open(const char *file) {
+	if (!is_valid_string(file)) exit(-1);
 
-    if (file_ptr == NULL) {
-        return -1;
-    }
+	struct file* file_ptr = filesys_open(file);
+	if (file_ptr == NULL){
+		return -1;		
+	}
 
-    for (int fd = 2; fd <= MAX_FILES; fd++) {
-        if (thread_current()->open_files[fd] == NULL) {
-            thread_current()->open_files[fd] = file_ptr;
-            return fd;
-        }
-    }
-	// return fd;
+	//struct thread* curr_thread = thread_current(); 
+	for (int fd = 2; fd < MAX_FILES; fd++){    
+		if (thread_current() -> open_files[fd] == NULL){     
+			thread_current() -> open_files[fd] = file_ptr;  
+			return fd;
+		}
+	}
 
-    // All file descriptors are in use.
-	file_close(file_ptr);
-    return -1;
+	//return fd;
+	return -1;
 }
 
-void close(int fd)
-{
-	if (fd < 2 || fd > MAX_FILES) {
-		return;
-	}
+void close (int fd){ 
+	if (!is_valid_fd(fd)) exit(-1);
 
-	struct file *file_ptr = thread_current()->open_files[fd];
-	if (file_ptr == NULL) {
-		return;
-	}
-
-	file_close(file_ptr);
-	thread_current()->open_files[fd] = NULL;
+	struct thread* curr_thread = thread_current(); 
+	file_close(curr_thread->open_files[fd]);
+	curr_thread->open_files[fd] = NULL;
 }
 
 bool remove(const char *file_name) {
-    if (!is_valid_string(file_name)) exit(-1);
-	
+	if (!is_valid_string(file_name)) exit(-1);
+
 	return filesys_remove(file_name);
 }
 
 void seek(int fd, unsigned position) {
-    if (fd < 2 || fd >= MAX_FILES) {
-        return;
-    }
+	if (!is_valid_fd(fd)) exit(-1);
 
-    struct file *file_ptr = thread_current()->open_files[fd];
-    if (file_ptr != NULL) {
-        // Make sure we do not seek past EOF
-        unsigned file_size = file_length(file_ptr);
-        if (position > file_size) {
-            position = file_size;  // Prevents seeking beyond EOF
-        }
-        file_seek(file_ptr, position);
-    }
+	struct file* file = thread_current()->open_files[fd]; 
+
+	if (file == NULL) {
+		return;
+	}
+
+	if (position <= (unsigned)filesize(fd)) { // prevents seeking beyond EOF
+		file_seek(file, position);
+	}
 }
 
+unsigned tell(int fd){
+	if (!is_valid_fd(fd)) exit(-1);
 
-unsigned tell(int fd) {
-  if (fd < 2 || fd >= MAX_FILES) {
-      return -1; 
-  }
+	struct file* file = thread_current()->open_files[fd]; 
 
-  struct file *file_ptr = thread_current()->open_files[fd];
-  if (file_ptr != NULL) {
-      return file_tell(file_ptr);  
-  }
-  return -1;
+	if (file == NULL) {
+		return 0;
+	}
+
+	return file_tell(file);
+}	
+
+int filesize(int fd) { 
+	if (!is_valid_fd(fd)) exit(-1);
+
+	struct file* file = thread_current()->open_files[fd]; 
+
+	if (file == NULL) {
+		return 0;
+	}
+
+	return file_length(file); 
 }
-
-
-int filesize(int fd) {
-    if (fd < 2 || fd >= MAX_FILES) {
-        return -1;  
-    }
-
-    struct file *file_ptr = thread_current()->open_files[fd];
-    if (file_ptr == NULL) {
-        return -1;
-    }
-
-    int size = file_length(file_ptr);
-    return (size >= 0) ? size : 0;  // Ensure non-negative file size
-}
-
 
 int read(int fd, void *buffer, unsigned size) {
-    if (!is_valid_buffer(buffer, size)) exit(-1);
-	
-	if (fd == 0) {
-        // Read from the keyboard.
-        unsigned i;
-        uint8_t* local_buffer = (uint8_t*) buffer;
-        for (i = 0; i < size; i++) {
-            local_buffer[i] = input_getc();
-            if (local_buffer[i] == '\r') {  // Convert '\r' to '\n'
-                local_buffer[i] = '\n';
-            }
-			printf("%c", local_buffer[i]);
-        }
-        return i;
-    } else if (fd > 1 && fd < MAX_FILES) { // read from file 
-		struct file *file_ptr = thread_current()->open_files[fd];
-        if (file_ptr != NULL) {
-            return file_read(file_ptr, buffer, size);
-        }
-    }
-
-    return -1;
-}
-
-int write(int fd, const void *buffer, unsigned size) {
+	if (!is_valid_fd(fd)) exit(-1);
 	if (!is_valid_buffer(buffer, size)) exit(-1);
-	
-	if (fd == 1) {  // Writing to console
-        const char *buf = (const char *)buffer;
-        for (unsigned i = 0; i < size; i++) {
-            if (buf[i] == '\n') {  
-                putbuf("\r", 1);  // Convert '\n' to '\r' for display
-            }
-            putbuf(&buf[i], 1);
-        }
-        return size;
-    } else if (fd > 1 && fd < MAX_FILES) {  // Writing to a file
-        struct file *file_ptr = thread_current()->open_files[fd];
-        if (file_ptr != NULL) {
-            return file_write(file_ptr, buffer, size);  // Do NOT modify file content
-        }
-    }
-    return -1;
+
+    // Läs från tangentbord
+	if (fd == STDIN_FILENO) { 
+		for (unsigned int i = 0; i < size; i++) {
+			char input = input_getc();
+			if (input == '\r') {  //convert '/r' to '/n'
+				input = '\n';
+			}
+
+			((char*)buffer)[i] = input;
+			putbuf(&input, 1);
+		}  
+		return size;
+	}
+
+	struct file* file = thread_current()->open_files[fd]; 
+
+	if (file == NULL) {
+	    return -1;
+	}
+
+	int NoBAR = file_read(file, buffer, size); 
+
+	if (NoBAR < 0){ 
+		return -1;
+	}
+
+	return NoBAR;	
 }
 
-// status behöver hanteras lab5 ignorera warning
+int write(int fd, const void *buffer, unsigned size){
+	if (!is_valid_fd(fd)) exit(-1);
+	if (!is_valid_buffer(buffer, size)) exit(-1);
+
+	if (fd == STDOUT_FILENO) {
+        putbuf(buffer, size);
+		return size;
+    }
+
+	if (fd == STDIN_FILENO) {
+		return -1;
+	}
+
+	struct file* file = thread_current()->open_files[fd]; 
+
+	if (file == NULL) {
+        return -1;
+	}
+
+	int NoBAW = file_write(file, buffer, size); 
+	
+	if (NoBAW < 0) { 
+		return -1;
+	}
+
+	return NoBAW;
+}
+
+// status behöver hanteras i lab5 ingorera warning 
 void exit(int status) {
+	
+	//lab5
+	for (int i=2; i < MAX_FILES; i++){
+		close(i);
+	}
 
-	// lab5
-	// if (status < 0){
-	// 	status = -1
-	// }
+	if (status < 0) {
+		status = -1;
+	}
 
-	// for (int i=2; i < MAX_FILES; i++){
-	// 	close(i);
-	// } 
-
-	// thread_current()->child_parent->exit_status = status;
-
+	thread_current()->child_parent->exit_status = status;
+    
 	thread_exit();
+}
+
+//lab5
+int wait(int pid) {
+    return process_wait(pid);
 }

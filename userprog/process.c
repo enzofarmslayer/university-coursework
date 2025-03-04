@@ -1,7 +1,5 @@
 #include "userprog/process.h"
 
-#include "threads/synch.h"
-
 #include "filesys/directory.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
@@ -23,74 +21,67 @@
 #include <stdlib.h>
 #include <string.h>
 #include <threads/malloc.h> 
-#include <threads/thread.h> 
+
+static thread_func start_process NO_RETURN;
+static bool load(const char* cmd_line, void (**eip)(void), void** esp);
+static void dump_stack(const void* esp);
+static void setup_main_stack(void* cmd_line, void** esp);
 
 // ------------LAB4 to wait for child to load
 struct sharedInformation
 {
-	bool loadStatus;
-	char* cmd_line;
-	struct semaphore load_sem;
-	struct parent_child *parent_child;
+    char *cmd_line;
+	struct semaphore load_sema;      /* Semaphore for synchronization */
+    struct parent_child *child_info;
 };
-
-
-static thread_func start_process NO_RETURN;
-static bool load(const char* file_name, void (**eip)(void), void** esp);
-static void dump_stack(const void* esp);
-static void setup_main_stack(void* cmd_line_, void** esp);
 
 /* Starts a new thread running a user program loaded from
 	CMD_LINE.  The new thread may be scheduled (and may even exit)
 	before process_execute() returns.  Returns the new process's
 	thread id, or TID_ERROR if the thread cannot be created. */
-tid_t process_execute(const char* cmd_line)
+tid_t process_execute (const char *cmd_line)
 {
-    struct sharedInformation *sharedInfo = malloc(sizeof(struct sharedInformation));
-	sharedInfo->loadStatus = false;
-	sema_init(&sharedInfo->load_sem, 0);
+	char *token, *save_ptr;
+	char s[strlen(cmd_line)];
 
-    sharedInfo->cmd_line = palloc_get_page(0); 
-    // if (sharedInfo->cmd_line == NULL) {
-    //     free(sharedInfo); // Free sharedInfo before returning
-    //     return TID_ERROR;
-    // }
+	struct sharedInformation *sharedInfo = malloc(sizeof(struct sharedInformation));
+	struct parent_child *child_parent = malloc(sizeof(struct parent_child));
 
-    strlcpy(sharedInfo->cmd_line, cmd_line, PGSIZE);
+	sema_init(&child_parent->wait_sema, 0);
+	sema_init(&sharedInfo->load_sema, 0);
+	child_parent -> parent_exited = false;
 
-	//printf("Parent Process ID: %d\n", thread_current()->tid); //prints 3
-    tid_t tid = thread_create(cmd_line, PRI_DEFAULT, start_process, sharedInfo);
-
-    if (tid == TID_ERROR) {
-        palloc_free_page(sharedInfo->cmd_line);
-        free(sharedInfo);
-        return TID_ERROR;
-    }
-
-	//lab5
-	//list_push_back(&thread_current()->children_list, &thread_current()->parent_child->elem);
-    // Wait for the child process to signal load success
-    sema_down(&sharedInfo->load_sem);
-
-    if (!sharedInfo->loadStatus) {
-        tid = TID_ERROR;
-    }
-
-    // Free sharedInfo after semaphore released
-    palloc_free_page(sharedInfo->cmd_line);
+	strlcpy(s, cmd_line, PGSIZE);
 	
+	sharedInfo->child_info = child_parent;
+	sharedInfo->cmd_line = s;
+
+	/* Create a new thread to execute FILE_NAME. */
+	tid_t tid = thread_create(&s, PRI_DEFAULT, start_process, sharedInfo);
+	if (tid == TID_ERROR) {
+		return TID_ERROR;
+	}
+
+	list_push_back(&thread_current()->children_list, &child_parent->elem);
+
+	sema_down(&sharedInfo->load_sema);
+
+	if (!child_parent->load_status) {
+		process_wait(tid);
+		return TID_ERROR;
+	}
+
 	free(sharedInfo);
-    return tid;
+	return tid;
 }
 
 /* A thread function that loads a user process and starts it
 	running. */
 static void start_process(void* cmd_line_)
 {
-	//LAB 4 CHANGES
-	struct sharedInformation *sharedInfo = (struct sharedInformation*) cmd_line_;
-	//char* cmd_line = cmd_line_;
-
+	struct sharedInformation* sharedInfo = cmd_line_;
+	char* cmd_line = sharedInfo->cmd_line;
+	struct parent_child* child_info = sharedInfo->child_info;
 	struct intr_frame if_;
 	struct thread *t = thread_current();
 	bool success;
@@ -103,31 +94,22 @@ static void start_process(void* cmd_line_)
 
 	// Note: load requires the file name only, not the entire cmd_line
 	success = load(t->name, &if_.eip, &if_.esp);
-
-	if(success){
-		setup_main_stack(sharedInfo->cmd_line, &if_.esp);
-		//dump_stack(if_.esp); // for lab 1 demo
+	if (success) {
+		setup_main_stack(cmd_line, &if_.esp);
+		//dumpstack
 	}
-
-	// lab5
-	// struct parent_child *child_parent = malloc(sizeof(struct parent_child));
-	// sema_init(&child_parent->wait_sem, 0);
-	// lock_init(&child_parent->lock);
-	// child_parent->exit_status = -1;
-	// child_parent->alive_count = 2;
 	
-	// //is this correct?
-	// thread_current()->parent_child = child_parent;
-	// // is this copy correct? 
-	// sharedInfo->parent_child = child_parent;
-	
-	// We have loaded succesfuly
-	sharedInfo->loadStatus = success;
-	sema_up(&sharedInfo->load_sem);
+	child_info->load_status = success ? 1 : 0;
+	child_info->pid = t->tid;
+	child_info->child_exited = false;
+	child_info->exit_status = -1;
+	thread_current()->child_parent = sharedInfo->child_info;
+	sema_up(&sharedInfo->load_sema);
 
+	//printf("New process started with ID: %d\n", t->tid);
 
 	/* If load failed, quit. */
-	//palloc_free_page(cmd_line_);
+
 	if (!success)
 		thread_exit();
 
@@ -150,79 +132,57 @@ static void start_process(void* cmd_line_)
 
 	This function will be implemented in problem 2-2.  For now, it
 	does nothing. */
-int process_wait(tid_t child_tid UNUSED)
+int process_wait(tid_t child_tid)
 {
- 	//given infinite loop
-	for (;;) {
+	int exit_status = -1; 
+	struct list_elem *e;
 
+	//printf("Process %d waiting for %d\n", thread_current()->tid, child_tid);
+
+	for (e = list_begin (&thread_current()->children_list); e != list_end(&thread_current()->children_list); e = list_next(e))
+	{
+		struct parent_child *child= list_entry(e, struct parent_child, elem);
+		if (child->pid == child_tid)
+		{
+			//printf("process_wait: Waiting for childr %d\n", child_tid);
+			if (!child->child_exited) sema_down(&child->wait_sema);
+			//printf("Child %d done\n", child_tid);
+			exit_status = child->exit_status;
+			list_remove(e);
+			free(child);
+			break;
+		} 
 	}
-
-	// struct thread *parent = thread_current();
-    // struct parent_child *pc = NULL;
-    
-    // // Search for the child in the parent's children list
-    // struct list_elem *e;
-    // for (e = list_begin(&parent->children_list); e != list_end(&parent->children_list); e = list_next(e))
-    // {
-    //     struct parent_child *entry = list_entry(e, struct parent_child, elem);
-    //     if (entry->child_tid == child_tid)
-    //     {
-    //         pc = entry;
-    //         break;
-    //     }
-    // }
-
-    // if (pc == NULL) {
-    //     return -1; // Child process not found
-    // }
-
-    // lock_acquire(&pc->lock);
-
-    // // Wait for the child to exit (if it hasn't yet)
-    // if (pc->alive_count > 1) {
-    //     sema_down(&pc->wait_sem);
-    // }
-
-    // // Retrieve exit status
-    // int status = pc->exit_status;
-
-    // // Remove child from parent's list and free resources
-    // list_remove(&pc->elem);
-	// pc->alive_count--;
-    // if (pc->alive_count == 0) {
-    //     free(pc);
-    // }
-    
-    // lock_release(&pc->lock);
-    
-    // return status;
-
+	
+	return exit_status;
 }
 
 /* Free the current process's resources. */
 void process_exit(void)
 {
-	struct thread* cur = thread_current();
-	uint32_t* pd;
+    struct thread* cur = thread_current();
+	struct parent_child* parent_relation = cur->child_parent;
+    uint32_t* pd;
 
-	// struct parent_child *pc = cur->parent_child;
+	printf("%s: exit(%d)\n", cur->name, parent_relation->exit_status);
 
-    // if (pc != NULL)
-    // {
-    //     lock_acquire(&pc->lock);
-    //     pc->exit_status = cur->exit_status;
+	//printf("Exit process ID: %d\n", cur->tid);
 
-    //     // Signal the parent that this child has exited
-    //     sema_up(&pc->wait_sem);
-	// 	pc->alive_count--;
-    //     // Reduce alive_count and free if no longer needed
-    //     if (pc->alive_count == 0)
-    //     {
-    //         free(pc);
-    //     }
-    //     lock_release(&pc->lock);
-    // }
+	if (parent_relation->parent_exited) {
+		free(parent_relation);
+	} else {
+		parent_relation->child_exited = true;
+	}
 
+    // Orphane all children
+    struct list_elem *e;
+    for (e = list_begin(&cur->children_list); e != list_end(&cur->children_list); e = list_next(e)) {
+        struct parent_child *child = list_entry(e, struct parent_child, elem);
+        child->parent_exited = true;
+    }
+
+	sema_up(&parent_relation->wait_sema);
+	
 	/* Destroy the current process's page directory and switch back
 		to the kernel-only page directory. */
 	pd = cur->pagedir;
@@ -396,27 +356,25 @@ bool load(const char* file_name, void (**eip)(void), void** esp)
 	struct file* file = NULL;
 	off_t file_ofs;
 	bool success = false;
-	int i;
-	//hehejhe
+
 	char file_name_only[strlen(file_name) + 1]; 
 	char *program_name, *save_ptr;
-	
+
 
 	/* Allocate and activate page directory. */
 	t->pagedir = pagedir_create();
 	if (t->pagedir == NULL)
 		goto done;
 	process_activate();
-	
+
 	/* Copy file_name into file_name_only so that it becomes a modifiable string*/
 	strlcpy(file_name_only, file_name, strlen(file_name) + 1);
 
 	/* Extract only program name*/
 	program_name = strtok_r(file_name_only, " ", &save_ptr);
 
-
 	/* Open executable file. */
-	file = filesys_open(program_name);
+	file = filesys_open(file_name);
 	if (file == NULL) {
 		printf("load: %s: open failed\n", file_name);
 		goto done;
@@ -433,7 +391,7 @@ bool load(const char* file_name, void (**eip)(void), void** esp)
 
 	/* Read program headers. */
 	file_ofs = ehdr.e_phoff;
-	for (i = 0; i < ehdr.e_phnum; i++) {
+	for (int i = 0; i < ehdr.e_phnum; i++) {
 		struct Elf32_Phdr phdr;
 
 		if (file_ofs < 0 || file_ofs > file_length(file))

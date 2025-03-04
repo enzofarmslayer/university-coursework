@@ -4,8 +4,9 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
-
 #include "threads/synch.h"
+
+
 #include "lib/kernel/list.h"
 
 /* States in a thread's life cycle. */
@@ -26,8 +27,9 @@ typedef int tid_t;
 #define PRI_DEFAULT 31 /* Default priority. */
 #define PRI_MAX	  63 /* Highest priority. */
 
-//lab2 
-#define MAX_FILES 130 // 0 and 1 for read write + 128 files.
+//lab2 Ska nog vara 128 iallafall, ska nog if def
+//#define MAX_FILES 130 // 0 and 1 for read write + 128 files, 
+
 
 /* A kernel thread or user process.
 
@@ -86,6 +88,7 @@ typedef int tid_t;
 	only because they are mutually exclusive: only a thread in the
 	ready state is on the run queue, whereas only a thread in the
 	blocked state is on a semaphore wait list. */
+//#define USERPROG // TA BORT
 struct thread {
 	/* Owned by thread.c. */
 	tid_t tid;						/* Thread identifier. */
@@ -95,37 +98,40 @@ struct thread {
 	int priority;					/* Priority. */
 	struct list_elem allelem;	/* List element for all threads list. */
 	
-	//lab3:
+	//lab3
 	int64_t wakeup_time;
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem; /* List element. */
-	
+
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint32_t* pagedir; /* Page directory. */
+
+	// 130 before and moved, maybe wrong
+	#define MAX_FILES 128
 	struct file *open_files[MAX_FILES];
-	
-	struct parent_child *parent_child;
+
+	struct parent_child *child_parent;
 	struct list children_list;
+	
 #endif
 
 	/* Owned by thread.c. */
 	unsigned magic; /* Detects stack overflow. */
 };
 
-
 /* Structure to maintain parent-child relationships. */
 struct parent_child {
-    int exit_status;      /* Stores child's exit status. */
-    tid_t child_tid;      /* Child thread ID. */
-    int alive_count;      /* Reference count to track when to free this struct. */
-    struct semaphore wait_sem; /* Semaphore for synchronization. */
-    struct lock lock;     /* Lock to protect concurrent access. */
-    struct list_elem elem; /* List element to link with parent's child list. */
-
+    tid_t pid;                  /* Child process ID */
+    int exit_status;            /* Exit status (-1 if bad terminatee ) */
+    bool child_exited;                /* Has the child exited? */
+    bool parent_exited;                /* Has the child exited? */
+    int load_status;            /* -1 = not created, 0 = error, 1 = success*/
+    //int alive_children;             // Antal levande barn (för barnet)
+    struct semaphore wait_sema;      /* Semaphore for synchronization */
+    struct list_elem elem;      /* List element (for storing in parent's child_list) */
 };
-
 
 /* If false (default), use round-robin scheduler.
 	If true, use multi-level feedback queue scheduler.

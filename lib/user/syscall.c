@@ -13,7 +13,7 @@
 						 : "memory");                                 \
 		retval;                                                   \
 	})
-
+ 
 /* Invokes syscall NUMBER, passing argument ARG0, and returns the
 	return value as an `int'. */
 #define syscall1(NUMBER, ARG0)                                                 \
@@ -161,3 +161,4 @@ void sleep(int millis)
 {
 	syscall1(SYS_SLEEP, millis);
 }
+
