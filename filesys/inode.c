@@ -9,17 +9,21 @@
 #include <round.h>
 #include <string.h>
 
+#include "threads/synch.h"
+
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
 
 /* On-disk inode.
-	Must be exactly BLOCK_SECTOR_SIZE bytes long. */
+	Must be exactly BLOCK_SECTOR_SIZE bytes long. */ 
 struct inode_disk {
 	block_sector_t start; /* First data sector. */
 	off_t length;			 /* File size in bytes. */
 	unsigned magic;		 /* Magic number. */
 	uint32_t unused[125]; /* Not used. */
 };
+
+static struct lock opil;	// 6 open inodes list 
 
 /* Returns the number of sectors to allocate for an inode SIZE
 	bytes long. */
@@ -35,7 +39,13 @@ struct inode {
 	int open_cnt;				/* Number of openers. */
 	bool removed;				/* True if deleted, false otherwise. */
 	struct inode_disk data; /* Inode content. */
+	
+	// 6
+	struct lock rw_lock; 
+	struct semaphore write_sema;
+	int reader_count;
 };
+/* Identifies an inode. */
 
 /* Returns the block device sector that contains byte offset POS
 	within INODE.
@@ -58,6 +68,7 @@ static struct list open_inodes;
 void inode_init(void)
 {
 	list_init(&open_inodes);
+	lock_init(&opil); // 6
 }
 
 /* Initializes an inode with LENGTH bytes of data and
@@ -94,6 +105,7 @@ bool inode_create(block_sector_t sector, off_t length)
 		}
 		free(disk_inode);
 	}
+
 	return success;
 }
 
@@ -105,26 +117,39 @@ struct inode* inode_open(block_sector_t sector)
 	struct list_elem* e;
 	struct inode* inode;
 
+	lock_acquire(&opil); // 6
+
 	/* Check whether this inode is already open. */
 	for (e = list_begin(&open_inodes); e != list_end(&open_inodes); e = list_next(e)) {
 		inode = list_entry(e, struct inode, elem);
 		if (inode->sector == sector) {
 			inode_reopen(inode);
+			lock_release(&opil); // 6
 			return inode;
 		}
 	}
 
-	/* Allocate memory. */
+	/* Allocate memory. */ //6
 	inode = malloc(sizeof *inode);
-	if (inode == NULL)
+	if (inode == NULL) {
+		lock_release(&opil);
 		return NULL;
+	}
 
 	/* Initialize. */
-	list_push_front(&open_inodes, &inode->elem);
 	inode->sector = sector;
 	inode->open_cnt = 1;
 	inode->removed = false;
+	
+	//6
+	inode->reader_count = 0;
+	lock_init(&inode->rw_lock);
+	sema_init(&inode->write_sema, 1);
+	list_push_front(&open_inodes, &inode->elem);
+	
 	block_read(fs_device, inode->sector, &inode->data);
+	lock_release(&opil);
+
 	return inode;
 }
 
@@ -151,6 +176,8 @@ void inode_close(struct inode* inode)
 	if (inode == NULL)
 		return;
 
+	lock_acquire(&inode->rw_lock); // 6
+	
 	/* Release resources if this was the last opener. */
 	if (--inode->open_cnt == 0) {
 		/* Remove from inode list and release lock. */
@@ -161,9 +188,12 @@ void inode_close(struct inode* inode)
 			free_map_release(inode->sector, 1);
 			free_map_release(inode->data.start, bytes_to_sectors(inode->data.length));
 		}
-
+		lock_release(&inode->rw_lock); // 6
 		free(inode);
+		return;
 	}
+
+	lock_release(&inode->rw_lock); //6
 }
 
 /* Marks INODE to be deleted when it is closed by the last caller who
@@ -182,6 +212,13 @@ off_t inode_read_at(struct inode* inode, void* buffer_, off_t size, off_t offset
 	uint8_t* buffer = buffer_;
 	off_t bytes_read = 0;
 	uint8_t* bounce = NULL;
+
+	// Entry section 6
+	lock_acquire(&inode->rw_lock); 
+	inode->reader_count++;
+	if (inode->reader_count == 1) sema_down(&inode->write_sema);
+	lock_release(&inode->rw_lock);
+	// End of entry section
 
 	while (size > 0) {
 		/* Disk sector to read, starting byte offset within sector. */
@@ -221,6 +258,13 @@ off_t inode_read_at(struct inode* inode, void* buffer_, off_t size, off_t offset
 	}
 	free(bounce);
 
+	// Exit section 66
+	lock_acquire(&inode->rw_lock);
+	inode->reader_count--;
+	if (inode->reader_count == 0) sema_up(&inode->write_sema);
+	lock_release(&inode->rw_lock);
+	// End of exit section
+
 	return bytes_read;
 }
 
@@ -234,6 +278,8 @@ off_t inode_write_at(struct inode* inode, const void* buffer_, off_t size, off_t
 	const uint8_t* buffer = buffer_;
 	off_t bytes_written = 0;
 	uint8_t* bounce = NULL;
+
+	sema_down(&inode->write_sema); //6
 
 	while (size > 0) {
 		/* Sector to write, starting byte offset within sector. */
@@ -280,6 +326,7 @@ off_t inode_write_at(struct inode* inode, const void* buffer_, off_t size, off_t
 	}
 	free(bounce);
 
+	sema_up(&inode->write_sema); //6
 	return bytes_written;
 }
 

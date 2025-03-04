@@ -73,6 +73,14 @@ bool is_valid_string(const char* s) {
 	bool valid_ptr = is_valid_ptr(s);
 	if (!valid_ptr) return false;
 
+	// Ensure the string has a null terminator before calling strlen(s)
+	const char* temp = s;
+	while (true) {
+		if (!is_valid_ptr(temp)) return false; // Ensure every byte is mapped
+		if (*temp == '\0') break; // Found null terminator
+		temp++;
+	}
+
 	// Find out the length of the string
 	int length = strlen(s);
 
