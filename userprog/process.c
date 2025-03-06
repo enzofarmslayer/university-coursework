@@ -145,7 +145,9 @@ int process_wait(tid_t child_tid)
 		if (child->pid == child_tid)
 		{
 			//printf("process_wait: Waiting for childr %d\n", child_tid);
-			if (!child->child_exited) sema_down(&child->wait_sema);
+			if (!child->child_exited) {
+				sema_down(&child->wait_sema);
+			}
 			//printf("Child %d done\n", child_tid);
 			exit_status = child->exit_status;
 			list_remove(e);
@@ -181,7 +183,9 @@ void process_exit(void)
         child->parent_exited = true;
     }
 
-	sema_up(&parent_relation->wait_sema);
+	if (!parent_relation->parent_exited) {
+		sema_up(&parent_relation->wait_sema);
+	}
 	
 	/* Destroy the current process's page directory and switch back
 		to the kernel-only page directory. */
