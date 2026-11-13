@@ -2,8 +2,6 @@
 
 Lab assignments from my studies at Linköping University (LiU), where I'm an MSc in Engineering student in Computer Engineering, specializing in AI and Machine Learning.
 
-Each course has its own folder. The labs were originally developed in LiU's GitLab, and their full commit history is kept here. Most labs were done in pairs, so commits from lab partners and course staff (who provide the starter code) also appear in the history.
-
 ## Courses
 
 | Course | Language | What the labs cover |
