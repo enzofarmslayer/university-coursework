@@ -1,0 +1,26 @@
+package se.liu.enzcu445.calendar;
+
+public class TimePoint {
+    private int hour;
+    private int minute;
+
+    public TimePoint(int hour, int minute) {
+        this.hour = hour;
+        this.minute = minute;
+    }
+
+    public int getHour() {
+        return hour;
+    }
+
+    public int getMinute() {
+        return minute;
+    }
+
+    @Override
+    public String toString() {
+        // prints in format 01:01 instead of 1:1
+        return String.format("%02d:%02d", hour, minute);
+    }
+
+}
