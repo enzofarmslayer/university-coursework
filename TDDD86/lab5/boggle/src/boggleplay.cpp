@@ -1,0 +1,115 @@
+// The file that handles communication between the game and user.
+// Takes in inputs and prints the game.
+
+#include <cstdlib>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include "Boggle.h"
+#include "bogglemain.h"
+#include "strlib.h"
+
+string askForWord();
+
+/*
+ * Plays one game of Boggle using the given boggle game state object.
+ */
+void playOneGame(Boggle& boggle) {
+    //clearConsole();
+
+    string choice;
+    cout << "Do you want to generate a random board? (Y/N): ";
+    getline(cin, choice);
+
+    if (toLowerCase(choice) == "y") {
+        boggle.createBoard();
+    } else {
+        string input;
+        cout << "Enter 16 characters for the board configuration: ";
+        getline(cin, input);
+        while (input.length() != 16) {
+            cout << "Invalid input. Enter exactly 16 letters: ";
+            getline(cin, input);
+        }
+        boggle.createBoardMan(input);
+    }
+
+    cout << "Current Boggle Board:" << endl;
+    boggle.printBoard();
+    int score = 0;
+
+    string input;
+    bool validWord = false;
+
+    while(!validWord) {
+        input = askForWord();
+
+        if (input.length() == 0) {
+            break;
+        }
+
+        if(!boggle.validateWordLength(input)) {
+            cout << "Word must be at least 4 characters and max 16." << endl;
+            continue;
+        }
+
+        else if(boggle.validateUsedWord(input)) {
+            cout << "Word has already been used." << endl;
+            continue;
+        }
+
+        else if(!boggle.validateWord(input)) {
+            cout << "Not an English word." << endl;
+            continue;
+
+        }
+
+        else if(!boggle.findWord(input)) {
+            cout << "Word not in Boggle." << endl;
+            continue;
+        }
+
+        else {
+            boggle.addWord(input);
+            score += input.length()-3;
+            cout << "Your words (" << boggle.getWords() << ")";
+            boggle.printWords();
+            cout << score << endl;
+        }
+    }
+
+    int compScore = 0;
+    cout << "It's my turn!" << endl;
+    unordered_set foundWords = boggle.findAllWords(compScore);
+    cout << "My words (" << foundWords.size() << "): ";
+    boggle.printCompWords();
+
+    if (compScore > score) {
+        cout << "My score : " << compScore << endl;
+        cout << "Ha ha ha, I destroyed you. Better luck next time, puny human!" << endl << endl;
+        return;
+    }
+}
+
+// Asks for an input word from user
+string askForWord() {
+    cout << "Enter a word or press Enter: ";
+
+    string input;
+    getline(cin, input);
+
+    return input;
+}
+
+
+/*
+ * Erases all currently visible text from the output console.
+ */
+void clearConsole() {
+#if defined(_WIN32) || defined(_WIN64)
+    std::system("CLS");
+#else
+    // assume POSIX
+    std::system("clear");
+#endif
+}

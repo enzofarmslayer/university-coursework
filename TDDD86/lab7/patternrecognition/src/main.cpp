@@ -1,0 +1,130 @@
+/*
+ * TDDD86 Pattern Recognition
+ * This program computes and plots all line segments involving 4 points
+ * in a file using Qt.
+ * Developers: kevma271, enzcu445
+ */
+
+#include <QApplication>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <fstream>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <chrono>
+#include "Point.h"
+#include <unordered_map>
+#include <queue>
+
+
+// constants
+static const int SCENE_WIDTH = 512;
+static const int SCENE_HEIGHT = 512;
+
+
+// Renders points
+void render_points(QGraphicsScene* scene, const vector<Point>& points) {
+    for(const auto& point : points) {
+        point.draw(scene);
+    }
+}
+
+
+// Draws line
+void render_line(QGraphicsScene* scene, const Point& p1, const Point& p2) {
+    p1.lineTo(scene, p2);
+}
+
+
+// The function that loops through all points and finds those with same slope
+int main(int argc, char *argv[]) {
+    QApplication a(argc, argv);
+
+    // open file
+    string filename = "input150.txt";
+    ifstream input;
+    input.open(filename);
+
+    // the vector of points
+    vector<Point> points;
+
+    // read points from file
+    int N;
+    int x;
+    int y;
+
+    input >> N;
+
+    for (int i = 0; i < N; ++i) {
+        input >> x >> y;
+        points.push_back(Point(x, y));
+    }
+    input.close();
+
+    // setup graphical window
+    QGraphicsView *view = new QGraphicsView();
+    QGraphicsScene *scene = new QGraphicsScene(0, 0, SCENE_WIDTH, SCENE_HEIGHT);
+    view->setScene(scene);
+    // draw points to screen all at once
+    render_points(scene, points);
+    view->scale(1, -1); //screen y-axis is inverted
+    view->resize(view->sizeHint());
+    view->setWindowTitle("Brute Force Pattern Recognition");
+    view->show();
+
+    // sort points by natural order
+    // makes finding endpoints of line segments easy
+    sort(points.begin(), points.end());
+    auto begin = chrono::high_resolution_clock::now();
+
+
+//     for (int i = 0 ; i < N-3 ; ++i) {
+//         for (int j = i+1 ; j < N-2 ; ++j) {
+//             for (int k = j+1 ; k < N-1 ; ++k) {
+//                 //only consider fourth point if first three are collinear
+//                 if (points.at(i).slopeTo(points.at(j)) == points.at(i).slopeTo(points.at(k))) {
+//                     for (int m{k+1} ; m < N ; ++m) {
+//                         if (points.at(i).slopeTo(points.at(j)) == points.at(i).slopeTo(points.at(m))) {
+//                             render_line(scene, points.at(i), points.at(m));
+//                             a.processEvents(); // show rendered line
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+    // Store key as slope and all points on the slope as value
+    std::unordered_map<double, priority_queue<int>> slopeMap; //max-heap
+
+    // Loop through all points and set them as orego
+    for (int i = 0; i < N; ++i) {
+        // After origo is chosen, find all different slopes
+        for (int j = i + 1; j < N; ++j) {
+            double slope = points.at(i).slopeTo(points.at(j));
+            // Sort according to max heap
+            slopeMap[slope].push(j);
+        }
+
+        // Loop through all slopes and draw those that are the furthest
+        for (auto mapIt = slopeMap.begin(); mapIt != slopeMap.end(); ++mapIt) {
+            if (mapIt->second.size() > 2) {
+                int furthestPointIndex = mapIt->second.top();
+                render_line(scene, points.at(i), points.at(furthestPointIndex));
+            }
+        }
+        slopeMap.clear();
+    }
+    a.processEvents();
+
+
+    auto end = chrono::high_resolution_clock::now();
+    cout << "Computing line segments took "
+         << std::chrono::duration_cast<chrono::milliseconds>(end - begin).count()
+         << " milliseconds." << endl;
+
+    return a.exec(); // start Qt event loop
+}
+
+
