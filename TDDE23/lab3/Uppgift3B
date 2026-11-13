@@ -1,0 +1,17 @@
+def fact(x, stop):
+    if x == 0 or x == 1:
+        return 1 
+    elif stop == 1:
+        return x
+    else:
+        return x * fact(x-1,stop-1)
+
+def choose(n, k):
+    if n == k:
+        return 1
+    if k == 1 or k == n-1:
+        return n
+    stop = n-k
+    sum = fact(n,stop)//fact(stop,stop)
+    return sum
+
